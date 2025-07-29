@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ddiring-backend-asset-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ddiring-backend-asset
+  template:
+    metadata:
+      labels:
+        app: ddiring-backend-asset
+    spec:
+      containers:
+      - name: ddiring-backend-asset
+        image: ddiring-backend-asset:dev
+        # Minikube 내부에 이미지를 직접 빌드하므로 외부 레포에서 이미지를 가져오지 않도록
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8082
