@@ -52,16 +52,16 @@ pipeline {
             steps {
                 // gradlew 권한부여
                 sh 'chmod +x gradlew'
-                // Gradle Wrapper를 사용하여 빌드
-                sh './gradlew clean bootJar'
+                // Gradlew로 빌드
+                sh './gradlew clean build'
             }
         }
 
         stage('Build Image and Deploy to Minikube') {
             steps {
-                // withKubeConfig: kubectl이 사용할 인증 정보를 임시 파일로 만듭니다.
+                // withKubeConfig-kubectl이 사용할 인증 설정파일
                 withKubeConfig([credentialsId: KUBE_CONFIG_ID]) {
-                    // ssh-agent: SSH 키를 사용하여 비밀번호 없이 원격 명령을 실행합니다.
+                    // sshagent를 사용하여 키로 ssh 연결 수행-비번 필요없어
                     sshagent(credentials: [KUBE_SSH_KEY_ID]) {
                         sh """
                             #!/bin/bash
@@ -72,11 +72,11 @@ pipeline {
                             eval \$(ssh -o StrictHostKeyChecking=no ${KUBE_USER}@${KUBE_IP} 'minikube -p minikube docker-env')
 
                             echo "## 2. Building image directly inside Minikube..."
-                            # 이제 'docker build'는 Minikube 내부에서 실행됩니다.
+                            # docker build-Minikube 내부에서 실행
                             docker build -t ${DOCKER_IMAGE_NAME} .
 
                             echo "## 3. Applying Kubernetes manifests..."
-                            # kubectl은 withKubeConfig로 설정된 인증 정보를 사용합니다.
+                            # kubectl이 withKubeConfig 인증 정보 사용
                             kubectl apply -f k8s/
 
                             echo "## 4. Restarting deployment to apply changes..."
