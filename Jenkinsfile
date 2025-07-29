@@ -69,11 +69,11 @@ pipeline {
 
                             echo "## 1. Connecting to Minikube's Docker/Podman daemon..."
                             # SSH로 원격 Minikube의 환경 변수를 가져와 현재 쉘에 적용
-                            eval \$(ssh -o StrictHostKeyChecking=no ${KUBE_USER}@${KUBE_IP} 'minikube -p minikube docker-env')
+                            eval \$(ssh -o StrictHostKeyChecking=no ${KUBE_USER}@${KUBE_IP} 'minikube -p minikube podman-env')
 
                             echo "## 2. Building image directly inside Minikube..."
-                            # docker build-Minikube 내부에서 실행
-                            docker build -t ${DOCKER_IMAGE_NAME} .
+                            # podman build-Minikube 내부에서 실행
+                            podman build -t ${DOCKER_IMAGE_NAME} .
 
                             echo "## 3. Applying Kubernetes manifests..."
                             # kubectl이 withKubeConfig 인증 정보 사용
