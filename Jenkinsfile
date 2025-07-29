@@ -59,28 +59,36 @@ pipeline {
 
         stage('Build Image and Deploy to Minikube') {
             steps {
-                // withKubeConfig-kubectl이 사용할 인증 설정파일
                 withKubeConfig([credentialsId: KUBE_CONFIG_ID]) {
-                    // sshagent를 사용하여 키로 ssh 연결 수행-비번 필요없어
                     sshagent(credentials: [KUBE_SSH_KEY_ID]) {
-                        sh """
-                            #!/bin/bash
-                            set -e
+                        // 문자열 처리 및 여러 sh 명령 실행을 위해 script 블록 사용
+                        script {
+                            echo "## 1. Getting remote Minikube podman environment..."
+                            // 원격에서 실행한 결과를 문자열로 가져옴
+                            def remoteEnvString = sh(
+                                script: "ssh -o StrictHostKeyChecking=no ${KUBE_USER}@${KUBE_IP} 'minikube -p minikube podman-env'",
+                                returnStdout: true
+                            )
 
-                            echo "## 1. Connecting to Minikube's Docker/Podman daemon..."
-                            eval \$(ssh -o StrictHostKeyChecking=no ${KUBE_USER}@${KUBE_IP} 'minikube -p minikube podman-env')
+                            echo "## 2. Correcting environment for remote connection..."
+                            // ✨ [수정된 부분]
+                            // 문자열에서 '127.0.0.1'을 실제 Minikube IP로 교체
+                            def correctedEnvString = remoteEnvString.replaceAll('127.0.0.1', KUBE_IP)
 
-                            unset CONTAINER_SSHKEY
+                            // 수정된 환경 변수와 함께 후속 명령들을 실행
+                            // withEnv 내에서 실행되는 sh 명령어들은 이 환경 변수들의 영향을 받음
+                            // CONTAINER_SSHKEY를 빈 값으로 설정하여 이전 오류도 함께 해결
+                            withEnv(["${correctedEnvString}", "CONTAINER_SSHKEY="]) {
+                                echo "## 3. Building image directly inside Minikube..."
+                                sh "podman build -t ${DOCKER_IMAGE_NAME} ."
 
-                            echo "## 2. Building image directly inside Minikube..."
-                            podman build -t ${DOCKER_IMAGE_NAME} .
+                                echo "## 4. Applying Kubernetes manifests..."
+                                sh "kubectl apply -f k8s/"
 
-                            echo "## 3. Applying Kubernetes manifests..."
-                            kubectl apply -f k8s/
-
-                            echo "## 4. Restarting deployment to apply changes..."
-                            kubectl rollout restart deployment/ddiring-backend-asset-deployment
-                        """
+                                echo "## 5. Restarting deployment to apply changes..."
+                                sh "kubectl rollout restart deployment/my-spring-app-deployment"
+                            }
+                        }
                     }
                 }
             }
