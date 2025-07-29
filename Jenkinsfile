@@ -16,7 +16,7 @@ pipeline {
     tools {
         gradle 'Gradle 8.14.2' // 젠킨스 Tools의 Gradle 이름
         jdk 'OpenJDK 17' // 젠킨스 Tools의 JDK 이름
-        docker 'Docker' // 젠킨스 Tools의 Docker 이름
+        dockerTool 'Docker' // 젠킨스 Tools의 Docker 이름
     }
 
     stages {
