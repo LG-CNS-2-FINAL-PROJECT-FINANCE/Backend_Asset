@@ -50,6 +50,8 @@ pipeline {
 
         stage('Build Spring Boot App') {
             steps {
+                // gradlew 권한부여
+                sh 'chmod +x gradlew'
                 // Gradle Wrapper를 사용하여 빌드
                 sh './gradlew clean bootJar'
             }
