@@ -66,7 +66,7 @@ pipeline {
                             echo "## 1. Getting remote Minikube podman environment..."
                             // 원격에서 실행한 결과를 문자열로 가져옴
                             def remoteEnvString = sh(
-                                script: "ssh -o StrictHostKeyChecking=no ${KUBE_USER}@${KUBE_IP} 'minikube -p minikube podman-env'",
+                                script: "ssh -o StrictHostKeyChecking=no ${KUBE_USER}@${KUBE_IP} 'minikube -p minikube podman-env -root'",
                                 returnStdout: true
                             )
 
@@ -80,7 +80,7 @@ pipeline {
                             // CONTAINER_SSHKEY를 빈 값으로 설정하여 이전 오류도 함께 해결
                             withEnv(["${correctedEnvString}", "CONTAINER_SSHKEY="]) {
                                 echo "## 3. Building image directly inside Minikube..."
-                                sh "podman build -t ${DOCKER_IMAGE_NAME} ."
+                                sh "sudo podman build -t ${DOCKER_IMAGE_NAME} ."
 
                                 echo "## 4. Applying Kubernetes manifests..."
                                 sh "kubectl apply -f k8s/"
