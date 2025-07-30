@@ -14,8 +14,7 @@ spec:
     spec:
       containers:
       - name: ddiring-backend-asset
-        image: localhost/backend_asset:0.0.1
-        # Minikube 내부에 이미지를 직접 빌드하므로 외부 레포에서 이미지를 가져오지 않도록
-        imagePullPolicy: IfNotPresent
+        image: backend_asset:0.0.1
+        imagePullPolicy: Never
         ports:
         - containerPort: 8082
