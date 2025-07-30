@@ -62,7 +62,7 @@ pipeline {
                 sshagent(credentials: [KUBE_SSH_KEY_ID]) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${KUBE_USER}@${KUBE_IP} 'mkdir -p ~/app'
-                        rsync -avz --delete --exclude 'build/' --exclude '.git/' ./ ${KUBE_USER}@${KUBE_IP}:~/app/
+                        rsync -avz --delete --exclude '.git/' ./ ${KUBE_USER}@${KUBE_IP}:~/app/
                     """
                 }
             }
