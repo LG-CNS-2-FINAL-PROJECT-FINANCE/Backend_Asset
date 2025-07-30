@@ -57,37 +57,32 @@ pipeline {
             }
         }
 
-        stage('Build Image and Deploy to Minikube') {
+        stage('Copy Artifacts to Minikube') {
             steps {
-                withKubeConfig([credentialsId: KUBE_CONFIG_ID]) {
-                    sshagent(credentials: [KUBE_SSH_KEY_ID]) {
-                        // 문자열 처리 및 여러 sh 명령 실행을 위해 script 블록 사용
+                sshagent(credentials: [KUBE_SSH_KEY_ID]) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${KUBE_USER}@${KUBE_IP} 'mkdir -p ~/app'
+                        rsync -avz --delete --exclude 'build/' --exclude '.git/' ./ ${KUBE_USER}@${KUBE_IP}:~/app/
+                    """
+                }
+            }
+        }
+
+        stage('Remote Podman Build & K8s Deploy') {
+            steps {
+                sshagent(credentials: [KUBE_SSH_KEY_ID]) {
+                    withKubeConfig([credentialsId: KUBE_CONFIG_ID]) {
                         script {
-                            echo "## 1. Getting remote Minikube podman environment..."
-                            // 원격에서 실행한 결과를 문자열로 가져옴
-                            def remoteEnvString = sh(
-                                script: "ssh -o StrictHostKeyChecking=no ${KUBE_USER}@${KUBE_IP} 'minikube -p minikube podman-env --root'",
-                                returnStdout: true
-                            )
+                            def remoteBuildScript = """
+                                cd ~/app
+                                sudo podman build -t ${DOCKER_IMAGE_NAME} .
+                                kubectl apply -f k8s/
+                                kubectl rollout restart deployment/ddiring-backend-asset-deployment
+                            """
 
-                            echo "## 2. Correcting environment for remote connection..."
-                            // ✨ [수정된 부분]
-                            // 문자열에서 '127.0.0.1'을 실제 Minikube IP로 교체
-                            def correctedEnvString = remoteEnvString.replaceAll('127.0.0.1', KUBE_IP)
-
-                            // 수정된 환경 변수와 함께 후속 명령들을 실행
-                            // withEnv 내에서 실행되는 sh 명령어들은 이 환경 변수들의 영향을 받음
-                            // CONTAINER_SSHKEY를 빈 값으로 설정하여 이전 오류도 함께 해결
-                            withEnv(["${correctedEnvString}", "CONTAINER_SSHKEY="]) {
-                                echo "## 3. Building image directly inside Minikube..."
-                                sh "sudo podman build -t ${DOCKER_IMAGE_NAME} ."
-
-                                echo "## 4. Applying Kubernetes manifests..."
-                                sh "kubectl apply -f k8s/"
-
-                                echo "## 5. Restarting deployment to apply changes..."
-                                sh "kubectl rollout restart deployment/my-spring-app-deployment"
-                            }
+                            sh """
+                                ssh -o StrictHostKeyChecking=no ${KUBE_USER}@${KUBE_IP} '${remoteBuildScript}'
+                            """
                         }
                     }
                 }
