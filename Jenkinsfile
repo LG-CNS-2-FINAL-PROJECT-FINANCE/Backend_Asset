@@ -66,7 +66,7 @@ pipeline {
                             echo "## 1. Getting remote Minikube podman environment..."
                             // 원격에서 실행한 결과를 문자열로 가져옴
                             def remoteEnvString = sh(
-                                script: "ssh -o StrictHostKeyChecking=no ${KUBE_USER}@${KUBE_IP} 'minikube -p minikube podman-env -root'",
+                                script: "ssh -o StrictHostKeyChecking=no ${KUBE_USER}@${KUBE_IP} 'minikube -p minikube podman-env --root'",
                                 returnStdout: true
                             )
 
