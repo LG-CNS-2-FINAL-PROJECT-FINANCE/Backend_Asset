@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: ddiring-backend-asset
-        image: backend_asset:0.0.1
+        image: localhost/backend_asset:0.0.1
         imagePullPolicy: Never
         ports:
         - containerPort: 8082
