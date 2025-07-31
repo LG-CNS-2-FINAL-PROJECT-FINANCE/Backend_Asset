@@ -52,6 +52,8 @@ pipeline {
             steps {
                 // gradlew 권한부여
                 sh 'chmod +x gradlew'
+                // 디버그
+                sh 'ls -al src/main/resources/'
                 // Gradlew로 빌드
                 sh './gradlew clean build'
             }
