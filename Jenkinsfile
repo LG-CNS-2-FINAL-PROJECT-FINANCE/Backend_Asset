@@ -54,7 +54,7 @@ pipeline {
                 sh 'chmod +x gradlew'
                 // 디버그
                 sh 'ls -al src/main/resources/'
-                sh 'cat /src/main/resources/application.yaml'
+                sh 'cat src/main/resources/application.yaml'
                 // Gradlew로 빌드
                 sh './gradlew clean build'
             }
