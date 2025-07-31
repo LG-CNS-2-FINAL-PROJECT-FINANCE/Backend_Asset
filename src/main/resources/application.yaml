@@ -1,3 +1,5 @@
 spring:
     application:
         name: backend_asset
+server:
+    port: 8082
