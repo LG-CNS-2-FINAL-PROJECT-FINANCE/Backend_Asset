@@ -78,7 +78,7 @@ pipeline {
                         script {
                             def remoteBuildScript = """
                                 cd ~/app
-                                podman build -t ${DOCKER_IMAGE_NAME} .
+                                sudo podman build -t ${DOCKER_IMAGE_NAME} .
                                 kubectl apply -f k8s/
                                 kubectl rollout restart deployment/ddiring-backend-asset-deployment
                             """
