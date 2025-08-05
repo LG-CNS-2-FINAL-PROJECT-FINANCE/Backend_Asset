@@ -1,4 +1,4 @@
-FROM amazoncorretto:17
+FROM docker.io/amazoncorretto:17
 VOLUME /app
 EXPOSE 8080
 COPY build/libs/*.jar /app.jar
