@@ -7,10 +7,6 @@ pipeline {
     agent any
 
     environment {
-        //KUBE_IP = '192.168.56.100'
-        //KUBE_USER = 'admin'
-        //KUBE_SSH_KEY_ID = 'local-cluster-key' // 젠킨스 global credential key
-        //KUBE_CONFIG_ID = 'local-cluster-config' // 젠킨스 global credential configfile
         REGISTRY_HOST = "192.168.56.200:5000"
         MANIFEST_REPO = 'git@github.com:LG-CNS-2-FINAL-PROJECT-FINANCE/Backend_Manifests.git'
         USER_EMAIL = 'ssassaium@gmail.com'
@@ -113,38 +109,5 @@ pipeline {
                 }
             }
         }
-        /*
-        stage('Copy Artifacts to Minikube') {
-            steps {
-                sshagent(credentials: [KUBE_SSH_KEY_ID]) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ${KUBE_USER}@${KUBE_IP} 'mkdir -p ~/app'
-                        rsync -avz --delete --exclude '.git/' ./ ${KUBE_USER}@${KUBE_IP}:~/app/
-                    """
-                }
-            }
-        }
-
-        stage('Remote Podman Build & K8s Deploy') {
-            steps {
-                sshagent(credentials: [KUBE_SSH_KEY_ID]) {
-                    withKubeConfig([credentialsId: KUBE_CONFIG_ID]) {
-                        script {
-                            def remoteBuildScript = """
-                                cd ~/app
-                                sudo podman build -t ${DOCKER_IMAGE_NAME} .
-                                kubectl apply -f k8s/
-                                kubectl rollout restart deployment/ddiring-backend-asset-deployment
-                            """
-
-                            sh """
-                                ssh -o StrictHostKeyChecking=no ${KUBE_USER}@${KUBE_IP} '${remoteBuildScript}'
-                            """
-                        }
-                    }
-                }
-            }
-        }
-        */
     }
 }
