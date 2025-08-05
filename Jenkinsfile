@@ -8,7 +8,6 @@ pipeline {
 
     environment {
         REGISTRY_HOST = "192.168.56.200:5000"
-        MANIFEST_REPO = 'git@github.com:LG-CNS-2-FINAL-PROJECT-FINANCE/Backend_Manifests.git'
         USER_EMAIL = 'ssassaium@gmail.com'
         USER_ID = 'kaebalsaebal'
         SERVICE_NAME = 'asset'
@@ -76,25 +75,23 @@ pipeline {
         stage('Update Helm Values') {
             steps{
                 script{
-                    withCredentials([
+                    withCredentials([usernamePassword(
                         credentialsId:'github-credential',
-                        keyFileVariable:'GIT_SSH_KEY'
-                    ]) {
+                        usernameVariable: 'GIT_USERNAME',
+                        passwordVariable: 'GIT_PASSWORD'
+                    )]) {
                         def imageRepo = "${REGISTRY_HOST}/${APP_NAME}"
                         def imageTag = "${APP_VERSION}"
+                        def MANIFEST_REPO = "https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/LG-CNS-2-FINAL-PROJECT-FINANCE/Backend_Manifests.git"
 
                         sh """
                              # Git 사용자 정보 설정(커밋 사용자 명시땜에)
-                            #git config --global user.email "${USER_EMAIL}"
-                            #git config --global user.name "${USER_ID}"
-                            
-                            # SSH Agent 설정
-                            eval \$(ssh-agent -s)
-                            ssh-add \${GIT_SSH_KEY}
+                            git config --global user.email "${USER_EMAIL}"
+                            git config --global user.name "${USER_ID}"
                             
                             # 매니페스트 레포 클론
                             git clone ${MANIFEST_REPO}
-                            cd manifest-repo
+                            cd Backend_Manifests
 
                             # yq를 사용하여 개발 환경의 values 파일 업데이트
                             yq -i '.image.repository = "${imageRepo}"' helm-chart/${SERVICE_NAME}/values-dev.yaml
