@@ -21,12 +21,6 @@ pipeline {
     }
 
     stages {
-        stage('Clean Workspace') {
-            steps {
-                deleteDir() // workspace 전체 정리
-            }
-        }
-
         stage('Set Version') {
             steps {
                 script {
@@ -82,6 +76,8 @@ pipeline {
 
         stage('Update Helm Values') {
             steps{
+                //기존 git 레포 제거
+                DeleteDir()
                 script{
                     withCredentials([usernamePassword(
                         credentialsId:'github-credential',
