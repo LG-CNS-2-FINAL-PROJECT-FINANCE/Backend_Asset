@@ -21,6 +21,12 @@ pipeline {
     }
 
     stages {
+        stage('Clean Workspace') {
+            steps {
+                deleteDir() // workspace 전체 정리
+            }
+        }
+
         stage('Set Version') {
             steps {
                 script {
@@ -63,12 +69,14 @@ pipeline {
 
         stage('Image Build and Push to Registry') {
             steps {
-                // 컨테이너 빌드
+                // 이미지 빌드
                 sh "echo Image building..."
                 sh "podman build -t ${DOCKER_IMAGE_NAME} ."
                 // 레지스트리 푸쉬
                 sh "echo Image pushing to local registry..."
                 sh "podman push ${DOCKER_IMAGE_NAME}"
+                // 로컬 이미지 제거
+                sh "podman rmi -f ${DOCKER_IMAGE_NAME} || true" 
             }
         }
 
