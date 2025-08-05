@@ -70,10 +70,10 @@ pipeline {
             steps {
                 // 컨테이너 빌드
                 sh "echo Image building..."
-                sh "podman build -t ${DOCKER_IMAGE_NAME} ."
+                sh "sudo podman build -t ${DOCKER_IMAGE_NAME} ."
                 // 레지스트리 푸쉬
                 sh "echo Image pushing to local registry..."
-                sh "podman push ${DOCKER_IMAGE_NAME}"
+                sh "sudo podman push ${DOCKER_IMAGE_NAME}"
             }
         }
 
