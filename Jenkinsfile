@@ -97,9 +97,13 @@ pipeline {
                             yq -i '.image.tag = "${imageTag}"' helm_chart/${SERVICE_NAME}/values-dev.yaml
                             
                             # 변경 사항 커밋 및 푸시
-                            git add helm_chart/${SERVICE_NAME}/values-dev.yaml
-                            git commit -m "Update image tag for dev to ${DOCKER_IMAGE_NAME} [skip ci]"
-                            git push origin master
+                            if ! git diff --quiet; then
+                              git add helm_chart/${SERVICE_NAME}/values-dev.yaml
+                              git commit -m "Update image tag for dev to ${DOCKER_IMAGE_NAME} [skip ci]"
+                              git push origin master
+                            else
+                              echo "No changes to commit."
+                            fi
                         """
                     }
                 }
