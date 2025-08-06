@@ -112,4 +112,13 @@ pipeline {
             }
         }
     }
+
+    // 빌드 완료 후
+    post {
+        // 성공이든, 실패든 항상 수행
+        always {
+            echo "Cleaning up workspace..."
+            deleteDir() // workspace 전체 정리
+        }
+    }
 }
