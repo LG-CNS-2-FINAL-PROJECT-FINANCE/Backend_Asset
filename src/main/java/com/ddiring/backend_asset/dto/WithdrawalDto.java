@@ -1,5 +1,6 @@
 package com.ddiring.backend_asset.dto;
 
+import com.ddiring.backend_asset.entitiy.Bank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -8,4 +9,8 @@ import lombok.NoArgsConstructor;
 public class WithdrawalDto {
     private Integer withdrawal;
     private Integer userSeq;
+    private Integer bankType;
+    public WithdrawalDto(Bank bank) {
+        this.bankType = bank.getBankType();
+    }
 }

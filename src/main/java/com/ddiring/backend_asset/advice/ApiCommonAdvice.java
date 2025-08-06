@@ -68,7 +68,7 @@ public class ApiCommonAdvice {
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler({Exception.class})
-    public ApiResponseDto<String > handleException(Exception e) {
+    public ApiResponseDto<String> handleException(Exception e) {
         e.printStackTrace();
         return ApiResponseDto.createError(
                 "ServerError",

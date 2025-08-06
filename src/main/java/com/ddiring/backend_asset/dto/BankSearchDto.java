@@ -7,11 +7,13 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class BankSearchDto {
-    private Integer bankSeq;
+    private String bankNumber;
     private Integer deposit;
+    private Integer bankType;
 
     public BankSearchDto(Bank bank) {
-        this.bankSeq = bank.getBankSeq();
+        this.bankNumber = bank.getBankNumber();
         this.deposit = bank.getDeposit();
+        this.bankType = bank.getBankType();
     }
 }
