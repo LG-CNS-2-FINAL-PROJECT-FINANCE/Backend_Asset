@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.ddiring'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 
 java {
 	toolchain {
@@ -39,4 +39,12 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+tasks.register('getAppName') {
+	doLast {
+		println "${rootProject.name}" }
+}
+tasks.register('getAppVersion') {
+	doLast {
+		println "${project.version}" }
 }
