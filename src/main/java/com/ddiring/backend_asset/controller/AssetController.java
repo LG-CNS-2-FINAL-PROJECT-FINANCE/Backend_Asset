@@ -2,7 +2,6 @@ package com.ddiring.backend_asset.controller;
 
 import com.ddiring.backend_asset.common.dto.ApiResponseDto;
 import com.ddiring.backend_asset.dto.*;
-import com.ddiring.backend_asset.entitiy.Wallet;
 import com.ddiring.backend_asset.service.BankService;
 import com.ddiring.backend_asset.service.WalletService;
 import lombok.RequiredArgsConstructor;
@@ -64,5 +63,8 @@ public class AssetController {
         List<MoneyMoveDto> history = bankService.allmoneyMove(userId, moneyMoveDto.getBankType());
         return ApiResponseDto.createOk(history);
     }
+    @GetMapping("/info")
+    public String getAssetInfo() {
+    return "짱짱맨";
+    }
 }
-
