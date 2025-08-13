@@ -1,11 +1,17 @@
 package com.ddiring.backend_asset.service;
 
+import com.ddiring.backend_asset.api.market.MarketDto;
+import com.ddiring.backend_asset.api.product.ProductDto;
 import com.ddiring.backend_asset.common.exception.BadParameter;
 import com.ddiring.backend_asset.common.exception.NotFound;
 import com.ddiring.backend_asset.dto.*;
 import com.ddiring.backend_asset.entitiy.Bank;
+import com.ddiring.backend_asset.entitiy.Escrow;
+import com.ddiring.backend_asset.entitiy.EscrowHistory;
 import com.ddiring.backend_asset.entitiy.History;
 import com.ddiring.backend_asset.repository.BankRepository;
+import com.ddiring.backend_asset.repository.EscrowHistoryRepository;
+import com.ddiring.backend_asset.repository.EscrowRepository;
 import com.ddiring.backend_asset.repository.HistoryRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +28,8 @@ import java.util.stream.Collectors;
 public class BankService {
     private final BankRepository bankRepository;
     private final HistoryRepository historyRepository;
+    private final EscrowRepository escrowRepository;
+    private final EscrowHistoryRepository escrowHistoryRepository;
 
     @Transactional
     public BankSearchDto bankSearch(Integer userId, Integer bankType) {
@@ -125,5 +133,88 @@ public class BankService {
         return history.stream()
                 .map(MoneyMoveDto::new)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void escrowAccount(ProductDto productDto) {
+        if (productDto.getAccount() == null) {
+            throw new BadParameter("정보 줘");
+        }
+
+        Optional<Escrow> account = escrowRepository.findByProjectId(productDto.getProjectId());
+        if (account.isPresent()) {
+            throw new BadParameter("이미 있는뎌?");
+        }
+
+        Escrow escrow = Escrow.builder()
+                .account(productDto.getAccount())
+                .title(productDto.getTitle())
+                .projectId(productDto.getProjectId())
+                .build();
+        escrowRepository.save(escrow);
+    }
+
+    @Transactional
+    public Integer depositToEscrow(MarketDto marketDto, ProductDto productDto ,Integer bankType, Integer userSeq) {
+        if (marketDto.getUserSeq() == null || marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
+            throw new BadParameter("다시");
+        }
+
+        Bank bank = bankRepository.findByUserSeqAndBankType(marketDto.getUserSeq(), bankType)
+                .orElseThrow(() -> new NotFound("누구?"));
+
+
+        if (bank.getDeposit() < marketDto.getPrice()) {
+            throw new BadParameter("돈 없");
+        }
+
+        Escrow escrow = escrowRepository.findByProjectId(productDto.getProjectId())
+                .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
+
+        bank.setDeposit(bank.getDeposit() - marketDto.getPrice());
+        bankRepository.save(bank);
+
+        EscrowHistory escrowHistory = EscrowHistory.builder()
+                .escrowAccount(escrow.getAccount())
+                .userSeq(userSeq)
+                .price(marketDto.getPrice())
+                .title(productDto.getTitle())
+                .transferType(1)
+                .transferDate(LocalDate.now())
+                .build();
+
+        escrowHistoryRepository.save(escrowHistory);
+
+        return bank.getDeposit();
+    }
+
+    @Transactional
+    public Integer withdrawalFromEscrow(MarketDto marketDto,ProductDto productDto, Integer bankType, Integer userSeq) {
+        if (marketDto.getUserSeq() == null || marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
+            throw new BadParameter("다시");
+        }
+
+        Bank bank = bankRepository.findByUserSeqAndBankType(marketDto.getUserSeq(), bankType)
+                .orElseThrow(() -> new NotFound("누구?"));
+
+
+        Escrow escrow = escrowRepository.findByProjectId(productDto.getProjectId())
+                .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
+
+        bank.setDeposit(bank.getDeposit() + marketDto.getPrice());
+        bankRepository.save(bank);
+
+        EscrowHistory escrowHistory = EscrowHistory.builder()
+                .escrowAccount(escrow.getAccount())
+                .userSeq(userSeq)
+                .price(marketDto.getPrice())
+                .title(productDto.getTitle())
+                .transferType(0)
+                .transferDate(LocalDate.now())
+                .build();
+
+        escrowHistoryRepository.save(escrowHistory);
+
+        return bank.getDeposit();
     }
 }

@@ -1,5 +1,7 @@
 package com.ddiring.backend_asset.controller;
 
+import com.ddiring.backend_asset.api.market.MarketDto;
+import com.ddiring.backend_asset.api.product.ProductDto;
 import com.ddiring.backend_asset.common.dto.ApiResponseDto;
 import com.ddiring.backend_asset.dto.*;
 import com.ddiring.backend_asset.service.BankService;
@@ -10,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/asset")
+@RequestMapping("/api/asset")
 @RequiredArgsConstructor
 public class AssetController {
     private final BankService bankService;
@@ -63,8 +65,32 @@ public class AssetController {
         List<MoneyMoveDto> history = bankService.allmoneyMove(userId, moneyMoveDto.getBankType());
         return ApiResponseDto.createOk(history);
     }
-    @GetMapping("/info")
-    public String getAssetInfo() {
-    return "짱짱맨";
+
+    @PostMapping("/escrow/account")
+    public ApiResponseDto<String> registerEscrow(
+            @RequestBody ProductDto productDto) {
+        bankService.escrowAccount(productDto);
+        return ApiResponseDto.defaultOk();
     }
+
+    @PostMapping("/escrow/deposit")
+    public ApiResponseDto<Integer> depositToEscrow(
+            @RequestHeader("userSeq") Integer userSeq,
+            @RequestHeader("bankType") Integer bankType,
+            @RequestBody EscrowRequestDto escrowRequestDto) {
+
+        Integer money = bankService.depositToEscrow(escrowRequestDto.getMarketDto(), escrowRequestDto.getProductDto(),  bankType, userSeq);
+        return ApiResponseDto.createOk(money);
+    }
+
+    @PostMapping("/escrow/withdrawal")
+    public ApiResponseDto<Integer> withdrawalFromEscrow(
+            @RequestHeader("userSeq") Integer userSeq,
+            @RequestHeader("bankType") Integer bankType,
+            @RequestBody EscrowRequestDto escrowRequestDto) {
+
+        Integer money = bankService.withdrawalFromEscrow(escrowRequestDto.getMarketDto(), escrowRequestDto.getProductDto(), bankType, userSeq);
+        return ApiResponseDto.createOk(money);
+    }
+
 }

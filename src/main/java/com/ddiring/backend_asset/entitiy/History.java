@@ -24,7 +24,7 @@ public class History {
     @Column(name = "user_seq")
     private Integer userSeq;
 
-    @Column(name = "bank_type")
+    @Column(name = "bank_type") //0 창작자 1 투자자
     private Integer bankType;
 
     @Column(name = "bank_number")
@@ -36,7 +36,7 @@ public class History {
     @Column(name = "bank_time")
     private LocalDate bankTime;
 
-    @Column(name = "money_type")
+    @Column(name = "money_type") //0 입금 1 출금
     private Integer moneyType;
 
     @Column(name = "created_id")
