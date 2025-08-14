@@ -39,8 +39,8 @@ public class BankService {
     }
 
     @Transactional
-    public void createBank(Integer userSeq, Integer roll, CreateBankDto createBankDto) {
-        Optional<Bank> existingBank = bankRepository.findByUserSeq(userSeq);
+    public Bank createBank(Integer userSeq, Integer roll) {
+        Optional<Bank> existingBank = bankRepository.findByUserSeqAndRoll(userSeq, roll);
 
         if (existingBank.isPresent()) {
             throw new BadParameter("이미 계좌를 가지고 있습니다.");
@@ -48,36 +48,28 @@ public class BankService {
         Random random = new Random();
         int randomNumber = random.nextInt(90000) + 10000;
 
+        String bankNumber;
         if (roll == 0) {
-            String bankNumber1 = "02010-00-" + randomNumber;
-            Optional<Bank> sameBankNumber = bankRepository.findByBankNumber(createBankDto.getBankNumber());
-            if (sameBankNumber.equals("02010-00-" + randomNumber)) {
-                throw new BadParameter("운 좋네 같은거 있음 다시 시도 해");
-            }
-            Bank bank = Bank.builder()
-                    .userSeq(userSeq)
-                    .roll(0)
-                    .bankNumber(bankNumber1)
-                    .deposit(0)
-                    .linkedAt(LocalDate.now())
-                    .build();
-            bankRepository.save(bank);
-
+            bankNumber = "02010-00-" + randomNumber;
         } else if (roll == 1) {
-            String bankNumber2 = "02010-01-" + randomNumber;
-            Optional<Bank> sameBankNumber = bankRepository.findByBankNumber(createBankDto.getBankNumber());
-            if (sameBankNumber.equals("02010-01-" + randomNumber)) {
-                throw new BadParameter("운 좋네 같은거 있음 다시 시도 해");
-            }
-            Bank bank1 = Bank.builder()
-                    .userSeq(userSeq)
-                    .roll(1)
-                    .bankNumber(bankNumber2)
-                    .deposit(0)
-                    .linkedAt(LocalDate.now())
-                    .build();
-            bankRepository.save(bank1);
+            bankNumber = "02010-01-" + randomNumber;
+        } else {
+            throw new BadParameter("유효하지 않은 roll 값입니다.");
         }
+
+        Optional<Bank> sameBankNumber = bankRepository.findByBankNumber(bankNumber);
+        if (sameBankNumber.isPresent()) {
+            throw new BadParameter("운 좋네 같은거 있음 다시 시도 해");
+        }
+
+        Bank bank = Bank.builder()
+                .userSeq(userSeq)
+                .roll(roll)
+                .bankNumber(bankNumber)
+                .deposit(0)
+                .linkedAt(LocalDate.now())
+                .build();
+        return bankRepository.save(bank);
 
     }
     @Transactional
@@ -105,7 +97,7 @@ public class BankService {
     public void withdrawal(Integer userSeq, Integer roll, WithdrawalDto withdrawalDto) {
         if (withdrawalDto.getWithdrawal() <= 0)
             throw new BadParameter("장난하냐");
-        Bank bank = bankRepository.findByUserSeqAndRoll(withdrawalDto.getUserSeq(), withdrawalDto.getRoll()).orElseThrow(() -> new NotFound("너 뭐냐"));
+        Bank bank = bankRepository.findByUserSeqAndRoll(userSeq, roll).orElseThrow(() -> new NotFound("너 뭐냐"));
         if (bank.getDeposit() - withdrawalDto.getWithdrawal() < 0) {
             throw new BadParameter("내 돈 빼먹지 마");
         }

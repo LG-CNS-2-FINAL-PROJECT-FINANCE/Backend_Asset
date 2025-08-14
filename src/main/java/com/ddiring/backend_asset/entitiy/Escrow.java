@@ -18,7 +18,7 @@ public class Escrow {
     @Column(name = "escrow_seq", nullable = false)
     private Integer escrowSeq;
 
-    @Column(name = "projectId")
+    @Column(name = "project_id")
     private String projectId;
 
     @Column(name = "account")

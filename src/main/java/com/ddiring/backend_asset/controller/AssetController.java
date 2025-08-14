@@ -7,6 +7,7 @@ import com.ddiring.backend_asset.dto.*;
 import com.ddiring.backend_asset.entitiy.EscrowHistory;
 import com.ddiring.backend_asset.service.BankService;
 import com.ddiring.backend_asset.service.WalletService;
+import jnr.ffi.annotations.In;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,8 +21,8 @@ public class AssetController {
     private final WalletService walletService;
 
     @GetMapping("/account")
-    public ApiResponseDto<String> createBank(@RequestHeader("userSeq") Integer userSeq, @RequestHeader("roll") Integer roll, @RequestBody CreateBankDto createBankDto) {
-        bankService.createBank(userSeq, roll, createBankDto);
+    public ApiResponseDto<String> createBank(@RequestHeader("userSeq") Integer userSeq, @RequestHeader("roll") Integer roll) {
+        bankService.createBank(userSeq, roll);
         return ApiResponseDto.createOk("물주 생성 굿");
     }
 
@@ -32,15 +33,15 @@ public class AssetController {
     }
 
     @PostMapping("/deposit")
-    public ApiResponseDto<String> deposit(@RequestHeader("userSeq") Integer userSeq, @RequestHeader("roll") Integer roll, @RequestBody DepositDto depositDto) {
+    public ApiResponseDto<Integer> deposit(@RequestHeader("userSeq") Integer userSeq, @RequestHeader("roll") Integer roll, @RequestBody DepositDto depositDto) {
         bankService.deposit(userSeq, roll, depositDto);
-        return ApiResponseDto.defaultOk();
+        return ApiResponseDto.createOk(depositDto.getDeposit());
     }
 
     @PostMapping("/withdrawal")
-    public ApiResponseDto<String> withdrawal(@RequestHeader("userSeq") Integer userSeq, @RequestHeader("roll") Integer roll, @RequestBody WithdrawalDto withdrawalDto) {
+    public ApiResponseDto<Integer> withdrawal(@RequestHeader("userSeq") Integer userSeq, @RequestHeader("roll") Integer roll, @RequestBody WithdrawalDto withdrawalDto) {
         bankService.withdrawal(userSeq, roll, withdrawalDto);
-        return ApiResponseDto.defaultOk();
+        return ApiResponseDto.createOk(withdrawalDto.getWithdrawal());
     }
 
     @PostMapping("/wallet")
