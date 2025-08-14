@@ -21,25 +21,25 @@ public class AssetController {
     private final WalletService walletService;
 
     @GetMapping("/account")
-    public ApiResponseDto<String> createBank(@RequestHeader("userSeq") Integer userSeq, @RequestHeader("roll") Integer roll) {
+    public ApiResponseDto<String> createBank(@RequestHeader("X-Auth-UserId") Integer userSeq, @RequestHeader("X-Auth-BankType") Integer roll) {
         bankService.createBank(userSeq, roll);
         return ApiResponseDto.createOk("물주 생성 굿");
     }
 
     @GetMapping("/{userSeq}/account")
-    public ApiResponseDto<BankSearchDto> bankSearch(@RequestHeader("userSeq") Integer userSeq, @RequestHeader("roll") Integer roll) {
+    public ApiResponseDto<BankSearchDto> bankSearch(@RequestHeader("X-Auth-UserId") Integer userSeq, @RequestHeader("X-Auth-BankType") Integer roll) {
         BankSearchDto history = bankService.bankSearch(userSeq, roll);
         return ApiResponseDto.createOk(history);
     }
 
     @PostMapping("/deposit")
-    public ApiResponseDto<Integer> deposit(@RequestHeader("userSeq") Integer userSeq, @RequestHeader("roll") Integer roll, @RequestBody DepositDto depositDto) {
+    public ApiResponseDto<Integer> deposit(@RequestHeader("userSeq") Integer userSeq, @RequestHeader("role") Integer roll, @RequestBody DepositDto depositDto) {
         bankService.deposit(userSeq, roll, depositDto);
         return ApiResponseDto.createOk(depositDto.getDeposit());
     }
 
     @PostMapping("/withdrawal")
-    public ApiResponseDto<Integer> withdrawal(@RequestHeader("userSeq") Integer userSeq, @RequestHeader("roll") Integer roll, @RequestBody WithdrawalDto withdrawalDto) {
+    public ApiResponseDto<Integer> withdrawal(@RequestHeader("userSeq") Integer userSeq, @RequestHeader("role") Integer roll, @RequestBody WithdrawalDto withdrawalDto) {
         bankService.withdrawal(userSeq, roll, withdrawalDto);
         return ApiResponseDto.createOk(withdrawalDto.getWithdrawal());
     }
