@@ -12,14 +12,9 @@ import java.time.LocalDate;
 public class MoneyMoveDto {
     private Integer bankPrice;
     private LocalDate bankTime;
-    private Integer bankType;
-    private Integer moneyType;
-
     public MoneyMoveDto(History history) {
         this.bankPrice = history.getBankPrice();
         this.bankTime = history.getBankTime();
-        this.moneyType = history.getMoneyType();
-        this.bankType = history.getBankType();
     }
 
 }

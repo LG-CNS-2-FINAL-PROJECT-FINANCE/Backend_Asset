@@ -32,58 +32,67 @@ public class BankService {
     private final EscrowHistoryRepository escrowHistoryRepository;
 
     @Transactional
-    public BankSearchDto bankSearch(Integer userId, Integer bankType) {
-        Optional<Bank> userid = bankRepository.findByUserSeqAndBankType(userId, bankType);
+    public BankSearchDto bankSearch(Integer userId, Integer roll) {
+        Optional<Bank> userid = bankRepository.findByUserSeqAndRoll(userId, roll);
         Bank bank = userid.orElseThrow(() -> new NotFound("계좌번호 없는데?"));
         return new BankSearchDto(bank);
     }
 
     @Transactional
-    public void createBank(CreateBankDto createBankDto) {
-        Optional<Bank> existingBank = bankRepository.findByUserSeq(createBankDto.getUserSeq());
+    public void createBank(Integer userSeq, Integer roll, CreateBankDto createBankDto) {
+        Optional<Bank> existingBank = bankRepository.findByUserSeq(userSeq);
 
         if (existingBank.isPresent()) {
             throw new BadParameter("이미 계좌를 가지고 있습니다.");
         }
         Random random = new Random();
         int randomNumber = random.nextInt(90000) + 10000;
-        String bankNumber1 = "02010-00-" + randomNumber;
-        Optional<Bank> sameBankNumber = bankRepository.findByBankNumber(createBankDto.getBankNumber());
-        if (sameBankNumber.equals("02010-00-" + randomNumber)) {
-            throw new BadParameter("운 좋네 같은거 있음 다시 시도 해");
+
+        if (roll == 0) {
+            String bankNumber1 = "02010-00-" + randomNumber;
+            Optional<Bank> sameBankNumber = bankRepository.findByBankNumber(createBankDto.getBankNumber());
+            if (sameBankNumber.equals("02010-00-" + randomNumber)) {
+                throw new BadParameter("운 좋네 같은거 있음 다시 시도 해");
+            }
+            Bank bank = Bank.builder()
+                    .userSeq(userSeq)
+                    .roll(0)
+                    .bankNumber(bankNumber1)
+                    .deposit(0)
+                    .linkedAt(LocalDate.now())
+                    .build();
+            bankRepository.save(bank);
+
+        } else if (roll == 1) {
+            String bankNumber2 = "02010-01-" + randomNumber;
+            Optional<Bank> sameBankNumber = bankRepository.findByBankNumber(createBankDto.getBankNumber());
+            if (sameBankNumber.equals("02010-01-" + randomNumber)) {
+                throw new BadParameter("운 좋네 같은거 있음 다시 시도 해");
+            }
+            Bank bank1 = Bank.builder()
+                    .userSeq(userSeq)
+                    .roll(1)
+                    .bankNumber(bankNumber2)
+                    .deposit(0)
+                    .linkedAt(LocalDate.now())
+                    .build();
+            bankRepository.save(bank1);
         }
-        Bank bank = Bank.builder()
-                .userSeq(createBankDto.getUserSeq())
-                .bankType(0)
-                .bankNumber(bankNumber1)
-                .deposit(0)
-                .linkedAt(LocalDate.now())
-                .build();
-        bankRepository.save(bank);
-        String bankNumber2 = "02010-01-" + randomNumber;
-        Bank bank1 = Bank.builder()
-                .userSeq(createBankDto.getUserSeq())
-                .bankType(1)
-                .bankNumber(bankNumber2)
-                .deposit(0)
-                .linkedAt(LocalDate.now())
-                .build();
-        bankRepository.save(bank1);
 
     }
     @Transactional
-    public void deposit(DepositDto depositDto) {
+    public void deposit(Integer userSeq, Integer roll, DepositDto depositDto) {
         if (depositDto.getDeposit() <= 0)
             throw new BadParameter("돈 넣어라");
-        if (depositDto.getUserSeq() == null || depositDto.getBankType() == null)
+        if (userSeq == null || roll == null)
             throw new BadParameter("누구슈?");
-        Bank bank = bankRepository.findByUserSeqAndBankType(depositDto.getUserSeq(), depositDto.getBankType()).orElseThrow(() -> new NotFound("너 뭐냐"));
+        Bank bank = bankRepository.findByUserSeqAndRoll(userSeq, roll).orElseThrow(() -> new NotFound("너 뭐냐"));
         bank.setDeposit(bank.getDeposit() + depositDto.getDeposit());
         bankRepository.save(bank);
 
         History history = History.builder()
-                .userSeq(depositDto.getUserSeq())
-                .bankType(depositDto.getBankType())
+                .userSeq(userSeq)
+                .roll(roll)
                 .bankPrice(depositDto.getDeposit())
                 .moneyType(0)
                 .bankTime(LocalDate.now())
@@ -93,10 +102,10 @@ public class BankService {
     }
 
     @Transactional
-    public void withdrawal(WithdrawalDto withdrawalDto) {
+    public void withdrawal(Integer userSeq, Integer roll, WithdrawalDto withdrawalDto) {
         if (withdrawalDto.getWithdrawal() <= 0)
             throw new BadParameter("장난하냐");
-        Bank bank = bankRepository.findByUserSeqAndBankType(withdrawalDto.getUserSeq(), withdrawalDto.getBankType()).orElseThrow(() -> new NotFound("너 뭐냐"));
+        Bank bank = bankRepository.findByUserSeqAndRoll(withdrawalDto.getUserSeq(), withdrawalDto.getRoll()).orElseThrow(() -> new NotFound("너 뭐냐"));
         if (bank.getDeposit() - withdrawalDto.getWithdrawal() < 0) {
             throw new BadParameter("내 돈 빼먹지 마");
         }
@@ -105,8 +114,8 @@ public class BankService {
         bankRepository.save(bank);
 
         History history = History.builder()
-                .userSeq(withdrawalDto.getUserSeq())
-                .bankType(withdrawalDto.getBankType())
+                .userSeq(userSeq)
+                .roll(roll)
                 .bankPrice(withdrawalDto.getWithdrawal())
                 .moneyType(1)
                 .bankTime(LocalDate.now())
@@ -114,22 +123,22 @@ public class BankService {
         historyRepository.save(history);
     }
     @Transactional
-    public List<MoneyMoveDto> moneyMove(Integer userSeq, Integer bankType, Integer moneyType) {
+    public List<MoneyMoveDto> moneyMove(Integer userSeq, Integer roll, Integer moneyType) {
         if (userSeq == null) {
             throw new NotFound("누구냐 넌");
         }
-        List<History> history = historyRepository.findByUserSeqAndBankTypeAndMoneyTypeOrderByBankTimeDesc(userSeq, bankType, moneyType);
+        List<History> history = historyRepository.findByUserSeqAndRollAndMoneyTypeOrderByBankTimeDesc(userSeq, roll, moneyType);
                 return history.stream()
                         .map(MoneyMoveDto::new)
                         .collect(Collectors.toList());
     }
 
     @Transactional
-    public List<MoneyMoveDto> allmoneyMove(Integer userSeq, Integer bankType) {
+    public List<MoneyMoveDto> allmoneyMove(Integer userSeq, Integer roll) {
         if (userSeq == null) {
             throw new NotFound("누구냐 넌");
         }
-        List<History> history = historyRepository.findByUserSeqAndBankTypeOrderByBankTimeDesc(userSeq, bankType);
+        List<History> history = historyRepository.findByUserSeqAndRollOrderByBankTimeDesc(userSeq, roll);
         return history.stream()
                 .map(MoneyMoveDto::new)
                 .collect(Collectors.toList());
@@ -152,15 +161,16 @@ public class BankService {
                 .projectId(productDto.getProjectId())
                 .build();
         escrowRepository.save(escrow);
+
     }
 
     @Transactional
-    public Integer depositToEscrow(MarketDto marketDto, ProductDto productDto ,Integer bankType, Integer userSeq) {
+    public Integer depositToEscrow(MarketDto marketDto, ProductDto productDto ,Integer roll, Integer userSeq) {
         if (marketDto.getUserSeq() == null || marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
             throw new BadParameter("다시");
         }
 
-        Bank bank = bankRepository.findByUserSeqAndBankType(marketDto.getUserSeq(), bankType)
+        Bank bank = bankRepository.findByUserSeqAndRoll(userSeq, roll)
                 .orElseThrow(() -> new NotFound("누구?"));
 
 
@@ -177,6 +187,7 @@ public class BankService {
         EscrowHistory escrowHistory = EscrowHistory.builder()
                 .escrowAccount(escrow.getAccount())
                 .userSeq(userSeq)
+                .roll(roll)
                 .price(marketDto.getPrice())
                 .title(productDto.getTitle())
                 .transferType(1)
@@ -189,12 +200,12 @@ public class BankService {
     }
 
     @Transactional
-    public Integer withdrawalFromEscrow(MarketDto marketDto,ProductDto productDto, Integer bankType, Integer userSeq) {
+    public Integer withdrawalFromEscrow(MarketDto marketDto,ProductDto productDto, Integer roll, Integer userSeq) {
         if (marketDto.getUserSeq() == null || marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
             throw new BadParameter("다시");
         }
 
-        Bank bank = bankRepository.findByUserSeqAndBankType(marketDto.getUserSeq(), bankType)
+        Bank bank = bankRepository.findByUserSeqAndRoll(userSeq, roll)
                 .orElseThrow(() -> new NotFound("누구?"));
 
 
@@ -207,6 +218,7 @@ public class BankService {
         EscrowHistory escrowHistory = EscrowHistory.builder()
                 .escrowAccount(escrow.getAccount())
                 .userSeq(userSeq)
+                .roll(roll)
                 .price(marketDto.getPrice())
                 .title(productDto.getTitle())
                 .transferType(0)
@@ -217,4 +229,24 @@ public class BankService {
 
         return bank.getDeposit();
     }
+
+    @Transactional
+    public List<EscrowHistroyDto> escrowHistory(Integer userSeq, Integer roll, Integer trasferType) {
+        List<EscrowHistory> escrowHistories = escrowHistoryRepository.findByUserSeqAndRollAndTransferTypeOrderByTransferDateDesc(userSeq, roll, trasferType);
+
+        return escrowHistories.stream()
+                .map(EscrowHistroyDto::new)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<EscrowHistroyDto> escrowAllHistory(Integer userSeq, Integer roll) {
+        List<EscrowHistory> escrowHistories = escrowHistoryRepository.findByUserSeqAndRollOrderByTransferDateDesc(userSeq, roll);
+
+        return escrowHistories.stream()
+                .map(EscrowHistroyDto::new)
+                .collect(Collectors.toList());
+    }
+
+
 }

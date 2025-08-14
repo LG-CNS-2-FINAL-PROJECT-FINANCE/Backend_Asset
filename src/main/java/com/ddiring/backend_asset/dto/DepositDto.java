@@ -10,11 +10,5 @@ import java.time.LocalDate;
 @Getter
 @NoArgsConstructor
 public class DepositDto {
-    private Integer bankType;
     private Integer deposit;
-    private Integer userSeq;
-
-    public DepositDto(Bank bank) {
-        this.bankType = bank.getBankType();
-    }
 }

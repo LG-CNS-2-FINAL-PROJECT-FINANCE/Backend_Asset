@@ -23,8 +23,8 @@ public class Bank {
     @Column(name = "bank_number", nullable = false)
     private String bankNumber;
 
-    @Column(name = "bank_type", nullable = false)
-    private Integer bankType;
+    @Column(name = "roll", nullable = false)
+    private Integer roll;
 
     @Column(name = "deposit", nullable = false)
     private Integer deposit;
@@ -45,10 +45,10 @@ public class Bank {
     private Integer updatedAt;
 
     @Builder
-    public Bank(Integer userSeq, Integer deposit, String bankNumber, Integer bankType, LocalDate linkedAt, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
+    public Bank(Integer userSeq, Integer deposit, String bankNumber, Integer roll, LocalDate linkedAt, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
         this.userSeq = userSeq;
         this.bankNumber = bankNumber;
-        this.bankType = bankType;
+        this.roll = roll;
         this.deposit = deposit;
         this.linkedAt = linkedAt;
         this.createdId = createdId;

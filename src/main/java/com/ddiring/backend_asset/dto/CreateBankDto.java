@@ -8,7 +8,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateBankDto {
     private Integer bankType;
-    private Integer userSeq;
+    private Integer roll;
     private String bankNumber;
-
+    public CreateBankDto(Bank bank) {
+        this.bankNumber = bank.getBankNumber();
+    }
 }

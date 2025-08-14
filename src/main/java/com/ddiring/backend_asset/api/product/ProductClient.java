@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 @FeignClient(name = "product")
 public interface ProductClient {
 
-    @GetMapping("/asset")
+    @GetMapping("/api/asset")
     ProductDto getProduct(@RequestHeader("userSeq") Integer userSeq);
 }

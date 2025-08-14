@@ -7,10 +7,14 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class ProductDto {
     private String projectId;
     private String title;
     private String account;
+    public  ProductDto(String projectId, String title, String account) {
+        this.projectId = projectId;
+        this.title = title;
+        this.account = account;
+    }
 }

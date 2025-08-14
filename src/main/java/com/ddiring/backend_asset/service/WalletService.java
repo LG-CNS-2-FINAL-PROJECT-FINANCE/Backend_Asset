@@ -56,9 +56,9 @@ public class WalletService {
 
     // 새 이더리움 지갑을 생성하고 주소와 개인 키를 반환하는 메소드
     @Transactional
-    public CreateWalletAddressDto createWalletAndReturnKeys(CreateWalletDto createWalletDto) {
+    public CreateWalletAddressDto createWalletAndReturnKeys(Integer userSeq) {
 
-        Optional<Wallet> userWallet = walletRepository.findByUserSeq(createWalletDto.getUserSeq());
+        Optional<Wallet> userWallet = walletRepository.findByUserSeq(userSeq);
         if (userWallet.isPresent()) {
             throw new com.ddiring.backend_asset.common.exception.BadParameter("지갑 있");
         }
@@ -77,7 +77,7 @@ public class WalletService {
 
             // 4. 지갑 주소를 DB에 저장 (개인 키는 저장하지 않음)
             Wallet wallet = Wallet.builder()
-                    .userSeq(createWalletDto.getUserSeq())
+                    .userSeq(userSeq)
                     .walletAddress(walletAddress)
                     .build();
 
