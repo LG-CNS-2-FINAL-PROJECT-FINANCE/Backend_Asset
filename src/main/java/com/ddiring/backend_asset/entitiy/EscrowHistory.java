@@ -24,7 +24,7 @@ public class EscrowHistory {
     private String userSeq;
 
     @Column(name = "role", nullable = false)
-    private String role;
+    private Integer role;
 
     @Column(name = "escrow_account", nullable = false)
     private String escrowAccount;
@@ -42,7 +42,7 @@ public class EscrowHistory {
     private LocalDate transferDate;
 
     @Builder
-    public EscrowHistory(String userSeq, String role, String escrowAccount, String title, Integer price, Integer transferType, LocalDate transferDate) {
+    public EscrowHistory(String userSeq, Integer role, String escrowAccount, String title, Integer price, Integer transferType, LocalDate transferDate) {
         this.userSeq = userSeq;
         this.escrowAccount = escrowAccount;
         this.role = role;

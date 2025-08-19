@@ -21,25 +21,25 @@ public class AssetController {
     private final WalletService walletService;
 
     @PostMapping("/account") // GET -> POST로 변경
-    public ApiResponseDto<String> createBank(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role) {
+    public ApiResponseDto<String> createBank(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer role) {
         bankService.createBank(userSeq, role);
         return ApiResponseDto.createOk("물주 생성 굿");
     }
 
     @GetMapping("/{userSeq}/account")
-    public ApiResponseDto<BankSearchDto> bankSearch(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role) {
+    public ApiResponseDto<BankSearchDto> bankSearch(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer role) {
         BankSearchDto history = bankService.bankSearch(userSeq, role);
         return ApiResponseDto.createOk(history);
     }
 
     @PostMapping("/deposit")
-    public ApiResponseDto<Integer> deposit(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role, @RequestBody DepositDto depositDto) {
+    public ApiResponseDto<Integer> deposit(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer role, @RequestBody DepositDto depositDto) {
         bankService.deposit(userSeq, role, depositDto);
         return ApiResponseDto.createOk(depositDto.getDeposit());
     }
 
     @PostMapping("/withdrawal")
-    public ApiResponseDto<Integer> withdrawal(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role, @RequestBody WithdrawalDto withdrawalDto) {
+    public ApiResponseDto<Integer> withdrawal(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer role, @RequestBody WithdrawalDto withdrawalDto) {
         bankService.withdrawal(userSeq, role, withdrawalDto);
         return ApiResponseDto.createOk(withdrawalDto.getWithdrawal());
     }
@@ -57,13 +57,13 @@ public class AssetController {
     }
 
     @GetMapping("/{userSeq}/history/{moneyType}")
-    public ApiResponseDto<List<MoneyMoveDto>> history(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role, @PathVariable Integer moneyType, @RequestBody MoneyMoveDto moneyMoveDto) {
+    public ApiResponseDto<List<MoneyMoveDto>> history(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer role, @PathVariable Integer moneyType, @RequestBody MoneyMoveDto moneyMoveDto) {
         List<MoneyMoveDto> history = bankService.moneyMove(userSeq, role, moneyType);
         return ApiResponseDto.createOk(history);
     }
 
     @GetMapping("/{userSeq}/history")
-    public ApiResponseDto<List<MoneyMoveDto>> allhistory(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role) {
+    public ApiResponseDto<List<MoneyMoveDto>> allhistory(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer role) {
         List<MoneyMoveDto> history = bankService.allmoneyMove(userSeq, role);
         return ApiResponseDto.createOk(history);
     }
@@ -78,7 +78,7 @@ public class AssetController {
     @PostMapping("/escrow/deposit")
     public ApiResponseDto<Integer> depositToEscrow(
             @RequestHeader("userSeq") String userSeq,
-            @RequestHeader("role") String role,
+            @RequestHeader("role") Integer role,
             @RequestBody EscrowRequestDto escrowRequestDto) {
 
         Integer money = bankService.depositToEscrow(escrowRequestDto.getMarketDto(), escrowRequestDto.getProductDto(),  role, userSeq);
@@ -88,7 +88,7 @@ public class AssetController {
     @PostMapping("/escrow/withdrawal")
     public ApiResponseDto<Integer> withdrawalFromEscrow(
             @RequestHeader("userSeq") String userSeq,
-            @RequestHeader("role") String role,
+            @RequestHeader("role") Integer role,
             @RequestBody EscrowRequestDto escrowRequestDto) {
 
         Integer money = bankService.withdrawalFromEscrow(escrowRequestDto.getMarketDto(), escrowRequestDto.getProductDto(), role, userSeq);
@@ -96,13 +96,13 @@ public class AssetController {
     }
 
     @GetMapping("/escrow/history/{trasferType}")
-    public ApiResponseDto<List<EscrowHistroyDto>> escrowHistory(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role, @PathVariable Integer trasferType) {
+    public ApiResponseDto<List<EscrowHistroyDto>> escrowHistory(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer role, @PathVariable Integer trasferType) {
         List<EscrowHistroyDto> escrowHistories = bankService.escrowHistory(userSeq, role, trasferType);
         return ApiResponseDto.createOk(escrowHistories);
     }
 
     @GetMapping("/escrow/history")
-    public ApiResponseDto<List<EscrowHistroyDto>> escrowHAllistory(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role) {
+    public ApiResponseDto<List<EscrowHistroyDto>> escrowHAllistory(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer role) {
         List<EscrowHistroyDto> escrowHistories = bankService.escrowAllHistory(userSeq, role);
         return ApiResponseDto.createOk(escrowHistories);
     }

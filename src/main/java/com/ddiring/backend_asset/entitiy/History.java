@@ -25,7 +25,7 @@ public class History {
     private String userSeq;
 
     @Column(name = "role") //0 창작자 1 투자자
-    private String role;
+    private Integer role;
 
     @Column(name = "bank_number")
     private String bankNumber;
@@ -52,7 +52,7 @@ public class History {
     private Integer updatedAt;
 
     @Builder
-    public History(String userSeq, String role, String bankNumber, Integer bankPrice, LocalDate bankTime,Integer moneyType, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
+    public History(String userSeq, Integer role, String bankNumber, Integer bankPrice, LocalDate bankTime,Integer moneyType, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
         this.userSeq = userSeq;
         this.role = role;
         this.bankNumber = bankNumber;

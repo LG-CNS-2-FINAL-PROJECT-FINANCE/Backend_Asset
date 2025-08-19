@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 public class BankSearchDto {
     private String bankNumber;
     private Integer deposit;
-    private String role;
+    private Integer role;
 
     public BankSearchDto(Bank bank) {
         this.bankNumber = bank.getBankNumber();

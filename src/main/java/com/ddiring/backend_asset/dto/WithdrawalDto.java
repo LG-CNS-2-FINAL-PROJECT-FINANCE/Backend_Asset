@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 public class WithdrawalDto {
     private Integer withdrawal;
     private String userSeq;
-    private String role;
+    private Integer role;
     public WithdrawalDto(Bank bank) {
-        role = bank.getRole();
+        this.role = bank.getRole();
     }
 }
