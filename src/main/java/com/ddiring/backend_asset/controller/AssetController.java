@@ -20,7 +20,7 @@ public class AssetController {
     private final BankService bankService;
     private final WalletService walletService;
 
-    @GetMapping("/account")
+    @PostMapping("/account") // GET -> POST로 변경
     public ApiResponseDto<String> createBank(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer role) {
         bankService.createBank(userSeq, role);
         return ApiResponseDto.createOk("물주 생성 굿");
