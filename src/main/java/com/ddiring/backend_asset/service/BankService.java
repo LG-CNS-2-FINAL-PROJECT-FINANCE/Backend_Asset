@@ -148,9 +148,9 @@ public class BankService {
         }
 
         Escrow escrow = Escrow.builder()
+                .projectId(productDto.getProjectId())
                 .account(productDto.getAccount())
                 .title(productDto.getTitle())
-                .projectId(productDto.getProjectId())
                 .build();
         escrowRepository.save(escrow);
 

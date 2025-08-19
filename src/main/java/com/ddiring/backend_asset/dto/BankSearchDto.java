@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 public class BankSearchDto {
     private String bankNumber;
     private Integer deposit;
-    private Integer roll;
+    private String role;
 
     public BankSearchDto(Bank bank) {
         this.bankNumber = bank.getBankNumber();
         this.deposit = bank.getDeposit();
-        this.roll = bank.getRole();
+        this.role = bank.getRole();
     }
 }
