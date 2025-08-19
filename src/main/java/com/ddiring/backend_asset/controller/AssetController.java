@@ -68,7 +68,7 @@ public class AssetController {
         return ApiResponseDto.createOk(history);
     }
 
-    @GetMapping("/escrow/account")
+    @PostMapping("/escrow/account")
     public ApiResponseDto<String> registerEscrow(
             @RequestBody ProductDto productDto) {
         bankService.escrowAccount(productDto);
