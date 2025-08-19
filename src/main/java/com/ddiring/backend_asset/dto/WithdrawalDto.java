@@ -11,6 +11,6 @@ public class WithdrawalDto {
     private String userSeq;
     private Integer roll;
     public WithdrawalDto(Bank bank) {
-        this.roll = bank.getRoll();
+        this.roll = bank.getRole();
     }
 }

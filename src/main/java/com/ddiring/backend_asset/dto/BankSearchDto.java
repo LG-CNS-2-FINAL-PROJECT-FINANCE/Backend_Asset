@@ -14,6 +14,6 @@ public class BankSearchDto {
     public BankSearchDto(Bank bank) {
         this.bankNumber = bank.getBankNumber();
         this.deposit = bank.getDeposit();
-        this.roll = bank.getRoll();
+        this.roll = bank.getRole();
     }
 }

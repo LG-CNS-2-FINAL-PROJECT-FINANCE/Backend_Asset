@@ -32,15 +32,15 @@ public class BankService {
     private final EscrowHistoryRepository escrowHistoryRepository;
 
     @Transactional
-    public BankSearchDto bankSearch(String userSeq, Integer roll) {
-        Optional<Bank> userid = bankRepository.findByUserSeqAndRoll(userSeq, roll);
+    public BankSearchDto bankSearch(String userSeq, Integer role) {
+        Optional<Bank> userid = bankRepository.findByUserSeqAndRole(userSeq, role);
         Bank bank = userid.orElseThrow(() -> new NotFound("계좌번호 없는데?"));
         return new BankSearchDto(bank);
     }
 
     @Transactional
-    public Bank createBank(String userSeq, Integer roll) {
-        Optional<Bank> existingBank = bankRepository.findByUserSeqAndRoll(userSeq, roll);
+    public Bank createBank(String userSeq, Integer role) {
+        Optional<Bank> existingBank = bankRepository.findByUserSeqAndRole(userSeq, role);
 
         if (existingBank.isPresent()) {
             throw new BadParameter("이미 계좌를 가지고 있습니다.");
@@ -49,12 +49,12 @@ public class BankService {
         int randomNumber = random.nextInt(90000) + 10000;
 
         String bankNumber;
-        if (roll == 0) {
+        if (role == 0) {
             bankNumber = "02010-00-" + randomNumber;
-        } else if (roll == 1) {
+        } else if (role == 1) {
             bankNumber = "02010-01-" + randomNumber;
         } else {
-            throw new BadParameter("유효하지 않은 roll 값입니다.");
+            throw new BadParameter("유효하지 않은 role 값입니다.");
         }
 
         Optional<Bank> sameBankNumber = bankRepository.findByBankNumber(bankNumber);
@@ -64,7 +64,7 @@ public class BankService {
 
         Bank bank = Bank.builder()
                 .userSeq(userSeq)
-                .roll(roll)
+                .role(role)
                 .bankNumber(bankNumber)
                 .deposit(0)
                 .linkedAt(LocalDate.now())
@@ -73,18 +73,18 @@ public class BankService {
 
     }
     @Transactional
-    public void deposit(String userSeq, Integer roll, DepositDto depositDto) {
+    public void deposit(String userSeq, Integer role, DepositDto depositDto) {
         if (depositDto.getDeposit() <= 0)
             throw new BadParameter("돈 넣어라");
-        if (userSeq == null || roll == null)
+        if (userSeq == null || role == null)
             throw new BadParameter("누구슈?");
-        Bank bank = bankRepository.findByUserSeqAndRoll(userSeq, roll).orElseThrow(() -> new NotFound("너 뭐냐"));
+        Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role).orElseThrow(() -> new NotFound("너 뭐냐"));
         bank.setDeposit(bank.getDeposit() + depositDto.getDeposit());
         bankRepository.save(bank);
 
         History history = History.builder()
                 .userSeq(userSeq)
-                .roll(roll)
+                .role(role)
                 .bankPrice(depositDto.getDeposit())
                 .moneyType(0)
                 .bankTime(LocalDate.now())
@@ -94,10 +94,10 @@ public class BankService {
     }
 
     @Transactional
-    public void withdrawal(String userSeq, Integer roll, WithdrawalDto withdrawalDto) {
+    public void withdrawal(String userSeq, Integer role, WithdrawalDto withdrawalDto) {
         if (withdrawalDto.getWithdrawal() <= 0)
             throw new BadParameter("장난하냐");
-        Bank bank = bankRepository.findByUserSeqAndRoll(userSeq, roll).orElseThrow(() -> new NotFound("너 뭐냐"));
+        Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role).orElseThrow(() -> new NotFound("너 뭐냐"));
         if (bank.getDeposit() - withdrawalDto.getWithdrawal() < 0) {
             throw new BadParameter("내 돈 빼먹지 마");
         }
@@ -107,7 +107,7 @@ public class BankService {
 
         History history = History.builder()
                 .userSeq(userSeq)
-                .roll(roll)
+                .role(role)
                 .bankPrice(withdrawalDto.getWithdrawal())
                 .moneyType(1)
                 .bankTime(LocalDate.now())
@@ -115,22 +115,22 @@ public class BankService {
         historyRepository.save(history);
     }
     @Transactional
-    public List<MoneyMoveDto> moneyMove(String userSeq, Integer roll, Integer moneyType) {
+    public List<MoneyMoveDto> moneyMove(String userSeq, Integer role, Integer moneyType) {
         if (userSeq == null) {
             throw new NotFound("누구냐 넌");
         }
-        List<History> history = historyRepository.findByUserSeqAndRollAndMoneyTypeOrderByBankTimeDesc(userSeq, roll, moneyType);
+        List<History> history = historyRepository.findByUserSeqAndRoleAndMoneyTypeOrderByBankTimeDesc(userSeq, role, moneyType);
                 return history.stream()
                         .map(MoneyMoveDto::new)
                         .collect(Collectors.toList());
     }
 
     @Transactional
-    public List<MoneyMoveDto> allmoneyMove(String userSeq, Integer roll) {
+    public List<MoneyMoveDto> allmoneyMove(String userSeq, Integer role) {
         if (userSeq == null) {
             throw new NotFound("누구냐 넌");
         }
-        List<History> history = historyRepository.findByUserSeqAndRollOrderByBankTimeDesc(userSeq, roll);
+        List<History> history = historyRepository.findByUserSeqAndRoleOrderByBankTimeDesc(userSeq, role);
         return history.stream()
                 .map(MoneyMoveDto::new)
                 .collect(Collectors.toList());
@@ -157,12 +157,12 @@ public class BankService {
     }
 
     @Transactional
-    public Integer depositToEscrow(MarketDto marketDto, ProductDto productDto ,Integer roll, String userSeq) {
+    public Integer depositToEscrow(MarketDto marketDto, ProductDto productDto ,Integer role, String userSeq) {
         if (marketDto.getUserSeq() == null || marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
             throw new BadParameter("다시");
         }
 
-        Bank bank = bankRepository.findByUserSeqAndRoll(userSeq, roll)
+        Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
                 .orElseThrow(() -> new NotFound("누구?"));
 
 
@@ -179,7 +179,7 @@ public class BankService {
         EscrowHistory escrowHistory = EscrowHistory.builder()
                 .escrowAccount(escrow.getAccount())
                 .userSeq(userSeq)
-                .roll(roll)
+                .role(role)
                 .price(marketDto.getPrice())
                 .title(productDto.getTitle())
                 .transferType(1)
@@ -192,12 +192,12 @@ public class BankService {
     }
 
     @Transactional
-    public Integer withdrawalFromEscrow(MarketDto marketDto,ProductDto productDto, Integer roll, String userSeq) {
+    public Integer withdrawalFromEscrow(MarketDto marketDto,ProductDto productDto, Integer role, String userSeq) {
         if (marketDto.getUserSeq() == null || marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
             throw new BadParameter("다시");
         }
 
-        Bank bank = bankRepository.findByUserSeqAndRoll(userSeq, roll)
+        Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
                 .orElseThrow(() -> new NotFound("누구?"));
 
 
@@ -210,7 +210,7 @@ public class BankService {
         EscrowHistory escrowHistory = EscrowHistory.builder()
                 .escrowAccount(escrow.getAccount())
                 .userSeq(userSeq)
-                .roll(roll)
+                .role(role)
                 .price(marketDto.getPrice())
                 .title(productDto.getTitle())
                 .transferType(0)
@@ -223,8 +223,8 @@ public class BankService {
     }
 
     @Transactional
-    public List<EscrowHistroyDto> escrowHistory(String userSeq, Integer roll, Integer trasferType) {
-        List<EscrowHistory> escrowHistories = escrowHistoryRepository.findByUserSeqAndRollAndTransferTypeOrderByTransferDateDesc(userSeq, roll, trasferType);
+    public List<EscrowHistroyDto> escrowHistory(String userSeq, Integer role, Integer trasferType) {
+        List<EscrowHistory> escrowHistories = escrowHistoryRepository.findByUserSeqAndRoleAndTransferTypeOrderByTransferDateDesc(userSeq, role, trasferType);
 
         return escrowHistories.stream()
                 .map(EscrowHistroyDto::new)
@@ -232,8 +232,8 @@ public class BankService {
     }
 
     @Transactional
-    public List<EscrowHistroyDto> escrowAllHistory(String userSeq, Integer roll) {
-        List<EscrowHistory> escrowHistories = escrowHistoryRepository.findByUserSeqAndRollOrderByTransferDateDesc(userSeq, roll);
+    public List<EscrowHistroyDto> escrowAllHistory(String userSeq, Integer role) {
+        List<EscrowHistory> escrowHistories = escrowHistoryRepository.findByUserSeqAndRoleOrderByTransferDateDesc(userSeq, role);
 
         return escrowHistories.stream()
                 .map(EscrowHistroyDto::new)

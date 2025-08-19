@@ -8,6 +8,6 @@ import java.util.List;
 
 @Repository
 public interface HistoryRepository extends JpaRepository<History, Integer> {
-    List<History> findByUserSeqAndRollAndMoneyTypeOrderByBankTimeDesc(String userSeq, Integer roll, Integer moneyType);
-    List<History> findByUserSeqAndRollOrderByBankTimeDesc(String userSeq, Integer roll);
+    List<History> findByUserSeqAndRoleAndMoneyTypeOrderByBankTimeDesc(String userSeq, Integer role, Integer moneyType);
+    List<History> findByUserSeqAndRoleOrderByBankTimeDesc(String userSeq, Integer role);
 }
