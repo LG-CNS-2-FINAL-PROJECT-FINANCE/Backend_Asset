@@ -32,14 +32,14 @@ public class BankService {
     private final EscrowHistoryRepository escrowHistoryRepository;
 
     @Transactional
-    public BankSearchDto bankSearch(String userSeq, Integer role) {
+    public BankSearchDto bankSearch(String userSeq, String role) {
         Optional<Bank> userid = bankRepository.findByUserSeqAndRole(userSeq, role);
         Bank bank = userid.orElseThrow(() -> new NotFound("계좌번호 없는데?"));
         return new BankSearchDto(bank);
     }
 
     @Transactional
-    public Bank createBank(String userSeq, Integer role) {
+    public Bank createBank(String userSeq, String role) {
         Optional<Bank> existingBank = bankRepository.findByUserSeqAndRole(userSeq, role);
 
         if (existingBank.isPresent()) {
@@ -49,9 +49,9 @@ public class BankService {
         int randomNumber = random.nextInt(90000) + 10000;
 
         String bankNumber;
-        if (role == 0) {
+        if (role.equals("0")) {
             bankNumber = "02010-00-" + randomNumber;
-        } else if (role == 1) {
+        } else if (role.equals("1")) {
             bankNumber = "02010-01-" + randomNumber;
         } else {
             throw new BadParameter("유효하지 않은 role 값입니다.");
@@ -73,7 +73,7 @@ public class BankService {
 
     }
     @Transactional
-    public void deposit(String userSeq, Integer role, DepositDto depositDto) {
+    public void deposit(String userSeq, String role, DepositDto depositDto) {
         if (depositDto.getDeposit() <= 0)
             throw new BadParameter("돈 넣어라");
         if (userSeq == null || role == null)
@@ -94,7 +94,7 @@ public class BankService {
     }
 
     @Transactional
-    public void withdrawal(String userSeq, Integer role, WithdrawalDto withdrawalDto) {
+    public void withdrawal(String userSeq, String role, WithdrawalDto withdrawalDto) {
         if (withdrawalDto.getWithdrawal() <= 0)
             throw new BadParameter("장난하냐");
         Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role).orElseThrow(() -> new NotFound("너 뭐냐"));
@@ -115,7 +115,7 @@ public class BankService {
         historyRepository.save(history);
     }
     @Transactional
-    public List<MoneyMoveDto> moneyMove(String userSeq, Integer role, Integer moneyType) {
+    public List<MoneyMoveDto> moneyMove(String userSeq, String role, Integer moneyType) {
         if (userSeq == null) {
             throw new NotFound("누구냐 넌");
         }
@@ -126,7 +126,7 @@ public class BankService {
     }
 
     @Transactional
-    public List<MoneyMoveDto> allmoneyMove(String userSeq, Integer role) {
+    public List<MoneyMoveDto> allmoneyMove(String userSeq, String role) {
         if (userSeq == null) {
             throw new NotFound("누구냐 넌");
         }
@@ -157,7 +157,7 @@ public class BankService {
     }
 
     @Transactional
-    public Integer depositToEscrow(MarketDto marketDto, ProductDto productDto ,Integer role, String userSeq) {
+    public Integer depositToEscrow(MarketDto marketDto, ProductDto productDto ,String role, String userSeq) {
         if (marketDto.getUserSeq() == null || marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
             throw new BadParameter("다시");
         }
@@ -192,7 +192,7 @@ public class BankService {
     }
 
     @Transactional
-    public Integer withdrawalFromEscrow(MarketDto marketDto,ProductDto productDto, Integer role, String userSeq) {
+    public Integer withdrawalFromEscrow(MarketDto marketDto,ProductDto productDto, String role, String userSeq) {
         if (marketDto.getUserSeq() == null || marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
             throw new BadParameter("다시");
         }
@@ -223,7 +223,7 @@ public class BankService {
     }
 
     @Transactional
-    public List<EscrowHistroyDto> escrowHistory(String userSeq, Integer role, Integer trasferType) {
+    public List<EscrowHistroyDto> escrowHistory(String userSeq, String role, Integer trasferType) {
         List<EscrowHistory> escrowHistories = escrowHistoryRepository.findByUserSeqAndRoleAndTransferTypeOrderByTransferDateDesc(userSeq, role, trasferType);
 
         return escrowHistories.stream()
@@ -232,7 +232,7 @@ public class BankService {
     }
 
     @Transactional
-    public List<EscrowHistroyDto> escrowAllHistory(String userSeq, Integer role) {
+    public List<EscrowHistroyDto> escrowAllHistory(String userSeq, String role) {
         List<EscrowHistory> escrowHistories = escrowHistoryRepository.findByUserSeqAndRoleOrderByTransferDateDesc(userSeq, role);
 
         return escrowHistories.stream()
