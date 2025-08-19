@@ -32,14 +32,14 @@ public class BankService {
     private final EscrowHistoryRepository escrowHistoryRepository;
 
     @Transactional
-    public BankSearchDto bankSearch(Integer userId, Integer roll) {
-        Optional<Bank> userid = bankRepository.findByUserSeqAndRoll(userId, roll);
+    public BankSearchDto bankSearch(String userSeq, Integer roll) {
+        Optional<Bank> userid = bankRepository.findByUserSeqAndRoll(userSeq, roll);
         Bank bank = userid.orElseThrow(() -> new NotFound("계좌번호 없는데?"));
         return new BankSearchDto(bank);
     }
 
     @Transactional
-    public Bank createBank(Integer userSeq, Integer roll) {
+    public Bank createBank(String userSeq, Integer roll) {
         Optional<Bank> existingBank = bankRepository.findByUserSeqAndRoll(userSeq, roll);
 
         if (existingBank.isPresent()) {
@@ -73,7 +73,7 @@ public class BankService {
 
     }
     @Transactional
-    public void deposit(Integer userSeq, Integer roll, DepositDto depositDto) {
+    public void deposit(String userSeq, Integer roll, DepositDto depositDto) {
         if (depositDto.getDeposit() <= 0)
             throw new BadParameter("돈 넣어라");
         if (userSeq == null || roll == null)
@@ -94,7 +94,7 @@ public class BankService {
     }
 
     @Transactional
-    public void withdrawal(Integer userSeq, Integer roll, WithdrawalDto withdrawalDto) {
+    public void withdrawal(String userSeq, Integer roll, WithdrawalDto withdrawalDto) {
         if (withdrawalDto.getWithdrawal() <= 0)
             throw new BadParameter("장난하냐");
         Bank bank = bankRepository.findByUserSeqAndRoll(userSeq, roll).orElseThrow(() -> new NotFound("너 뭐냐"));
@@ -115,7 +115,7 @@ public class BankService {
         historyRepository.save(history);
     }
     @Transactional
-    public List<MoneyMoveDto> moneyMove(Integer userSeq, Integer roll, Integer moneyType) {
+    public List<MoneyMoveDto> moneyMove(String userSeq, Integer roll, Integer moneyType) {
         if (userSeq == null) {
             throw new NotFound("누구냐 넌");
         }
@@ -126,7 +126,7 @@ public class BankService {
     }
 
     @Transactional
-    public List<MoneyMoveDto> allmoneyMove(Integer userSeq, Integer roll) {
+    public List<MoneyMoveDto> allmoneyMove(String userSeq, Integer roll) {
         if (userSeq == null) {
             throw new NotFound("누구냐 넌");
         }
@@ -157,7 +157,7 @@ public class BankService {
     }
 
     @Transactional
-    public Integer depositToEscrow(MarketDto marketDto, ProductDto productDto ,Integer roll, Integer userSeq) {
+    public Integer depositToEscrow(MarketDto marketDto, ProductDto productDto ,Integer roll, String userSeq) {
         if (marketDto.getUserSeq() == null || marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
             throw new BadParameter("다시");
         }
@@ -192,7 +192,7 @@ public class BankService {
     }
 
     @Transactional
-    public Integer withdrawalFromEscrow(MarketDto marketDto,ProductDto productDto, Integer roll, Integer userSeq) {
+    public Integer withdrawalFromEscrow(MarketDto marketDto,ProductDto productDto, Integer roll, String userSeq) {
         if (marketDto.getUserSeq() == null || marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
             throw new BadParameter("다시");
         }
@@ -223,7 +223,7 @@ public class BankService {
     }
 
     @Transactional
-    public List<EscrowHistroyDto> escrowHistory(Integer userSeq, Integer roll, Integer trasferType) {
+    public List<EscrowHistroyDto> escrowHistory(String userSeq, Integer roll, Integer trasferType) {
         List<EscrowHistory> escrowHistories = escrowHistoryRepository.findByUserSeqAndRollAndTransferTypeOrderByTransferDateDesc(userSeq, roll, trasferType);
 
         return escrowHistories.stream()
@@ -232,7 +232,7 @@ public class BankService {
     }
 
     @Transactional
-    public List<EscrowHistroyDto> escrowAllHistory(Integer userSeq, Integer roll) {
+    public List<EscrowHistroyDto> escrowAllHistory(String userSeq, Integer roll) {
         List<EscrowHistory> escrowHistories = escrowHistoryRepository.findByUserSeqAndRollOrderByTransferDateDesc(userSeq, roll);
 
         return escrowHistories.stream()

@@ -16,7 +16,7 @@ public class Wallet {
     private Integer walletSeq;
 
     @Column(name = "user_seq", nullable = false, unique = true)
-    private Integer userSeq;
+    private String userSeq;
 
     @Column(name = "wallet_address", nullable = false)
     private String walletAddress;
@@ -34,7 +34,7 @@ public class Wallet {
     private Integer updatedAt;
 
     @Builder
-    public Wallet(Integer userSeq, String walletAddress, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
+    public Wallet(String userSeq, String walletAddress, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
         this.userSeq = userSeq;
         this.walletAddress = walletAddress;
         this.createdId = createdId;

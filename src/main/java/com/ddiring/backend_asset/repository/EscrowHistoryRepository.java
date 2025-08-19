@@ -8,6 +8,6 @@ import java.util.List;
 
 @Repository
 public interface EscrowHistoryRepository extends JpaRepository<EscrowHistory, Integer> {
-    List<EscrowHistory> findByUserSeqAndRollOrderByTransferDateDesc(Integer userSeq, Integer roll);
-    List<EscrowHistory> findByUserSeqAndRollAndTransferTypeOrderByTransferDateDesc(Integer userSeq, Integer roll, Integer transferType);
+    List<EscrowHistory> findByUserSeqAndRollOrderByTransferDateDesc(String userSeq, Integer roll);
+    List<EscrowHistory> findByUserSeqAndRollAndTransferTypeOrderByTransferDateDesc(String userSeq, Integer roll, Integer transferType);
 }

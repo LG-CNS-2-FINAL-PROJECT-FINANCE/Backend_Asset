@@ -22,7 +22,7 @@ public class History {
     private Integer historyId;
 
     @Column(name = "user_seq")
-    private Integer userSeq;
+    private String userSeq;
 
     @Column(name = "roll") //0 창작자 1 투자자
     private Integer roll;
@@ -52,7 +52,7 @@ public class History {
     private Integer updatedAt;
 
     @Builder
-    public History(Integer userSeq, Integer roll, String bankNumber, Integer bankPrice, LocalDate bankTime,Integer moneyType, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
+    public History(String userSeq, Integer roll, String bankNumber, Integer bankPrice, LocalDate bankTime,Integer moneyType, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
         this.userSeq = userSeq;
         this.roll = roll;
         this.bankNumber = bankNumber;

@@ -49,14 +49,14 @@ public class WalletService {
 
     // 특정 userSeq에 해당하는 지갑을 찾는 메소드 (예외 처리 포함)
     @Transactional
-    public Wallet findByUserSeq(Integer userSeq) {
+    public Wallet findByUserSeq(String userSeq) {
         return walletRepository.findByUserSeq(userSeq)
                 .orElseThrow(() -> new com.ddiring.backend_asset.common.exception.NotFound("지갑을 찾을 수 없습니다."));
     }
 
     // 새 이더리움 지갑을 생성하고 주소와 개인 키를 반환하는 메소드
     @Transactional
-    public CreateWalletAddressDto createWalletAndReturnKeys(Integer userSeq) {
+    public CreateWalletAddressDto createWalletAndReturnKeys(String userSeq) {
 
         Optional<Wallet> userWallet = walletRepository.findByUserSeq(userSeq);
         if (userWallet.isPresent()) {
@@ -101,7 +101,7 @@ public class WalletService {
      * @return 지갑에 있는 토큰 정보 목록
      */
     @Transactional
-    public List<WalletTokenInfoDto> getWalletTokenInfo(Integer userSeq) {
+    public List<WalletTokenInfoDto> getWalletTokenInfo(String userSeq) {
         // 1. userSeq로 지갑 주소 조회
         Optional<Wallet> walletOptional = walletRepository.findByUserSeq(userSeq);
         Wallet wallet = walletOptional.orElseThrow(() -> new com.ddiring.backend_asset.common.exception.NotFound("해당하는 지갑을 찾을 수 없습니다."));

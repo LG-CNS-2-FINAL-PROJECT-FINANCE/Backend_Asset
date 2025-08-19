@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface BankRepository extends JpaRepository<Bank, Integer> {
-    Optional<Bank> findByUserSeq(Integer userSeq);
-    Optional<Bank> findByUserSeqAndRoll(Integer userSeq, Integer roll);
+    Optional<Bank> findByUserSeq(String userSeq);
+    Optional<Bank> findByUserSeqAndRoll(String userSeq, Integer roll);
     Optional<Bank> findByBankNumber(String bankNumber);
 }

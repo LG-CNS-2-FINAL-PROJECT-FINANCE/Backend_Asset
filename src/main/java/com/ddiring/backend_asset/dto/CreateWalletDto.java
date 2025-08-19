@@ -6,5 +6,5 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class CreateWalletDto {
-    private Integer userSeq;
+    private String userSeq;
 }

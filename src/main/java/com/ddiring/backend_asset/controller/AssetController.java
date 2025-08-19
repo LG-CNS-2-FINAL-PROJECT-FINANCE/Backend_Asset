@@ -21,49 +21,49 @@ public class AssetController {
     private final WalletService walletService;
 
     @GetMapping("/account")
-    public ApiResponseDto<String> createBank(@RequestHeader("X-Auth-UserId") Integer userSeq, @RequestHeader("X-Auth-BankType") Integer roll) {
+    public ApiResponseDto<String> createBank(@RequestHeader("userSeq") String userSeq, @RequestHeader("roll") Integer roll) {
         bankService.createBank(userSeq, roll);
         return ApiResponseDto.createOk("물주 생성 굿");
     }
 
     @GetMapping("/{userSeq}/account")
-    public ApiResponseDto<BankSearchDto> bankSearch(@RequestHeader("X-Auth-UserId") Integer userSeq, @RequestHeader("X-Auth-BankType") Integer roll) {
+    public ApiResponseDto<BankSearchDto> bankSearch(@RequestHeader("userSeq") String userSeq, @RequestHeader("roll") Integer roll) {
         BankSearchDto history = bankService.bankSearch(userSeq, roll);
         return ApiResponseDto.createOk(history);
     }
 
     @PostMapping("/deposit")
-    public ApiResponseDto<Integer> deposit(@RequestHeader("userSeq") Integer userSeq, @RequestHeader("role") Integer roll, @RequestBody DepositDto depositDto) {
+    public ApiResponseDto<Integer> deposit(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer roll, @RequestBody DepositDto depositDto) {
         bankService.deposit(userSeq, roll, depositDto);
         return ApiResponseDto.createOk(depositDto.getDeposit());
     }
 
     @PostMapping("/withdrawal")
-    public ApiResponseDto<Integer> withdrawal(@RequestHeader("userSeq") Integer userSeq, @RequestHeader("role") Integer roll, @RequestBody WithdrawalDto withdrawalDto) {
+    public ApiResponseDto<Integer> withdrawal(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer roll, @RequestBody WithdrawalDto withdrawalDto) {
         bankService.withdrawal(userSeq, roll, withdrawalDto);
         return ApiResponseDto.createOk(withdrawalDto.getWithdrawal());
     }
 
     @PostMapping("/wallet")
-    public ApiResponseDto<CreateWalletAddressDto> createWallet(@RequestHeader("userSeq") Integer userSeq) {
+    public ApiResponseDto<CreateWalletAddressDto> createWallet(@RequestHeader("userSeq") String userSeq) {
         CreateWalletAddressDto wallet = walletService.createWalletAndReturnKeys(userSeq);
         return ApiResponseDto.createOk(wallet);
     }
 
     @GetMapping("/{userSeq}/wallet-tokens") // 새로운 엔드포인트 정의
-    public ApiResponseDto<List<WalletTokenInfoDto>> getWalletTokens(@RequestHeader("userSeq") Integer userSeq) {
+    public ApiResponseDto<List<WalletTokenInfoDto>> getWalletTokens(@RequestHeader("userSeq") String userSeq) {
         List<WalletTokenInfoDto> walletTokenInfoList = walletService.getWalletTokenInfo(userSeq);
         return ApiResponseDto.createOk(walletTokenInfoList);
     }
 
     @GetMapping("/{userSeq}/history/{moneyType}")
-    public ApiResponseDto<List<MoneyMoveDto>> history(@RequestHeader("userSeq") Integer userSeq, @RequestHeader("roll") Integer roll, @PathVariable Integer moneyType, @RequestBody MoneyMoveDto moneyMoveDto) {
+    public ApiResponseDto<List<MoneyMoveDto>> history(@RequestHeader("userSeq") String userSeq, @RequestHeader("roll") Integer roll, @PathVariable Integer moneyType, @RequestBody MoneyMoveDto moneyMoveDto) {
         List<MoneyMoveDto> history = bankService.moneyMove(userSeq, roll, moneyType);
         return ApiResponseDto.createOk(history);
     }
 
     @GetMapping("/{userSeq}/history")
-    public ApiResponseDto<List<MoneyMoveDto>> allhistory(@RequestHeader("userSeq") Integer userSeq, @RequestHeader("roll") Integer roll) {
+    public ApiResponseDto<List<MoneyMoveDto>> allhistory(@RequestHeader("userSeq") String userSeq, @RequestHeader("roll") Integer roll) {
         List<MoneyMoveDto> history = bankService.allmoneyMove(userSeq, roll);
         return ApiResponseDto.createOk(history);
     }
@@ -77,7 +77,7 @@ public class AssetController {
 
     @PostMapping("/escrow/deposit")
     public ApiResponseDto<Integer> depositToEscrow(
-            @RequestHeader("userSeq") Integer userSeq,
+            @RequestHeader("userSeq") String userSeq,
             @RequestHeader("roll") Integer roll,
             @RequestBody EscrowRequestDto escrowRequestDto) {
 
@@ -87,7 +87,7 @@ public class AssetController {
 
     @PostMapping("/escrow/withdrawal")
     public ApiResponseDto<Integer> withdrawalFromEscrow(
-            @RequestHeader("userSeq") Integer userSeq,
+            @RequestHeader("userSeq") String userSeq,
             @RequestHeader("roll") Integer roll,
             @RequestBody EscrowRequestDto escrowRequestDto) {
 
@@ -96,13 +96,13 @@ public class AssetController {
     }
 
     @GetMapping("/escrow/history/{trasferType}")
-    public ApiResponseDto<List<EscrowHistroyDto>> escrowHistory(@RequestHeader("userSeq") Integer userSeq, @RequestHeader("roll") Integer roll, @PathVariable Integer trasferType) {
+    public ApiResponseDto<List<EscrowHistroyDto>> escrowHistory(@RequestHeader("userSeq") String userSeq, @RequestHeader("roll") Integer roll, @PathVariable Integer trasferType) {
         List<EscrowHistroyDto> escrowHistories = bankService.escrowHistory(userSeq, roll, trasferType);
         return ApiResponseDto.createOk(escrowHistories);
     }
 
     @GetMapping("/escrow/history")
-    public ApiResponseDto<List<EscrowHistroyDto>> escrowHAllistory(@RequestHeader("userSeq") Integer userSeq, @RequestHeader("roll") Integer roll) {
+    public ApiResponseDto<List<EscrowHistroyDto>> escrowHAllistory(@RequestHeader("userSeq") String userSeq, @RequestHeader("roll") Integer roll) {
         List<EscrowHistroyDto> escrowHistories = bankService.escrowAllHistory(userSeq, roll);
         return ApiResponseDto.createOk(escrowHistories);
     }
