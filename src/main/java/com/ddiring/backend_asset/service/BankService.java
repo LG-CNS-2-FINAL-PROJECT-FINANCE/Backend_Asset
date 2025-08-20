@@ -39,8 +39,8 @@ public class BankService {
         Bank bank = userid.orElseThrow(() -> new NotFound("계좌번호 없는데?"));
 
         // Bank 객체의 필드 값을 로그로 찍어봅니다.
-        log.info("DB에서 조회한 Bank 객체 정보: bankNumber={}, deposit={}, role={}",
-                bank.getBankNumber(), bank.getDeposit(), bank.getRole());
+        log.info("DB에서 조회한 Bank 객체 정보: {}, bankNumber={}, deposit={}, role={}",
+                userSeq, bank.getBankNumber(), bank.getDeposit(), bank.getRole());
 
         // BankSearchDto 객체를 생성하고 로그를 찍습니다.
         BankSearchDto dto = new BankSearchDto(bank);

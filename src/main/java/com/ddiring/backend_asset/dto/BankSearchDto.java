@@ -7,9 +7,10 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class BankSearchDto {
-    private String bankNumber;
-    private Integer deposit;
+    public String bankNumber;
+    public Integer deposit;
     public BankSearchDto(Bank bank) {
         this.bankNumber = bank.getBankNumber();
         this.deposit = bank.getDeposit();

@@ -20,7 +20,7 @@ public class AssetController {
     private final BankService bankService;
     private final WalletService walletService;
 
-    @GetMapping("/account") //뱅크 생성
+    @PostMapping("/account") //뱅크 생성
     public ApiResponseDto<String> createBank(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role) {
         bankService.createBank(userSeq, role);
         return ApiResponseDto.createOk("물주 생성 굿");
@@ -95,25 +95,5 @@ public class AssetController {
         return ApiResponseDto.createOk(money);
     }
 
-    @PostMapping("/market-withdrawal")
-    public ApiResponseDto<Integer> marketWithdrawal(
-            @RequestHeader("userSeq") String userSeq,
-            @RequestHeader("role") String role,
-            @RequestBody MarketDto marketDto) {
-
-        Integer remainingBalance = bankService.marketWithdrawal(userSeq, role, marketDto);
-        return ApiResponseDto.createOk(remainingBalance);
-    }
-
-    // 마켓 거래 전용 입금 API (Market 서비스가 호출)
-    @PostMapping("/market-deposit")
-    public ApiResponseDto<Integer> marketDeposit(
-            @RequestHeader("userSeq") String userSeq,
-            @RequestHeader("role") String role,
-            @RequestBody MarketDto marketDto) {
-
-        Integer remainingBalance = bankService.marketDeposit(userSeq, role, marketDto);
-        return ApiResponseDto.createOk(remainingBalance);
-    }
 
 }
