@@ -11,5 +11,5 @@ import org.springframework.web.bind.annotation.RequestHeader;
 public interface MarketClient {
 
     @GetMapping("/api/asset/deposit")
-    ProductDto getProduct(@RequestHeader("userSeq") Integer userSeq);
+    ProductDto getProduct(@RequestHeader("userSeq") String userSeq,  @RequestHeader("role") String role);
 }

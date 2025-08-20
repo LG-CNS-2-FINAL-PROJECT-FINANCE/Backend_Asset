@@ -20,26 +20,26 @@ public class AssetController {
     private final BankService bankService;
     private final WalletService walletService;
 
-    @PostMapping("/account") // GET -> POST로 변경
-    public ApiResponseDto<String> createBank(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer role) {
+    @GetMapping("/account") //뱅크 생성
+    public ApiResponseDto<String> createBank(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role) {
         bankService.createBank(userSeq, role);
         return ApiResponseDto.createOk("물주 생성 굿");
     }
 
-    @GetMapping("/{userSeq}/account")
-    public ApiResponseDto<BankSearchDto> bankSearch(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer role) {
+    @GetMapping("/account/search")
+    public ApiResponseDto<BankSearchDto> bankSearch(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role) {
         BankSearchDto history = bankService.bankSearch(userSeq, role);
         return ApiResponseDto.createOk(history);
     }
 
-    @PostMapping("/deposit")
-    public ApiResponseDto<Integer> deposit(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer role, @RequestBody DepositDto depositDto) {
+    @PostMapping("/deposit") //입금
+    public ApiResponseDto<Integer> deposit(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role, @RequestBody DepositDto depositDto) {
         bankService.deposit(userSeq, role, depositDto);
         return ApiResponseDto.createOk(depositDto.getDeposit());
     }
 
     @PostMapping("/withdrawal")
-    public ApiResponseDto<Integer> withdrawal(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer role, @RequestBody WithdrawalDto withdrawalDto) {
+    public ApiResponseDto<Integer> withdrawal(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role, @RequestBody WithdrawalDto withdrawalDto) {
         bankService.withdrawal(userSeq, role, withdrawalDto);
         return ApiResponseDto.createOk(withdrawalDto.getWithdrawal());
     }
@@ -50,20 +50,20 @@ public class AssetController {
         return ApiResponseDto.createOk(wallet);
     }
 
-    @GetMapping("/{userSeq}/wallet-tokens") // 새로운 엔드포인트 정의
+    @GetMapping("/{userSeq}/wallet-tokens")
     public ApiResponseDto<List<WalletTokenInfoDto>> getWalletTokens(@RequestHeader("userSeq") String userSeq) {
         List<WalletTokenInfoDto> walletTokenInfoList = walletService.getWalletTokenInfo(userSeq);
         return ApiResponseDto.createOk(walletTokenInfoList);
     }
 
     @GetMapping("/{userSeq}/history/{moneyType}")
-    public ApiResponseDto<List<MoneyMoveDto>> history(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer role, @PathVariable Integer moneyType, @RequestBody MoneyMoveDto moneyMoveDto) {
+    public ApiResponseDto<List<MoneyMoveDto>> history(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role, @PathVariable Integer moneyType, @RequestBody MoneyMoveDto moneyMoveDto) {
         List<MoneyMoveDto> history = bankService.moneyMove(userSeq, role, moneyType);
         return ApiResponseDto.createOk(history);
     }
 
     @GetMapping("/{userSeq}/history")
-    public ApiResponseDto<List<MoneyMoveDto>> allhistory(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer role) {
+    public ApiResponseDto<List<MoneyMoveDto>> allhistory(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role) {
         List<MoneyMoveDto> history = bankService.allmoneyMove(userSeq, role);
         return ApiResponseDto.createOk(history);
     }
@@ -78,7 +78,7 @@ public class AssetController {
     @PostMapping("/escrow/deposit")
     public ApiResponseDto<Integer> depositToEscrow(
             @RequestHeader("userSeq") String userSeq,
-            @RequestHeader("role") Integer role,
+            @RequestHeader("role") String role,
             @RequestBody EscrowRequestDto escrowRequestDto) {
 
         Integer money = bankService.depositToEscrow(escrowRequestDto.getMarketDto(), escrowRequestDto.getProductDto(),  role, userSeq);
@@ -88,23 +88,32 @@ public class AssetController {
     @PostMapping("/escrow/withdrawal")
     public ApiResponseDto<Integer> withdrawalFromEscrow(
             @RequestHeader("userSeq") String userSeq,
-            @RequestHeader("role") Integer role,
+            @RequestHeader("role") String role,
             @RequestBody EscrowRequestDto escrowRequestDto) {
 
         Integer money = bankService.withdrawalFromEscrow(escrowRequestDto.getMarketDto(), escrowRequestDto.getProductDto(), role, userSeq);
         return ApiResponseDto.createOk(money);
     }
 
-    @GetMapping("/escrow/history/{trasferType}")
-    public ApiResponseDto<List<EscrowHistroyDto>> escrowHistory(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer role, @PathVariable Integer trasferType) {
-        List<EscrowHistroyDto> escrowHistories = bankService.escrowHistory(userSeq, role, trasferType);
-        return ApiResponseDto.createOk(escrowHistories);
+    @PostMapping("/market-withdrawal")
+    public ApiResponseDto<Integer> marketWithdrawal(
+            @RequestHeader("userSeq") String userSeq,
+            @RequestHeader("role") String role,
+            @RequestBody MarketDto marketDto) {
+
+        Integer remainingBalance = bankService.marketWithdrawal(userSeq, role, marketDto);
+        return ApiResponseDto.createOk(remainingBalance);
     }
 
-    @GetMapping("/escrow/history")
-    public ApiResponseDto<List<EscrowHistroyDto>> escrowHAllistory(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") Integer role) {
-        List<EscrowHistroyDto> escrowHistories = bankService.escrowAllHistory(userSeq, role);
-        return ApiResponseDto.createOk(escrowHistories);
+    // 마켓 거래 전용 입금 API (Market 서비스가 호출)
+    @PostMapping("/market-deposit")
+    public ApiResponseDto<Integer> marketDeposit(
+            @RequestHeader("userSeq") String userSeq,
+            @RequestHeader("role") String role,
+            @RequestBody MarketDto marketDto) {
+
+        Integer remainingBalance = bankService.marketDeposit(userSeq, role, marketDto);
+        return ApiResponseDto.createOk(remainingBalance);
     }
 
 }

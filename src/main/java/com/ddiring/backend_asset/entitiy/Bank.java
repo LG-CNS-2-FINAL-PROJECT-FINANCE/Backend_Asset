@@ -3,7 +3,7 @@ package com.ddiring.backend_asset.entitiy;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDate; // java.time.LocalDate import 필요
 
 @Entity
 @Getter
@@ -24,28 +24,28 @@ public class Bank {
     private String bankNumber;
 
     @Column(name = "role", nullable = false)
-    private Integer role;
+    private String role;
 
     @Column(name = "deposit", nullable = false)
     private Integer deposit;
 
-    @Column(name = "linked_at", nullable = false)
+    @Column(name = "linked_at")
     private LocalDate linkedAt;
 
     @Column(name = "created_id")
     private Integer createdId;
 
     @Column(name = "created_at")
-    private Integer createdAt;
+    private LocalDate createdAt; // Integer -> LocalDate로 수정
 
     @Column(name = "updated_id")
     private Integer updatedId;
 
     @Column(name = "updated_at")
-    private Integer updatedAt;
+    private LocalDate updatedAt; // Integer -> LocalDate로 수정
 
     @Builder
-    public Bank(String userSeq, Integer deposit, String bankNumber, Integer role, LocalDate linkedAt, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
+    public Bank(String userSeq, Integer deposit, String bankNumber, String role, LocalDate linkedAt, Integer createdId, LocalDate createdAt, Integer updatedId, LocalDate updatedAt) {
         this.userSeq = userSeq;
         this.bankNumber = bankNumber;
         this.role = role;
