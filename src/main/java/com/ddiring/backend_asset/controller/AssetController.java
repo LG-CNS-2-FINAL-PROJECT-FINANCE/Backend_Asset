@@ -30,7 +30,9 @@ public class AssetController {
     }
 
     @GetMapping("/account/search")
-    public ApiResponseDto<BankSearchDto> bankSearch(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role) {
+    public ApiResponseDto<BankSearchDto> bankSearch() {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getClientDevice();
         BankSearchDto history = bankService.bankSearch(userSeq, role);
         return ApiResponseDto.createOk(history);
     }
