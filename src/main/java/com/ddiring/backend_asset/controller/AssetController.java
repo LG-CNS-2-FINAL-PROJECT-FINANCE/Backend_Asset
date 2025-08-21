@@ -3,6 +3,7 @@ package com.ddiring.backend_asset.controller;
 import com.ddiring.backend_asset.api.market.MarketDto;
 import com.ddiring.backend_asset.api.product.ProductDto;
 import com.ddiring.backend_asset.common.dto.ApiResponseDto;
+import com.ddiring.backend_asset.common.util.GatewayRequestHeaderUtils;
 import com.ddiring.backend_asset.dto.*;
 import com.ddiring.backend_asset.entitiy.EscrowHistory;
 import com.ddiring.backend_asset.service.BankService;
@@ -21,7 +22,9 @@ public class AssetController {
     private final WalletService walletService;
 
     @PostMapping("/account") //뱅크 생성
-    public ApiResponseDto<String> createBank(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role) {
+    public ApiResponseDto<String> createBank() {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getClientDevice();
         bankService.createBank(userSeq, role);
         return ApiResponseDto.createOk("물주 생성 굿");
     }

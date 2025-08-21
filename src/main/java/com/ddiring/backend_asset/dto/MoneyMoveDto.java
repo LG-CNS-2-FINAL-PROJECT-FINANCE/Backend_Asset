@@ -1,7 +1,6 @@
 package com.ddiring.backend_asset.dto;
 
 import com.ddiring.backend_asset.entitiy.History;
-import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
