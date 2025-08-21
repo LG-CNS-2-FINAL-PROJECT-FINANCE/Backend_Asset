@@ -23,6 +23,8 @@ public class ApiCommonAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({BadParameter.class})
     public ApiResponseDto<String> handleBadParameter(BadParameter e) {
+        e.printStackTrace();
+
         return ApiResponseDto.createError(
                 e.getErrorCode(),
                 e.getErrorMessage()
@@ -32,6 +34,8 @@ public class ApiCommonAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler({NotFound.class})
     public ApiResponseDto<String> handleNotFound(NotFound e) {
+        e.printStackTrace();
+
         return ApiResponseDto.createError(
                 e.getErrorCode(),
                 e.getErrorMessage()
@@ -41,6 +45,8 @@ public class ApiCommonAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({ClientError.class})
     public ApiResponseDto<String> handleClientError(ClientError e) {
+        e.printStackTrace();
+
         return ApiResponseDto.createError(
                 e.getErrorCode(),
                 e.getErrorMessage()
@@ -50,6 +56,7 @@ public class ApiCommonAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler({NoResourceFoundException.class})
     public ApiResponseDto<String> handleNoResourceFoundException(NoResourceFoundException e) {
+        e.printStackTrace();
 
         return ApiResponseDto.createError(
                 "NoResource",
@@ -59,6 +66,8 @@ public class ApiCommonAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({MethodArgumentNotValidException.class})
     public ApiResponseDto<ParameterErrorDto.FieldList> handleArgumentNotValidException(MethodArgumentNotValidException e) {
+        e.printStackTrace();
+
         BindingResult result = e.getBindingResult();
         ParameterErrorDto.FieldList fieldList = ParameterErrorDto.FieldList.of(result);
 
@@ -70,6 +79,7 @@ public class ApiCommonAdvice {
     @ExceptionHandler({Exception.class})
     public ApiResponseDto<String> handleException(Exception e) {
         e.printStackTrace();
+
         return ApiResponseDto.createError(
                 "ServerError",
                 "서버 에러입니다.");

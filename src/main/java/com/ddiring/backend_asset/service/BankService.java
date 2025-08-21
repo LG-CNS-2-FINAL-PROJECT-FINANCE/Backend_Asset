@@ -35,8 +35,8 @@ public class BankService {
 
     @Transactional
     public BankSearchDto bankSearch(String userSeq, String role) {
-        Optional<Bank> userid = bankRepository.findByUserSeqAndRole(userSeq, role);
-        Bank bank = userid.orElseThrow(() -> new NotFound("계좌번호 없는데?"));
+        Optional<Bank> userId = bankRepository.findByUserSeqAndRole(userSeq, role);
+        Bank bank = userId.orElseThrow(() -> new NotFound("계좌번호 없는데?"));
 
         // Bank 객체의 필드 값을 로그로 찍어봅니다.
         log.info("DB에서 조회한 Bank 객체 정보: {}, bankNumber={}, deposit={}, role={}",

@@ -21,7 +21,7 @@ public class GatewayRequestHeaderUtils {
         return userSeq;
     }
 
-    public static String getClientDevice() {
+    public static String getRole() {
         String role = getRequestHeaderParamAsString("role");
         if (role == null) {
             return null;
