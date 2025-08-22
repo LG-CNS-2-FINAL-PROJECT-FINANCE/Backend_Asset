@@ -50,8 +50,8 @@ public class BankService {
     }
 
     @Transactional
-    public Bank createBank(String userSeq, String role) {
-        Optional<Bank> existingBank = bankRepository.findByUserSeqAndRole(userSeq, role);
+    public void createBank(String userSeq, String role) {
+        Optional<Bank> existingBank = bankRepository.findByUserSeq(userSeq);
         if (existingBank.isPresent()) {
             throw new BadParameter("이미 계좌를 가지고 있습니다.");
         }
@@ -59,8 +59,29 @@ public class BankService {
         int randomNumber = random.nextInt(90000) + 10000;
 
         String bankNumber;
+        String bankNumber1;
         if (role.equals("USER") || role.equals("CREATOR")) {
             bankNumber = "02010-00-" + randomNumber;
+            bankNumber1 = "02010-01-" + randomNumber;
+
+            Bank bank = Bank.builder()
+                    .userSeq(userSeq)
+                    .role("USER")
+                    .bankNumber(bankNumber)
+                    .deposit(0L)
+                    .linkedAt(LocalDate.now())
+                    .build();
+            bankRepository.save(bank);
+
+            Bank bank1 = Bank.builder()
+                    .userSeq(userSeq)
+                    .role("CREATOR")
+                    .bankNumber(bankNumber1)
+                    .deposit(0L)
+                    .linkedAt(LocalDate.now())
+                    .build();
+            bankRepository.save(bank1);
+
         } else {
             throw new BadParameter("유효하지 않은 role 값입니다.");
         }
@@ -69,15 +90,6 @@ public class BankService {
         if (sameBankNumber.isPresent()) {
             throw new BadParameter("운 좋네 같은거 있음 다시 시도 해");
         }
-
-        Bank bank = Bank.builder()
-                .userSeq(userSeq)
-                .role(role)
-                .bankNumber(bankNumber)
-                .deposit(0L)
-                .linkedAt(LocalDate.now())
-                .build();
-        return bankRepository.save(bank);
 
     }
     @Transactional
