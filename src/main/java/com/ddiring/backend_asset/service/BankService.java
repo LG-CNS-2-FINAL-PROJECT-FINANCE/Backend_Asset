@@ -38,22 +38,20 @@ public class BankService {
         Optional<Bank> userId = bankRepository.findByUserSeqAndRole(userSeq, role);
         Bank bank = userId.orElseThrow(() -> new NotFound("계좌번호 없는데?"));
 
+        BankSearchDto dto = new BankSearchDto(bank);
         // Bank 객체의 필드 값을 로그로 찍어봅니다.
         log.info("DB에서 조회한 Bank 객체 정보: {}, bankNumber={}, deposit={}, role={}",
                 userSeq, bank.getBankNumber(), bank.getDeposit(), bank.getRole());
-
         // BankSearchDto 객체를 생성하고 로그를 찍습니다.
-        BankSearchDto dto = new BankSearchDto(bank);
         log.info("BankSearchDto로 변환 완료: bankNumber={}, deposit={}",
                 dto.getBankNumber(), dto.getDeposit());
 
-        return dto;
+        return new BankSearchDto(bank);
     }
 
     @Transactional
     public Bank createBank(String userSeq, String role) {
         Optional<Bank> existingBank = bankRepository.findByUserSeqAndRole(userSeq, role);
-
         if (existingBank.isPresent()) {
             throw new BadParameter("이미 계좌를 가지고 있습니다.");
         }
@@ -61,10 +59,8 @@ public class BankService {
         int randomNumber = random.nextInt(90000) + 10000;
 
         String bankNumber;
-        if (role.equals("USER")) {
+        if (role.equals("USER") || role.equals("CREATOR")) {
             bankNumber = "02010-00-" + randomNumber;
-        } else if (role.equals("CREATOR")) {
-            bankNumber = "02010-01-" + randomNumber;
         } else {
             throw new BadParameter("유효하지 않은 role 값입니다.");
         }
