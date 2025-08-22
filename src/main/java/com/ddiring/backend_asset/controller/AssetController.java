@@ -58,9 +58,9 @@ public class AssetController {
     }
 
     @GetMapping("/wallet/search")
-    public ApiResponseDto<List<WalletTokenInfoDto>> getWalletTokens() {
+    public ApiResponseDto<String> getWalletTokens() {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
-        List<WalletTokenInfoDto> walletTokenInfoList = walletService.getWalletTokenInfo(userSeq);
+        String walletTokenInfoList = walletService.getWalletAddress(userSeq);
         return ApiResponseDto.createOk(walletTokenInfoList);
     }
 

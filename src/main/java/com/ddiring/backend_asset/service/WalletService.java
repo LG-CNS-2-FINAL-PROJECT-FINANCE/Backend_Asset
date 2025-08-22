@@ -1,5 +1,6 @@
 package com.ddiring.backend_asset.service;
 
+import com.ddiring.backend_asset.common.exception.BadParameter;
 import com.ddiring.backend_asset.component.ExternalPriceApi;
 import com.ddiring.backend_asset.dto.CreateWalletDto;
 import com.ddiring.backend_asset.dto.CreateWalletAddressDto; // WalletCreationResponseDto 대신 CreateWalletAddressDto 사용
@@ -165,5 +166,13 @@ public class WalletService {
             // 블록체인 통신 중 오류 발생 시 예외 처리
             throw new RuntimeException("블록체인에서 토큰 잔액 조회 실패: " + e.getMessage(), e);
         }
+    }
+    @Transactional
+    public String getWalletAddress(String userSeq) {
+        Optional<Wallet> userWallet = walletRepository.findByUserSeq(userSeq);
+        if (!userWallet.isPresent()) {
+            throw new BadParameter("지갑 주소가 없습니다");
+        }
+        return userWallet.get().getWalletAddress();
     }
 }
