@@ -60,10 +60,14 @@ public class BankService {
 
         String bankNumber;
         String bankNumber1;
+
         if (role.equals("USER") || role.equals("CREATOR")) {
             bankNumber = "02010-00-" + randomNumber;
             bankNumber1 = "02010-01-" + randomNumber;
-
+            Optional<Bank> sameBankNumber = bankRepository.findByBankNumber(bankNumber);
+            if (sameBankNumber.isPresent()) {
+                throw new BadParameter("운 좋네 같은거 있음 다시 시도 해");
+            }
             Bank bank = Bank.builder()
                     .userSeq(userSeq)
                     .role("USER")
@@ -86,10 +90,6 @@ public class BankService {
             throw new BadParameter("유효하지 않은 role 값입니다.");
         }
 
-        Optional<Bank> sameBankNumber = bankRepository.findByBankNumber(bankNumber);
-        if (sameBankNumber.isPresent()) {
-            throw new BadParameter("운 좋네 같은거 있음 다시 시도 해");
-        }
 
     }
     @Transactional
