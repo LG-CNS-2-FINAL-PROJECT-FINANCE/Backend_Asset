@@ -57,7 +57,7 @@ public class AssetController {
         return ApiResponseDto.createOk(wallet);
     }
 
-    @GetMapping("/{userSeq}/wallet-tokens")
+    @GetMapping("/wallet/search")
     public ApiResponseDto<List<WalletTokenInfoDto>> getWalletTokens() {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         List<WalletTokenInfoDto> walletTokenInfoList = walletService.getWalletTokenInfo(userSeq);
@@ -106,9 +106,7 @@ public class AssetController {
     }
 
     @GetMapping("/bank/balance")
-    public ApiResponseDto<BankSearchDto> getBankBalance() {
-        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
-        String role = GatewayRequestHeaderUtils.getRole();
+    public ApiResponseDto<BankSearchDto> getBankBalance(@RequestParam("userSeq") String userSeq, @RequestParam("role") String role) {
         BankSearchDto bankSearchDto = bankService.bankSearch(userSeq, role);
         return ApiResponseDto.createOk(bankSearchDto);
     }
