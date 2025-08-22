@@ -72,7 +72,7 @@ public class AssetController {
         return ApiResponseDto.createOk(walletTokenInfoList);
     }
 
-    @GetMapping("/{userSeq}/history/{moneyType}")
+    @GetMapping("/history/{moneyType}")
     public ApiResponseDto<List<MoneyMoveDto>> history(@PathVariable Integer moneyType, @RequestBody MoneyMoveDto moneyMoveDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         String role = GatewayRequestHeaderUtils.getRole();
@@ -80,7 +80,7 @@ public class AssetController {
         return ApiResponseDto.createOk(history);
     }
 
-    @GetMapping("/{userSeq}/history")
+    @GetMapping("/history")
     public ApiResponseDto<List<MoneyMoveDto>> allhistory() {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         String role = GatewayRequestHeaderUtils.getRole();
