@@ -78,7 +78,7 @@ public class BankService {
                 .userSeq(userSeq)
                 .role(role)
                 .bankNumber(bankNumber)
-                .deposit(0)
+                .deposit(0L)
                 .linkedAt(LocalDate.now())
                 .build();
         return bankRepository.save(bank);
@@ -171,7 +171,7 @@ public class BankService {
     }
 
     @Transactional
-    public Integer depositToEscrow(MarketDto marketDto, ProductDto productDto ,String role, String userSeq) {
+    public Long depositToEscrow(MarketDto marketDto, ProductDto productDto ,String role, String userSeq) {
         if (marketDto.getUserSeq() == null || marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
             throw new BadParameter("다시");
         }
@@ -206,7 +206,7 @@ public class BankService {
     }
 
     @Transactional
-    public Integer withdrawalFromEscrow(MarketDto marketDto,ProductDto productDto, String role, String userSeq) {
+    public Long withdrawalFromEscrow(MarketDto marketDto,ProductDto productDto, String role, String userSeq) {
         if (marketDto.getUserSeq() == null || marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
             throw new BadParameter("다시");
         }
@@ -254,7 +254,7 @@ public class BankService {
                 .collect(Collectors.toList());
     }
     @Transactional
-    public Integer marketWithdrawal(String userSeq, String role, MarketDto marketDto) {
+    public Long marketWithdrawal(String userSeq, String role, MarketDto marketDto) {
         if (marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
             throw new BadParameter("출금 금액은 0보다 커야 합니다.");
         }
@@ -280,7 +280,7 @@ public class BankService {
      * @return 입금 후 남은 잔액
      */
     @Transactional
-    public Integer marketDeposit(String userSeq, String role, MarketDto marketDto) {
+    public Long marketDeposit(String userSeq, String role, MarketDto marketDto) {
         if (marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
             throw new BadParameter("입금 금액은 0보다 커야 합니다.");
         }

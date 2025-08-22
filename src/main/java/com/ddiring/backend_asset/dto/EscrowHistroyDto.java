@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Getter
 @NoArgsConstructor
 public class EscrowHistroyDto {
-    private Integer price;
+    private Long price;
     private Integer trasferType;
     private LocalDate tansferDate;
 

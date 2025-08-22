@@ -34,7 +34,7 @@ public class Token {
     private Integer amount;
 
     @Column(name = "price", nullable = false)
-    private Integer price;
+    private Long price;
 
     @Column(name = "created_id")
     private Integer createdId;
@@ -49,7 +49,7 @@ public class Token {
     private Integer updatedAt;
 
     @Builder
-    public Token(Integer walletSeq, String contractAddress, String tokenName, String tokenSymbol, Integer amount, Integer price, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
+    public Token(Integer walletSeq, String contractAddress, String tokenName, String tokenSymbol, Integer amount, Long price, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
         this.walletSeq = walletSeq;
         this.contractAddress = contractAddress;
         this.tokenName = tokenName;

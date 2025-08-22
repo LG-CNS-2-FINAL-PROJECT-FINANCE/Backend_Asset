@@ -9,6 +9,7 @@ import com.ddiring.backend_asset.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -35,7 +36,7 @@ public class AssetController {
     }
 
     @PostMapping("/account/deposit") //입금
-    public ApiResponseDto<Integer> deposit(@RequestBody DepositDto depositDto) {
+    public ApiResponseDto<Long> deposit(@RequestBody DepositDto depositDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         String role = GatewayRequestHeaderUtils.getRole();
         bankService.deposit(userSeq, role, depositDto);
@@ -43,7 +44,7 @@ public class AssetController {
     }
 
     @PostMapping("/account/withdrawal")
-    public ApiResponseDto<Integer> withdrawal(@RequestBody WithdrawalDto withdrawalDto) {
+    public ApiResponseDto<Long> withdrawal(@RequestBody WithdrawalDto withdrawalDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         String role = GatewayRequestHeaderUtils.getRole();
         bankService.withdrawal(userSeq, role, withdrawalDto);
@@ -88,20 +89,20 @@ public class AssetController {
     }
 
     @PostMapping("/escrow/deposit")
-    public ApiResponseDto<Integer> depositToEscrow(
+    public ApiResponseDto<Long> depositToEscrow(
             @RequestBody EscrowRequestDto escrowRequestDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         String role = GatewayRequestHeaderUtils.getRole();
-        Integer money = bankService.depositToEscrow(escrowRequestDto.getMarketDto(), escrowRequestDto.getProductDto(),  role, userSeq);
+        Long money = bankService.depositToEscrow(escrowRequestDto.getMarketDto(), escrowRequestDto.getProductDto(),  role, userSeq);
         return ApiResponseDto.createOk(money);
     }
 
     @PostMapping("/escrow/withdrawal")
-    public ApiResponseDto<Integer> withdrawalFromEscrow(
+    public ApiResponseDto<Long> withdrawalFromEscrow(
             @RequestBody EscrowRequestDto escrowRequestDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         String role = GatewayRequestHeaderUtils.getRole();
-        Integer money = bankService.withdrawalFromEscrow(escrowRequestDto.getMarketDto(), escrowRequestDto.getProductDto(), role, userSeq);
+        Long money = bankService.withdrawalFromEscrow(escrowRequestDto.getMarketDto(), escrowRequestDto.getProductDto(), role, userSeq);
         return ApiResponseDto.createOk(money);
     }
 

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 public class WalletSearchDto {
     private Integer tokenSeq;
     private Integer amount;
-    private Integer price;
+    private Long price;
 
     public WalletSearchDto(Token token) {
         this.tokenSeq = token.getTokenSeq();

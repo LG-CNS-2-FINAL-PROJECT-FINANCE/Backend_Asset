@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class MarketDto {
     private String userSeq;
-    private Integer price;
+    private Long price;
 }

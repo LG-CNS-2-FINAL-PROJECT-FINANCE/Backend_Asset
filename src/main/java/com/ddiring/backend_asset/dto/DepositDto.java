@@ -10,5 +10,5 @@ import java.time.LocalDate;
 @Getter
 @NoArgsConstructor
 public class DepositDto {
-    private Integer deposit;
+    private Long deposit;
 }
