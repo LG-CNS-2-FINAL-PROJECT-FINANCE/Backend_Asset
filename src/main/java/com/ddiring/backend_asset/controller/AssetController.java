@@ -34,7 +34,7 @@ public class AssetController {
         return ApiResponseDto.createOk(history);
     }
 
-    @PostMapping("/deposit") //입금
+    @PostMapping("/account/deposit") //입금
     public ApiResponseDto<Integer> deposit(@RequestBody DepositDto depositDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         String role = GatewayRequestHeaderUtils.getRole();
@@ -42,7 +42,7 @@ public class AssetController {
         return ApiResponseDto.createOk(depositDto.getDeposit());
     }
 
-    @PostMapping("/withdrawal")
+    @PostMapping("/account/withdrawal")
     public ApiResponseDto<Integer> withdrawal(@RequestBody WithdrawalDto withdrawalDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         String role = GatewayRequestHeaderUtils.getRole();
