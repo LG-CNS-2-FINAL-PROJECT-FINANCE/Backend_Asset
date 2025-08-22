@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate; // java.time.LocalDate import 필요
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -30,7 +31,7 @@ public class Bank {
     private Long deposit;
 
     @Column(name = "linked_at")
-    private LocalDate linkedAt;
+    private LocalDateTime linkedAt;
 
     @Column(name = "created_id")
     private Integer createdId;
@@ -45,7 +46,7 @@ public class Bank {
     private LocalDate updatedAt; // Integer -> LocalDate로 수정
 
     @Builder
-    public Bank(String userSeq, Long deposit, String bankNumber, String role, LocalDate linkedAt, Integer createdId, LocalDate createdAt, Integer updatedId, LocalDate updatedAt) {
+    public Bank(String userSeq, Long deposit, String bankNumber, String role, LocalDateTime linkedAt, Integer createdId, LocalDate createdAt, Integer updatedId, LocalDate updatedAt) {
         this.userSeq = userSeq;
         this.bankNumber = bankNumber;
         this.role = role;

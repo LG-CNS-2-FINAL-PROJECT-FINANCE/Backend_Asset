@@ -13,6 +13,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -39,7 +40,7 @@ public class History {
     private Long bankPrice;
 
     @Column(name = "bank_time")
-    private LocalDate bankTime;
+    private LocalDateTime bankTime;
 
     @Column(name = "money_type") //0 입금 1 출금
     private Integer moneyType;
@@ -61,7 +62,7 @@ public class History {
     private LocalDate updatedAt;
 
     @Builder
-    public History(String userSeq, String role, String bankNumber, Long bankPrice, LocalDate bankTime,Integer moneyType, Integer createdId, LocalDate createdAt, Integer updatedId, LocalDate updatedAt) {
+    public History(String userSeq, String role, String bankNumber, Long bankPrice, LocalDateTime bankTime, Integer moneyType, Integer createdId, LocalDate createdAt, Integer updatedId, LocalDate updatedAt) {
         this.userSeq = userSeq;
         this.role = role;
         this.bankNumber = bankNumber;

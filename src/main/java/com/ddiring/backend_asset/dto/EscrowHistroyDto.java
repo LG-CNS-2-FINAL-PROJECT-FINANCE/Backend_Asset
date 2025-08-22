@@ -5,13 +5,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
 public class EscrowHistroyDto {
     private Long price;
     private Integer trasferType;
-    private LocalDate tansferDate;
+    private LocalDateTime tansferDate;
 
     public EscrowHistroyDto(EscrowHistory escrowHistory) {
         this.price = escrowHistory.getPrice();

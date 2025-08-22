@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -39,10 +40,10 @@ public class EscrowHistory {
     private Integer transferType;
 
     @Column(name = "transfer_date", nullable = false)
-    private LocalDate transferDate;
+    private LocalDateTime transferDate;
 
     @Builder
-    public EscrowHistory(String userSeq, String role, String escrowAccount, String title, Long price, Integer transferType, LocalDate transferDate) {
+    public EscrowHistory(String userSeq, String role, String escrowAccount, String title, Long price, Integer transferType, LocalDateTime transferDate) {
         this.userSeq = userSeq;
         this.escrowAccount = escrowAccount;
         this.role = role;

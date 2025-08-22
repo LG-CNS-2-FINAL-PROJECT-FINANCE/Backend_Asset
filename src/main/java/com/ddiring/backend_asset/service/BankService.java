@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -73,7 +74,7 @@ public class BankService {
                     .role("USER")
                     .bankNumber(bankNumber)
                     .deposit(0L)
-                    .linkedAt(LocalDate.now())
+                    .linkedAt(LocalDateTime.now())
                     .build();
             bankRepository.save(bank);
 
@@ -82,7 +83,7 @@ public class BankService {
                     .role("CREATOR")
                     .bankNumber(bankNumber1)
                     .deposit(0L)
-                    .linkedAt(LocalDate.now())
+                    .linkedAt(LocalDateTime.now())
                     .build();
             bankRepository.save(bank1);
 
@@ -107,7 +108,7 @@ public class BankService {
                 .role(role)
                 .bankPrice(depositDto.getDeposit())
                 .moneyType(0)
-                .bankTime(LocalDate.now())
+                .bankTime(LocalDateTime.now())
                 .build();
         historyRepository.save(history);
 
@@ -130,7 +131,7 @@ public class BankService {
                 .role(role)
                 .bankPrice(withdrawalDto.getWithdrawal())
                 .moneyType(1)
-                .bankTime(LocalDate.now())
+                .bankTime(LocalDateTime.now())
                 .build();
         historyRepository.save(history);
     }
@@ -205,7 +206,7 @@ public class BankService {
                 .price(marketDto.getPrice())
                 .title(productDto.getTitle())
                 .transferType(1)
-                .transferDate(LocalDate.now())
+                .transferDate(LocalDateTime.now())
                 .build();
 
         escrowHistoryRepository.save(escrowHistory);
@@ -236,7 +237,7 @@ public class BankService {
                 .price(marketDto.getPrice())
                 .title(productDto.getTitle())
                 .transferType(0)
-                .transferDate(LocalDate.now())
+                .transferDate(LocalDateTime.now())
                 .build();
 
         escrowHistoryRepository.save(escrowHistory);
