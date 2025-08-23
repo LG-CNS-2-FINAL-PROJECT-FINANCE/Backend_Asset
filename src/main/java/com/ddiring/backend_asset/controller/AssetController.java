@@ -128,27 +128,5 @@ public class AssetController {
         return ApiResponseDto.createOk(depositDto.getPrice());
     }
 
-    @PostMapping("/internal/lock-funds")
-    public ApiResponseDto<Void> lockFunds(@RequestBody LockFundsRequestDto requestDto) {
-        bankService.lockFunds(requestDto);
-        return ApiResponseDto.defaultOk();
-    }
 
-    /**
-     * 2단계: 거래 체결 시 동결된 자금을 실제 에스크로 서비스로 이체합니다.
-     */
-    @PostMapping("/internal/transfer-to-escrow")
-    public ApiResponseDto<Void> transferToEscrow(@RequestBody TransferToEscrowRequestDto requestDto) {
-        bankService.transferToEscrow(requestDto);
-        return ApiResponseDto.defaultOk();
-    }
-
-    /**
-     * (번외) 주문 취소 시 동결된 자금을 사용자에게 환불합니다.
-     */
-    @PostMapping("/internal/unlock-funds")
-    public ApiResponseDto<Void> unlockFunds(@RequestBody UnlockFundsRequestDto requestDto) {
-        bankService.unlockFunds(requestDto);
-        return ApiResponseDto.defaultOk();
-    }
 }
