@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 public class MoneyMoveDto {
-    private Long bankPrice;
+    private Integer bankPrice;
     private LocalDateTime bankTime;
     private Integer moneyType;
     public MoneyMoveDto(History history) {

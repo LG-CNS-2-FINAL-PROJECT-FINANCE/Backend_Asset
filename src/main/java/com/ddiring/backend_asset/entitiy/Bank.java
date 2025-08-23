@@ -28,7 +28,7 @@ public class Bank {
     private String role;
 
     @Column(name = "deposit", nullable = false)
-    private Long deposit;
+    private Integer deposit;
 
     @Column(name = "linked_at")
     private LocalDateTime linkedAt;
@@ -46,7 +46,7 @@ public class Bank {
     private LocalDate updatedAt; // Integer -> LocalDate로 수정
 
     @Builder
-    public Bank(String userSeq, Long deposit, String bankNumber, String role, LocalDateTime linkedAt, Integer createdId, LocalDate createdAt, Integer updatedId, LocalDate updatedAt) {
+    public Bank(String userSeq, Integer deposit, String bankNumber, String role, LocalDateTime linkedAt, Integer createdId, LocalDate createdAt, Integer updatedId, LocalDate updatedAt) {
         this.userSeq = userSeq;
         this.bankNumber = bankNumber;
         this.role = role;

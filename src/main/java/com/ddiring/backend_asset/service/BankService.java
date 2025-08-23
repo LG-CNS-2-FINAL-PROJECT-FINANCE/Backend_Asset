@@ -73,7 +73,7 @@ public class BankService {
                     .userSeq(userSeq)
                     .role("USER")
                     .bankNumber(bankNumber)
-                    .deposit(0L)
+                    .deposit(0)
                     .linkedAt(LocalDateTime.now())
                     .build();
             bankRepository.save(bank);
@@ -82,7 +82,7 @@ public class BankService {
                     .userSeq(userSeq)
                     .role("CREATOR")
                     .bankNumber(bankNumber1)
-                    .deposit(0L)
+                    .deposit(0)
                     .linkedAt(LocalDateTime.now())
                     .build();
             bankRepository.save(bank1);
@@ -95,18 +95,18 @@ public class BankService {
     }
     @Transactional
     public void deposit(String userSeq, String role, DepositDto depositDto) {
-        if (depositDto.getDeposit() <= 0)
+        if (depositDto.getPrice() <= 0)
             throw new BadParameter("돈 넣어라");
         if (userSeq == null || role == null)
             throw new BadParameter("누구슈?");
         Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role).orElseThrow(() -> new NotFound("너 뭐냐"));
-        bank.setDeposit(bank.getDeposit() + depositDto.getDeposit());
+        bank.setDeposit(bank.getDeposit() + depositDto.getPrice());
         bankRepository.save(bank);
 
         History history = History.builder()
                 .userSeq(userSeq)
                 .role(role)
-                .bankPrice(depositDto.getDeposit())
+                .bankPrice(depositDto.getPrice())
                 .moneyType(0)
                 .bankTime(LocalDateTime.now())
                 .build();
@@ -180,7 +180,7 @@ public class BankService {
     }
 
     @Transactional
-    public Long depositToEscrow(MarketDto marketDto, ProductDto productDto ,String role, String userSeq) {
+    public Integer depositToEscrow(MarketDto marketDto, ProductDto productDto ,String role, String userSeq) {
         if (marketDto.getUserSeq() == null || marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
             throw new BadParameter("다시");
         }
@@ -215,7 +215,7 @@ public class BankService {
     }
 
     @Transactional
-    public Long withdrawalFromEscrow(MarketDto marketDto,ProductDto productDto, String role, String userSeq) {
+    public Integer withdrawalFromEscrow(MarketDto marketDto,ProductDto productDto, String role, String userSeq) {
         if (marketDto.getUserSeq() == null || marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
             throw new BadParameter("다시");
         }
@@ -263,7 +263,7 @@ public class BankService {
                 .collect(Collectors.toList());
     }
     @Transactional
-    public Long marketWithdrawal(String userSeq, String role, MarketDto marketDto) {
+    public Integer marketWithdrawal(String userSeq, String role, MarketDto marketDto) {
         if (marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
             throw new BadParameter("출금 금액은 0보다 커야 합니다.");
         }
@@ -289,7 +289,7 @@ public class BankService {
      * @return 입금 후 남은 잔액
      */
     @Transactional
-    public Long marketDeposit(String userSeq, String role, MarketDto marketDto) {
+    public Integer marketDeposit(String userSeq, String role, MarketDto marketDto) {
         if (marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
             throw new BadParameter("입금 금액은 0보다 커야 합니다.");
         }

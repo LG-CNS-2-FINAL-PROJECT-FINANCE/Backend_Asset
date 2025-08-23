@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class WithdrawalDto {
-    private Long withdrawal;
+    private Integer withdrawal;
 
 }

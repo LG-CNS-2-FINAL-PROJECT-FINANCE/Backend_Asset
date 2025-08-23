@@ -34,7 +34,7 @@ public class EscrowHistory {
     private String title;
 
     @Column(name = "price", nullable = false)
-    private Long price;
+    private Integer price;
 
     @Column(name = "transfer_type", nullable = false)
     private Integer transferType;
@@ -43,7 +43,7 @@ public class EscrowHistory {
     private LocalDateTime transferDate;
 
     @Builder
-    public EscrowHistory(String userSeq, String role, String escrowAccount, String title, Long price, Integer transferType, LocalDateTime transferDate) {
+    public EscrowHistory(String userSeq, String role, String escrowAccount, String title, Integer price, Integer transferType, LocalDateTime transferDate) {
         this.userSeq = userSeq;
         this.escrowAccount = escrowAccount;
         this.role = role;

@@ -37,7 +37,7 @@ public class History {
     private String bankNumber;
 
     @Column(name = "bank_price")
-    private Long bankPrice;
+    private Integer bankPrice;
 
     @Column(name = "bank_time")
     private LocalDateTime bankTime;
@@ -62,7 +62,7 @@ public class History {
     private LocalDate updatedAt;
 
     @Builder
-    public History(String userSeq, String role, String bankNumber, Long bankPrice, LocalDateTime bankTime, Integer moneyType, Integer createdId, LocalDate createdAt, Integer updatedId, LocalDate updatedAt) {
+    public History(String userSeq, String role, String bankNumber, Integer bankPrice, LocalDateTime bankTime, Integer moneyType, Integer createdId, LocalDate createdAt, Integer updatedId, LocalDate updatedAt) {
         this.userSeq = userSeq;
         this.role = role;
         this.bankNumber = bankNumber;

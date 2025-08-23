@@ -36,15 +36,15 @@ public class AssetController {
     }
 
     @PostMapping("/account/deposit") //입금
-    public ApiResponseDto<Long> deposit(@RequestBody DepositDto depositDto) {
+    public ApiResponseDto<Integer> deposit(@RequestBody DepositDto depositDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         String role = GatewayRequestHeaderUtils.getRole();
         bankService.deposit(userSeq, role, depositDto);
-        return ApiResponseDto.createOk(depositDto.getDeposit());
+        return ApiResponseDto.createOk(depositDto.getPrice());
     }
 
     @PostMapping("/account/withdrawal")
-    public ApiResponseDto<Long> withdrawal(@RequestBody WithdrawalDto withdrawalDto) {
+    public ApiResponseDto<Integer> withdrawal(@RequestBody WithdrawalDto withdrawalDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         String role = GatewayRequestHeaderUtils.getRole();
         bankService.withdrawal(userSeq, role, withdrawalDto);
@@ -95,21 +95,22 @@ public class AssetController {
         return ApiResponseDto.defaultOk();
     }
 
+
     @PostMapping("/escrow/deposit")
-    public ApiResponseDto<Long> depositToEscrow(
+    public ApiResponseDto<Integer> depositToEscrow(
             @RequestBody EscrowRequestDto escrowRequestDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         String role = GatewayRequestHeaderUtils.getRole();
-        Long money = bankService.depositToEscrow(escrowRequestDto.getMarketDto(), escrowRequestDto.getProductDto(),  role, userSeq);
+        Integer money = bankService.depositToEscrow(escrowRequestDto.getMarketDto(), escrowRequestDto.getProductDto(),  role, userSeq);
         return ApiResponseDto.createOk(money);
     }
 
     @PostMapping("/escrow/withdrawal")
-    public ApiResponseDto<Long> withdrawalFromEscrow(
+    public ApiResponseDto<Integer> withdrawalFromEscrow(
             @RequestBody EscrowRequestDto escrowRequestDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         String role = GatewayRequestHeaderUtils.getRole();
-        Long money = bankService.withdrawalFromEscrow(escrowRequestDto.getMarketDto(), escrowRequestDto.getProductDto(), role, userSeq);
+        Integer money = bankService.withdrawalFromEscrow(escrowRequestDto.getMarketDto(), escrowRequestDto.getProductDto(), role, userSeq);
         return ApiResponseDto.createOk(money);
     }
 
@@ -117,5 +118,37 @@ public class AssetController {
     public ApiResponseDto<BankSearchDto> getBankBalance(@RequestParam("userSeq") String userSeq, @RequestParam("role") String role) {
         BankSearchDto bankSearchDto = bankService.bankSearch(userSeq, role);
         return ApiResponseDto.createOk(bankSearchDto);
+    }
+
+    @PostMapping("/market/deposit") //입금
+    public ApiResponseDto<Integer> marketDeposit(@RequestBody DepositDto depositDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
+        bankService.deposit(userSeq, role, depositDto);
+        return ApiResponseDto.createOk(depositDto.getPrice());
+    }
+
+    @PostMapping("/internal/lock-funds")
+    public ApiResponseDto<Void> lockFunds(@RequestBody LockFundsRequestDto requestDto) {
+        bankService.lockFunds(requestDto);
+        return ApiResponseDto.defaultOk();
+    }
+
+    /**
+     * 2단계: 거래 체결 시 동결된 자금을 실제 에스크로 서비스로 이체합니다.
+     */
+    @PostMapping("/internal/transfer-to-escrow")
+    public ApiResponseDto<Void> transferToEscrow(@RequestBody TransferToEscrowRequestDto requestDto) {
+        bankService.transferToEscrow(requestDto);
+        return ApiResponseDto.defaultOk();
+    }
+
+    /**
+     * (번외) 주문 취소 시 동결된 자금을 사용자에게 환불합니다.
+     */
+    @PostMapping("/internal/unlock-funds")
+    public ApiResponseDto<Void> unlockFunds(@RequestBody UnlockFundsRequestDto requestDto) {
+        bankService.unlockFunds(requestDto);
+        return ApiResponseDto.defaultOk();
     }
 }
