@@ -10,8 +10,5 @@ import java.time.LocalDate;
 @Getter
 @NoArgsConstructor
 public class DepositDto {
-    private String userSeq;
-    private String projectId;
-    private String role;
     private Integer price;
 }

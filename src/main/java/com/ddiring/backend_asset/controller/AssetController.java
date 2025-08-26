@@ -120,13 +120,5 @@ public class AssetController {
         return ApiResponseDto.createOk(bankSearchDto);
     }
 
-    @PostMapping("/market/deposit") //입금
-    public ApiResponseDto<Integer> marketDeposit(@RequestBody DepositDto depositDto) {
-        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
-        String role = GatewayRequestHeaderUtils.getRole();
-        bankService.deposit(userSeq, role, depositDto);
-        return ApiResponseDto.createOk(depositDto.getPrice());
-    }
-
 
 }
