@@ -30,7 +30,7 @@ public class Token {
     @Column(name = "amount", nullable = false)
     private Integer amount;
 
-    @Column(name = "price", nullable = false)
+    @Column(name = "price")
     private Integer price;
 
     @Column(name = "created_id")
