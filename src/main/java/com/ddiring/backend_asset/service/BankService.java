@@ -10,7 +10,6 @@ import com.ddiring.backend_asset.entitiy.Escrow;
 import com.ddiring.backend_asset.entitiy.EscrowHistory;
 import com.ddiring.backend_asset.entitiy.History;
 import com.ddiring.backend_asset.repository.BankRepository;
-import com.ddiring.backend_asset.repository.EscrowHistoryRepository;
 import com.ddiring.backend_asset.repository.EscrowRepository;
 import com.ddiring.backend_asset.repository.HistoryRepository;
 import jakarta.transaction.Transactional;
@@ -18,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +30,6 @@ public class BankService {
     private final BankRepository bankRepository;
     private final HistoryRepository historyRepository;
     private final EscrowRepository escrowRepository;
-    private final EscrowHistoryRepository escrowHistoryRepository;
 
     @Transactional
     public BankSearchDto bankSearch(String userSeq, String role) {
@@ -173,7 +170,6 @@ public class BankService {
         Escrow escrow = Escrow.builder()
                 .projectId(productDto.getProjectId())
                 .account(productDto.getAccount())
-                .title(productDto.getTitle())
                 .build();
         escrowRepository.save(escrow);
 
@@ -199,17 +195,6 @@ public class BankService {
         bank.setDeposit(bank.getDeposit() - marketDto.getPrice());
         bankRepository.save(bank);
 
-        EscrowHistory escrowHistory = EscrowHistory.builder()
-                .escrowAccount(escrow.getAccount())
-                .userSeq(userSeq)
-                .role(role)
-                .price(marketDto.getPrice())
-                .title(productDto.getTitle())
-                .transferType(1)
-                .transferDate(LocalDateTime.now())
-                .build();
-
-        escrowHistoryRepository.save(escrowHistory);
 
         return bank.getDeposit();
     }
@@ -229,18 +214,6 @@ public class BankService {
 
         bank.setDeposit(bank.getDeposit() + marketDto.getPrice());
         bankRepository.save(bank);
-
-        EscrowHistory escrowHistory = EscrowHistory.builder()
-                .escrowAccount(escrow.getAccount())
-                .userSeq(userSeq)
-                .role(role)
-                .price(marketDto.getPrice())
-                .title(productDto.getTitle())
-                .transferType(0)
-                .transferDate(LocalDateTime.now())
-                .build();
-
-        escrowHistoryRepository.save(escrowHistory);
 
         return bank.getDeposit();
     }

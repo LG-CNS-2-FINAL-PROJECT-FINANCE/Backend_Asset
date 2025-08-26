@@ -10,5 +10,5 @@ import org.springframework.web.bind.annotation.RequestHeader;
 public interface ProductClient {
 
     @GetMapping("/api/asset")
-    ProductDto getProduct(@RequestHeader("userSeq") String userSeq);
+    ProductDto getProduct(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role);
 }

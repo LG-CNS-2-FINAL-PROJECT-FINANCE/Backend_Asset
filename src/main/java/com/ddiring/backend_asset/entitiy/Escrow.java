@@ -24,13 +24,9 @@ public class Escrow {
     @Column(name = "account")
     private String account;
 
-    @Column(name = "title")
-    private String title;
-
     @Builder
-    public Escrow(String account, String title , String projectId) {
+    public Escrow(String account, String projectId) {
         this.account = account;
-        this.title = title;
         this.projectId = projectId;
     }
 }
