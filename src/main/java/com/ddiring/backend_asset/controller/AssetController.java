@@ -119,7 +119,8 @@ public class AssetController {
     @PostMapping("/market/buy")
     public ApiResponseDto<String> marketBuy(@RequestBody MarketBuyDto marketBuyDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
-        bankService.setBuyPrice(userSeq, marketBuyDto);
+        String role = GatewayRequestHeaderUtils.getRole();
+        bankService.setBuyPrice(userSeq, role, marketBuyDto);
         return ApiResponseDto.createOk("success");
     }
 
