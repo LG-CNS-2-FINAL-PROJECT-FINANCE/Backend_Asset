@@ -5,6 +5,7 @@ import com.ddiring.backend_asset.common.dto.ApiResponseDto;
 import com.ddiring.backend_asset.common.util.GatewayRequestHeaderUtils;
 import com.ddiring.backend_asset.dto.*;
 import com.ddiring.backend_asset.service.BankService;
+import com.ddiring.backend_asset.service.TokenService;
 import com.ddiring.backend_asset.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import java.util.List;
 public class AssetController {
     private final BankService bankService;
     private final WalletService walletService;
+    private final TokenService tokenService;
 
     @PostMapping("/account") //뱅크 생성
     public ApiResponseDto<String> createBank() {
@@ -65,12 +67,6 @@ public class AssetController {
         return ApiResponseDto.createOk(walletTokenInfoList);
     }
 
-    @GetMapping("/wallet-token/search")
-    public ApiResponseDto<List<WalletTokenInfoDto>> getWalletTokens() {
-        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
-        List<WalletTokenInfoDto> walletTokenInfoList = walletService.getWalletTokenInfo(userSeq);
-        return ApiResponseDto.createOk(walletTokenInfoList);
-    }
 
     @GetMapping("/history/{moneyType}")
     public ApiResponseDto<List<MoneyMoveDto>> history(@PathVariable Integer moneyType, @RequestBody MoneyMoveDto moneyMoveDto) {
@@ -120,5 +116,16 @@ public class AssetController {
         return ApiResponseDto.createOk(bankSearchDto);
     }
 
+    @PostMapping("/asset/market/buy")
+    public ApiResponseDto<String> marketBuy(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role, @RequestBody MarketBuyDto marketBuyDto) {
+        bankService.setBuyPrice(userSeq, role, marketBuyDto);
+        return ApiResponseDto.createOk("success");
+    }
+
+    @PostMapping("/asset/market/sell")
+    public ApiResponseDto<String> marketSell(@RequestHeader("userSeq") String userSeq,  @RequestBody MarketSellDto marketSellDto) {
+        tokenService.setSellToken(userSeq, marketSellDto);
+        return ApiResponseDto.createOk("success");
+    }
 
 }

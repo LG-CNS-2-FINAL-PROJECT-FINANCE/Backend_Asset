@@ -1,10 +1,13 @@
 package com.ddiring.backend_asset.service;
 
 import com.ddiring.backend_asset.common.exception.BadParameter;
+import com.ddiring.backend_asset.common.exception.NotFound;
 import com.ddiring.backend_asset.component.ExternalPriceApi;
 import com.ddiring.backend_asset.dto.CreateWalletDto;
 import com.ddiring.backend_asset.dto.CreateWalletAddressDto; // WalletCreationResponseDto 대신 CreateWalletAddressDto 사용
+import com.ddiring.backend_asset.dto.MarketSellDto;
 import com.ddiring.backend_asset.dto.WalletTokenInfoDto;
+import com.ddiring.backend_asset.entitiy.Bank;
 import com.ddiring.backend_asset.entitiy.Token;
 import com.ddiring.backend_asset.entitiy.Wallet;
 import com.ddiring.backend_asset.repository.TokenRepository;
@@ -93,80 +96,6 @@ public class WalletService {
         }
     }
 
-    /**
-     * 사용자의 지갑에 있는 토큰의 이름, 심볼, 개수, 가격 정보를 조회합니다.
-     * 토큰 이름과 심볼은 DB(Token 엔티티)에서 가져오고,
-     * 토큰 개수는 블록체인에서, 가격은 외부 API에서 조회합니다.
-     *
-     * @param userSeq 사용자 시퀀스 번호
-     * @return 지갑에 있는 토큰 정보 목록
-     */
-    @Transactional
-    public List<WalletTokenInfoDto> getWalletTokenInfo(String userSeq) {
-        // 1. userSeq로 지갑 주소 조회
-        Optional<Wallet> walletOptional = walletRepository.findByUserSeq(userSeq);
-        Wallet wallet = walletOptional.orElseThrow(() -> new com.ddiring.backend_asset.common.exception.NotFound("해당하는 지갑을 찾을 수 없습니다."));
-        String walletAddress = wallet.getWalletAddress();
-
-        // 2. 지갑에 연결된 모든 토큰 조회 (DB에서 토큰 이름, 심볼, 컨트랙트 주소 가져옴)
-        List<Token> tokens = tokenRepository.findByWalletSeq(wallet.getWalletSeq());
-
-        // 3. 각 토큰에 대해 블록체인 잔액과 외부 가격 조회
-        return tokens.stream().map(token -> {
-            // 블록체인에서 토큰 잔액 조회
-            BigInteger balance = getTokenBalance(token.getContractAddress(), walletAddress);
-
-            // 외부 API에서 토큰 가격 조회
-            BigDecimal price = externalPriceApi.getTokenPriceInKRW(token.getContractAddress());
-
-            return new WalletTokenInfoDto(
-                    token.getTokenName(),      // DB에서 가져온 토큰 이름
-                    token.getTokenSymbol(),    // DB에서 가져온 토큰 심볼
-                    Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER), // ETHER 단위로 변환
-                    price
-            );
-        }).collect(Collectors.toList());
-    }
-
-    /**
-     * 특정 ERC-20 토큰의 컨트랙트 주소와 지갑 주소를 사용하여 블록체인에서 토큰 잔액을 조회합니다.
-     *
-     * @param tokenContractAddress 조회할 토큰의 스마트 컨트랙트 주소
-     * @param walletAddress 잔액을 조회할 지갑 주소
-     * @return 해당 지갑 주소의 토큰 잔액 (BigInteger)
-     */
-    private BigInteger getTokenBalance(String tokenContractAddress, String walletAddress) {
-        // ERC-20 표준의 balanceOf 함수를 호출하기 위한 Function 객체 생성
-        Function function = new Function(
-                "balanceOf", // ERC-20 표준 함수 이름
-                Collections.singletonList(new Address(walletAddress)), // 입력 파라미터: 지갑 주소
-                Collections.singletonList(new TypeReference<Uint256>() {})); // 출력 파라미터: Uint256 (잔액)
-
-        // 함수 호출을 위한 데이터 인코딩
-        String encodedFunction = FunctionEncoder.encode(function);
-
-        try {
-            // 이더리움 노드에 eth_call 요청 전송
-            EthCall ethCall = web3j.ethCall(
-                            Transaction.createEthCallTransaction(
-                                    walletAddress, // from 주소 (여기서는 호출하는 지갑 주소, 실제 트랜잭션은 아님)
-                                    tokenContractAddress, // 호출 대상 컨트랙트 주소
-                                    encodedFunction), // 인코딩된 함수 데이터
-                            DefaultBlockParameterName.LATEST) // 최신 블록에서 조회
-                    .send();
-
-            // 응답 값 디코딩
-            List<org.web3j.abi.datatypes.Type> results = FunctionReturnDecoder.decode(ethCall.getValue(), function.getOutputParameters());
-            if (!results.isEmpty()) {
-                return (BigInteger) results.get(0).getValue();
-            } else {
-                return BigInteger.ZERO; // 잔액이 없는 경우 0 반환
-            }
-        } catch (IOException e) {
-            // 블록체인 통신 중 오류 발생 시 예외 처리
-            throw new RuntimeException("블록체인에서 토큰 잔액 조회 실패: " + e.getMessage(), e);
-        }
-    }
     @Transactional
     public String getWalletAddress(String userSeq) {
         Optional<Wallet> userWallet = walletRepository.findByUserSeq(userSeq);

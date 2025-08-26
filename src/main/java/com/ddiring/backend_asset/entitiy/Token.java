@@ -18,17 +18,14 @@ public class Token {
     @Column(name = "token_seq", nullable = false)
     private Integer tokenSeq;
 
+    @Column(name = "user_seq", nullable = false, unique = true)
+    private String userSeq;
+
     @Column(name = "wallet_seq", nullable = false)
     private Integer walletSeq;
 
-    @Column(name = "contract_address", nullable = false)
-    private String contractAddress;
-
-    @Column(name = "token_name", nullable = false)
-    private String tokenName;
-
-    @Column(name = "token_symbol", nullable = false)
-    private String tokenSymbol;
+    @Column(name = "project_id", nullable = false)
+    private String projectId;
 
     @Column(name = "amount", nullable = false)
     private Integer amount;
@@ -49,11 +46,9 @@ public class Token {
     private Integer updatedAt;
 
     @Builder
-    public Token(Integer walletSeq, String contractAddress, String tokenName, String tokenSymbol, Integer amount, Integer price, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
+    public Token(Integer walletSeq, String projectId, Integer amount, Integer price, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
         this.walletSeq = walletSeq;
-        this.contractAddress = contractAddress;
-        this.tokenName = tokenName;
-        this.tokenSymbol = tokenSymbol;
+        this.projectId = projectId;
         this.amount = amount;
         this.price = price;
         this.createdId = createdId;

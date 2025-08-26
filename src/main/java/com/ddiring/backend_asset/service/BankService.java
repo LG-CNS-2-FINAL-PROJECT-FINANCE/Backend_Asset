@@ -244,6 +244,13 @@ public class BankService {
 
         return bank.getDeposit();
     }
+    @Transactional
+    public void setBuyPrice(String userSeq, String role, MarketBuyDto marketBuyDto) {
+        Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
+                .orElseThrow(() -> new NotFound("누구?"));
 
+        bank.setDeposit(bank.getDeposit() - marketBuyDto.getBuyPrice());
+        bankRepository.save(bank);
+    }
 
 }
