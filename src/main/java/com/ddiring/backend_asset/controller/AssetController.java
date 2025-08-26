@@ -117,13 +117,15 @@ public class AssetController {
     }
 
     @PostMapping("/asset/market/buy")
-    public ApiResponseDto<String> marketBuy(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role, @RequestBody MarketBuyDto marketBuyDto) {
-        bankService.setBuyPrice(userSeq, role, marketBuyDto);
+    public ApiResponseDto<String> marketBuy(@RequestBody MarketBuyDto marketBuyDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        bankService.setBuyPrice(userSeq, marketBuyDto);
         return ApiResponseDto.createOk("success");
     }
 
     @PostMapping("/asset/market/sell")
-    public ApiResponseDto<String> marketSell(@RequestHeader("userSeq") String userSeq,  @RequestBody MarketSellDto marketSellDto) {
+    public ApiResponseDto<String> marketSell(@RequestBody MarketSellDto marketSellDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         tokenService.setSellToken(userSeq, marketSellDto);
         return ApiResponseDto.createOk("success");
     }
