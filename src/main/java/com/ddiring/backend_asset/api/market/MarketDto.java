@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class MarketDto {
-    private String userSeq;
     private Integer price;
+    private String projectId;
 }

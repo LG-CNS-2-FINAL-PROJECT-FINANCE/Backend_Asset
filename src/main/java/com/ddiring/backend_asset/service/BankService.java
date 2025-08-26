@@ -7,7 +7,6 @@ import com.ddiring.backend_asset.common.exception.NotFound;
 import com.ddiring.backend_asset.dto.*;
 import com.ddiring.backend_asset.entitiy.Bank;
 import com.ddiring.backend_asset.entitiy.Escrow;
-import com.ddiring.backend_asset.entitiy.EscrowHistory;
 import com.ddiring.backend_asset.entitiy.History;
 import com.ddiring.backend_asset.repository.BankRepository;
 import com.ddiring.backend_asset.repository.EscrowRepository;
@@ -176,8 +175,8 @@ public class BankService {
     }
 
     @Transactional
-    public Integer depositToEscrow(MarketDto marketDto, ProductDto productDto ,String role, String userSeq) {
-        if (marketDto.getUserSeq() == null || marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
+    public Integer depositToEscrow(String userSeq, String role, MarketDto marketDto) {
+        if (userSeq == null || marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
             throw new BadParameter("다시");
         }
 
@@ -189,19 +188,17 @@ public class BankService {
             throw new BadParameter("돈 없");
         }
 
-        Escrow escrow = escrowRepository.findByProjectId(productDto.getProjectId())
+        Escrow escrow = escrowRepository.findByProjectId(marketDto.getProjectId())
                 .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
 
-        bank.setDeposit(bank.getDeposit() - marketDto.getPrice());
-        bankRepository.save(bank);
 
 
         return bank.getDeposit();
     }
 
     @Transactional
-    public Integer withdrawalFromEscrow(MarketDto marketDto,ProductDto productDto, String role, String userSeq) {
-        if (marketDto.getUserSeq() == null || marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
+    public Integer withdrawalFromEscrow(String userSeq, String role, MarketDto marketDto) {
+        if (userSeq == null || marketDto.getPrice() == null || marketDto.getPrice() <= 0) {
             throw new BadParameter("다시");
         }
 
@@ -209,7 +206,7 @@ public class BankService {
                 .orElseThrow(() -> new NotFound("누구?"));
 
 
-        Escrow escrow = escrowRepository.findByProjectId(productDto.getProjectId())
+        Escrow escrow = escrowRepository.findByProjectId(marketDto.getProjectId())
                 .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
 
         bank.setDeposit(bank.getDeposit() + marketDto.getPrice());
@@ -217,6 +214,7 @@ public class BankService {
 
         return bank.getDeposit();
     }
+
     @Transactional
     public void setBuyPrice(String userSeq,String role, MarketBuyDto marketBuyDto) {
         Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
@@ -226,4 +224,15 @@ public class BankService {
         bankRepository.save(bank);
     }
 
+    @Transactional
+    public void escrowNumber(ProductDto productDto) {
+        if (productDto.getAccount() == null) {
+            throw new BadParameter("다시내놔");
+        }
+        Escrow escrow = Escrow.builder()
+                .account(productDto.getAccount())
+                .projectId(productDto.getProjectId())
+                .build();
+        escrowRepository.save(escrow);
+    }
 }

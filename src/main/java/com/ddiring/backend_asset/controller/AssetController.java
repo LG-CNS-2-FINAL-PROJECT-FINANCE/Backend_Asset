@@ -1,5 +1,6 @@
 package com.ddiring.backend_asset.controller;
 
+import com.ddiring.backend_asset.api.market.MarketDto;
 import com.ddiring.backend_asset.api.product.ProductDto;
 import com.ddiring.backend_asset.common.dto.ApiResponseDto;
 import com.ddiring.backend_asset.common.util.GatewayRequestHeaderUtils;
@@ -94,19 +95,19 @@ public class AssetController {
 
     @PostMapping("/escrow/deposit")
     public ApiResponseDto<Integer> depositToEscrow(
-            @RequestBody EscrowRequestDto escrowRequestDto) {
+            @RequestBody MarketDto marketDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         String role = GatewayRequestHeaderUtils.getRole();
-        Integer money = bankService.depositToEscrow(escrowRequestDto.getMarketDto(), escrowRequestDto.getProductDto(),  role, userSeq);
+        Integer money = bankService.depositToEscrow(userSeq, role, marketDto);
         return ApiResponseDto.createOk(money);
     }
 
     @PostMapping("/escrow/withdrawal")
     public ApiResponseDto<Integer> withdrawalFromEscrow(
-            @RequestBody EscrowRequestDto escrowRequestDto) {
+            @RequestBody MarketDto marketDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         String role = GatewayRequestHeaderUtils.getRole();
-        Integer money = bankService.withdrawalFromEscrow(escrowRequestDto.getMarketDto(), escrowRequestDto.getProductDto(), role, userSeq);
+        Integer money = bankService.withdrawalFromEscrow(userSeq, role, marketDto);
         return ApiResponseDto.createOk(money);
     }
 
@@ -128,6 +129,12 @@ public class AssetController {
     public ApiResponseDto<String> marketSell(@RequestBody MarketSellDto marketSellDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         tokenService.setSellToken(userSeq, marketSellDto);
+        return ApiResponseDto.createOk("success");
+    }
+
+    @PostMapping("/market/sell")
+    public ApiResponseDto<String> escrowNumber(@RequestBody ProductDto productDto) {
+        bankService.escrowNumber(productDto);
         return ApiResponseDto.createOk("success");
     }
 
