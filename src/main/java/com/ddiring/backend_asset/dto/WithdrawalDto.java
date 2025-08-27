@@ -8,5 +8,4 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class WithdrawalDto {
     private Integer withdrawal;
-
 }

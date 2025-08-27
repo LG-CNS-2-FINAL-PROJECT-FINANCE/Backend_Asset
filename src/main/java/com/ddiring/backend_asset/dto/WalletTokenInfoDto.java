@@ -8,8 +8,8 @@ import java.math.BigDecimal;
 @Getter
 @AllArgsConstructor
 public class WalletTokenInfoDto {
-    private String tokenName;
-    private String tokenSymbol;
-    private BigDecimal tokenAmount;
-    private BigDecimal tokenPriceInKRW;
+    private String projectId;
+    private String userSeq;
+    private Integer amount;
+    private Integer price;
 }
