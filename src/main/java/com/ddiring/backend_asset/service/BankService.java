@@ -1,5 +1,6 @@
 package com.ddiring.backend_asset.service;
 
+import com.ddiring.backend_asset.api.escrow.EscrowClient;
 import com.ddiring.backend_asset.api.escrow.EscrowDto;
 import com.ddiring.backend_asset.api.market.MarketDto;
 import com.ddiring.backend_asset.api.product.ProductDto;
@@ -30,6 +31,7 @@ public class BankService {
     private final BankRepository bankRepository;
     private final HistoryRepository historyRepository;
     private final EscrowRepository escrowRepository;
+    private final EscrowClient escrowClient;
 
     @Transactional
     public BankSearchDto bankSearch(String userSeq, String role) {
@@ -230,6 +232,9 @@ public class BankService {
         escrowDto.setTransSeq(marketBuyDto.getOrdersId());
         escrowDto.setTransType(1);
         escrowDto.setAmount(marketBuyDto.getBuyPrice());
+
+        escrowClient.escrowDeposit(escrowDto);
+
         bankRepository.save(bank);
     }
 
