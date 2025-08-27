@@ -8,7 +8,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "escrowClient", url = "${escrow.base-url}")
 public interface EscrowClient {
+
     @PostMapping("/api/escrow/deposit")
     ResponseEntity<String> escrowDeposit(@RequestBody EscrowDto escrowDto);
 
+    @PostMapping("/api/escrow/refund")
+    ResponseEntity<String> escrowRefund(@RequestBody EscrowDto escrowDto);
 }

@@ -10,6 +10,7 @@ import com.ddiring.backend_asset.dto.*;
 import com.ddiring.backend_asset.entitiy.Bank;
 import com.ddiring.backend_asset.entitiy.Escrow;
 import com.ddiring.backend_asset.entitiy.History;
+import com.ddiring.backend_asset.entitiy.Token;
 import com.ddiring.backend_asset.repository.BankRepository;
 import com.ddiring.backend_asset.repository.EscrowRepository;
 import com.ddiring.backend_asset.repository.HistoryRepository;
@@ -238,6 +239,25 @@ public class BankService {
         bankRepository.save(bank);
     }
 
+    @Transactional
+    public void setRefundToken(String userSeq, String role, MarketRefundDto marketRefundDto) {
+        Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
+                .orElseThrow(() -> new NotFound("누구?"));
+        Escrow escrow = escrowRepository.findByProjectId(marketRefundDto.getProjectId())
+                .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
+        bank.setDeposit(bank.getDeposit() + marketRefundDto.getRefundPrice());
+
+        EscrowDto escrowDto = new EscrowDto();
+        escrowDto.setAccount(escrow.getAccount());
+        escrowDto.setUserSeq(userSeq);
+        escrowDto.setTransSeq(marketRefundDto.getOrdersId());
+        escrowDto.setTransType(-1);
+        escrowDto.setAmount(marketRefundDto.getRefundPrice());
+
+        escrowClient.escrowDeposit(escrowDto);
+
+        bankRepository.save(bank);
+    }
     @Transactional
     public void escrowNumber(ProductDto productDto) {
         if (productDto.getAccount() == null) {

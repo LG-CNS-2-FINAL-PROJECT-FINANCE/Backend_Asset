@@ -98,7 +98,6 @@ public class AssetController {
         return ApiResponseDto.defaultOk();
     }
 
-
     @PostMapping("/escrow/deposit")
     public ApiResponseDto<Integer> depositToEscrow(
             @RequestBody MarketDto marketDto) {
@@ -135,6 +134,14 @@ public class AssetController {
     public ApiResponseDto<String> marketSell(@RequestBody MarketSellDto marketSellDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         tokenService.setSellToken(userSeq, marketSellDto);
+        return ApiResponseDto.createOk("success");
+    }
+
+    @PostMapping("/market/refund")
+    public ApiResponseDto<String> marketRefund(@RequestBody MarketRefundDto marketRefundDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
+        bankService.setRefundToken(userSeq, role, marketRefundDto);
         return ApiResponseDto.createOk("success");
     }
 
