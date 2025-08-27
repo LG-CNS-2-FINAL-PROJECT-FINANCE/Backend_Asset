@@ -35,7 +35,7 @@ public class ApiCommonAdvice {
     @ExceptionHandler({NotFound.class})
     public ApiResponseDto<String> handleNotFound(NotFound e) {
         e.printStackTrace();
-
+        log.error(e.getErrorMessage());
         return ApiResponseDto.createError(
                 e.getErrorCode(),
                 e.getErrorMessage()
@@ -57,7 +57,7 @@ public class ApiCommonAdvice {
     @ExceptionHandler({NoResourceFoundException.class})
     public ApiResponseDto<String> handleNoResourceFoundException(NoResourceFoundException e) {
         e.printStackTrace();
-
+        log.error(e.getMessage());
         return ApiResponseDto.createError(
                 "NoResource",
                 "리소스를 찾을 수 없습니다.");
