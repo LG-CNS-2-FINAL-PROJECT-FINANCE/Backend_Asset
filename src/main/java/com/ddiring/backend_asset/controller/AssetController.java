@@ -132,7 +132,7 @@ public class AssetController {
         return ApiResponseDto.createOk("success");
     }
 
-    @PostMapping("/market/sell")
+    @PostMapping("/market/escrow")
     public ApiResponseDto<String> escrowNumber(@RequestBody ProductDto productDto) {
         bankService.escrowNumber(productDto);
         return ApiResponseDto.createOk("success");
