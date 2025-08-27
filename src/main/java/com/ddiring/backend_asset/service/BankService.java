@@ -1,5 +1,6 @@
 package com.ddiring.backend_asset.service;
 
+import com.ddiring.backend_asset.api.escrow.EscrowDto;
 import com.ddiring.backend_asset.api.market.MarketDto;
 import com.ddiring.backend_asset.api.product.ProductDto;
 import com.ddiring.backend_asset.common.exception.BadParameter;
@@ -219,8 +220,16 @@ public class BankService {
     public void setBuyPrice(String userSeq,String role, MarketBuyDto marketBuyDto) {
         Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
                 .orElseThrow(() -> new NotFound("누구?"));
-
+        Escrow escrow = escrowRepository.findByProjectId(marketBuyDto.getProjectId())
+                .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
         bank.setDeposit(bank.getDeposit() - marketBuyDto.getBuyPrice());
+
+        EscrowDto escrowDto = new EscrowDto();
+        escrowDto.setAccount(escrow.getAccount());
+        escrowDto.setUserSeq(userSeq);
+        escrowDto.setTransSeq(marketBuyDto.getOrdersId());
+        escrowDto.setTransType(1);
+        escrowDto.setAmount(marketBuyDto.getBuyPrice());
         bankRepository.save(bank);
     }
 
