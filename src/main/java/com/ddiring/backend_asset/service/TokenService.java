@@ -46,8 +46,8 @@ public class TokenService {
 
     @Transactional
     public void setSellToken(String userSeq, MarketSellDto marketSellDto) {
-        Token token = tokenRepository.findByUserSeq(userSeq)
-                .orElseThrow(() -> new NotFound("누구?"));
+        Token token = tokenRepository.findByUserSeqAndProjectId(userSeq, marketSellDto.getProjectId())
+                .orElseThrow(() -> new NotFound("해당 프로젝트의 토큰을 찾을 수 없습니다."));
 
         token.setAmount(token.getAmount() - marketSellDto.getSellToken());
         tokenRepository.save(token);

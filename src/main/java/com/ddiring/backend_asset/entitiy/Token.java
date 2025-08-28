@@ -18,7 +18,7 @@ public class Token {
     @Column(name = "token_seq", nullable = false)
     private Integer tokenSeq;
 
-    @Column(name = "user_seq", nullable = false, unique = true)
+    @Column(name = "user_seq", nullable = false)
     private String userSeq;
 
     @Column(name = "project_id", nullable = false)

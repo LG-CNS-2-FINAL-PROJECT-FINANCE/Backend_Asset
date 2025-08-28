@@ -13,4 +13,5 @@ public interface TokenRepository extends JpaRepository<Token, Integer> {
     Optional<Token> findByUserSeqAndTokenSymbol(String userSeq, String tokenSymbol);
 //    List<Token> findByUserSeq(String userSeq);
     Optional<Token>findByUserSeq(String userSeq);
+    Optional<Token> findByUserSeqAndProjectId(String userSeq, String projectId);
 }
