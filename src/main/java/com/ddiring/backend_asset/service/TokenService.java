@@ -12,6 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class TokenService {
@@ -32,11 +36,22 @@ public class TokenService {
 
     @Transactional
     public void setSellToken(String userSeq, MarketSellDto marketSellDto) {
-        Token token = tokenRepository.findByUserSeq(userSeq)
+        Token token = tokenRepository.findByUserSeqAndTokenSymbol(userSeq, marketSellDto.getTokenSymbol())
                 .orElseThrow(() -> new NotFound("누구?"));
 
         token.setAmount(token.getAmount() - marketSellDto.getSellToken());
         tokenRepository.save(token);
     }
 
+    @Transactional
+    public List<WalletTokenInfoDto> getTokenInfo(String userSeq) {
+        List<Token> tokens = tokenRepository.findByUserSeq(userSeq);
+        if(tokens.isEmpty()){
+            List.of();
+        }
+
+        return tokens.stream()
+                .map(WalletTokenInfoDto::new)
+                .collect(Collectors.toList());
+    }
 }

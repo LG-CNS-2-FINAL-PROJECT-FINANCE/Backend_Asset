@@ -24,6 +24,9 @@ public class Token {
     @Column(name = "project_id", nullable = false)
     private String projectId;
 
+    @Column(name = "token_Symbol", nullable = false)
+    private String tokenSymbol;
+
     @Column(name = "amount", nullable = false)
     private Integer amount;
 

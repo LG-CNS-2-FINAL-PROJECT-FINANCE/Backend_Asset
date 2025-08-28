@@ -75,6 +75,13 @@ public class AssetController {
 //        return ApiResponseDto.createOk(walletTokenInfoList);
 //    }
 
+    @GetMapping("/wallet-token/search")
+    public ApiResponseDto<List<WalletTokenInfoDto>> getTokenAmount() {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        List<WalletTokenInfoDto> walletTokenInfo = tokenService.getTokenInfo(userSeq);
+        return ApiResponseDto.createOk(walletTokenInfo);
+    }
+
     @GetMapping("/history/{moneyType}")
     public ApiResponseDto<List<MoneyMoveDto>> history(@PathVariable Integer moneyType, @RequestBody MoneyMoveDto moneyMoveDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
