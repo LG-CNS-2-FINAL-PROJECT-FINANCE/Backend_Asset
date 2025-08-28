@@ -146,9 +146,9 @@ public class AssetController {
         return ApiResponseDto.createOk("success");
     }
 
-    @GetMapping("/{projectId}/title")
-    public String getMarketTitle(@PathVariable String projectId) {
-        String marketTitleDto = bankService.getMarketTitleDto(projectId);
+    @PostMapping("/title")
+    public String getMarketTitle(@RequestBody TitleRequestDto requestDto) {
+        String marketTitleDto = bankService.getMarketTitleDto(requestDto.getProjectId());
         return marketTitleDto;
     }
 }
