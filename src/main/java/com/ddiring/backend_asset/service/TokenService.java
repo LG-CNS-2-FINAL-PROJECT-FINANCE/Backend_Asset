@@ -52,6 +52,7 @@ public class TokenService {
         token.setAmount(token.getAmount() - marketSellDto.getSellToken());
         tokenRepository.save(token);
     }
+
 //    @Transactional
 //    public List<WalletTokenInfoDto> getTokenInfo(String userSeq) {
 //        List<Token> tokens = tokenRepository.findByUserSeq(userSeq);
