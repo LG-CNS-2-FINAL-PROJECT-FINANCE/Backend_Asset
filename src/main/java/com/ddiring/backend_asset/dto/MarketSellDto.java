@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 public class MarketSellDto {
     public Integer transType;
     private Integer sellToken;
-    private String tokenSymbol;
+//    private String tokenSymbol;
     private String projectId;
 }
