@@ -165,14 +165,20 @@ public class BankService {
         if (productDto.getProjectId() == null) {
             throw new BadParameter("이제 다 됐다.");
         }
-
-        Escrow escrow = Escrow.builder()
-                .title(productDto.getTitle())
-                .projectId(productDto.getProjectId())
-                .account(productDto.getAccount())
-                .build();
-        escrowRepository.save(escrow);
-
+        Optional<Escrow> account = escrowRepository.findByProjectId(productDto.getProjectId());
+        if (account.isPresent()) {
+            Escrow escrow = account.get();
+            escrow.setTitle(productDto.getTitle());
+            escrowRepository.save(escrow);
+        }
+        else {
+            Escrow escrow = Escrow.builder()
+                    .title(productDto.getTitle())
+                    .projectId(productDto.getProjectId())
+                    .account(productDto.getAccount())
+                    .build();
+            escrowRepository.save(escrow);
+        }
     }
 
     @Transactional
