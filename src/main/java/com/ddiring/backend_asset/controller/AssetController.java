@@ -87,7 +87,7 @@ public class AssetController {
     public ApiResponseDto<List<MoneyMoveDto>> allhistory() {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         String role = GatewayRequestHeaderUtils.getRole();
-        List<MoneyMoveDto> history = bankService.allmoneyMove(userSeq, role);
+        List<MoneyMoveDto> history = bankService.allMoneyMove(userSeq, role);
         return ApiResponseDto.createOk(history);
     }
 
@@ -145,4 +145,9 @@ public class AssetController {
         return ApiResponseDto.createOk("success");
     }
 
+    @GetMapping("/{projectId}/title")
+    public String getMarketTitle(@PathVariable String projectId) {
+        String marketTitleDto = bankService.getMarketTitleDto(projectId);
+        return marketTitleDto;
+    }
 }

@@ -9,9 +9,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class ProductDto {
+    private String title;
     private String projectId;
     private String account;
-    public ProductDto(String projectId, String account) {
+    public ProductDto(String title, String projectId, String account) {
+        this.title = title;
         this.projectId = projectId;
         this.account = account;
     }

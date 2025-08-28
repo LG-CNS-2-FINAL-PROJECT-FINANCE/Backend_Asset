@@ -18,6 +18,9 @@ public class Escrow {
     @Column(name = "escrow_seq", nullable = false)
     private Integer escrowSeq;
 
+    @Column(name = "title")
+    private String title;
+
     @Column(name = "project_id")
     private String projectId;
 
@@ -25,7 +28,8 @@ public class Escrow {
     private String account;
 
     @Builder
-    public Escrow(String account, String projectId) {
+    public Escrow(String title, String account, String projectId) {
+        this.title = title;
         this.account = account;
         this.projectId = projectId;
     }

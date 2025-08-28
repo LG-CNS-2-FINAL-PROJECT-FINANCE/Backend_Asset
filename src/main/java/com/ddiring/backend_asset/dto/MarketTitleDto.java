@@ -2,11 +2,11 @@ package com.ddiring.backend_asset.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @NoArgsConstructor
-public class MarketSellDto {
-    public Integer transType;
-    private Integer sellToken;
-    private String projectId;
+public class MarketTitleDto {
+    private String title;
 }

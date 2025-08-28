@@ -147,7 +147,7 @@ public class BankService {
     }
 
     @Transactional
-    public List<MoneyMoveDto> allmoneyMove(String userSeq, String role) {
+    public List<MoneyMoveDto> allMoneyMove(String userSeq, String role) {
         if (userSeq == null) {
             throw new NotFound("누구냐 넌");
         }
@@ -171,6 +171,7 @@ public class BankService {
         }
 
         Escrow escrow = Escrow.builder()
+                .title(productDto.getTitle())
                 .projectId(productDto.getProjectId())
                 .account(productDto.getAccount())
                 .build();
@@ -231,7 +232,7 @@ public class BankService {
         escrowDto.setAccount(escrow.getAccount());
         escrowDto.setUserSeq(userSeq);
         escrowDto.setTransSeq(marketBuyDto.getOrdersId());
-        escrowDto.setTransType(1);
+        escrowDto.setTransType(marketBuyDto.getTransType());
         escrowDto.setAmount(marketBuyDto.getBuyPrice());
 
         escrowClient.escrowDeposit(escrowDto);
@@ -258,15 +259,11 @@ public class BankService {
 
         bankRepository.save(bank);
     }
+
     @Transactional
-    public void escrowNumber(ProductDto productDto) {
-        if (productDto.getAccount() == null) {
-            throw new BadParameter("다시내놔");
-        }
-        Escrow escrow = Escrow.builder()
-                .account(productDto.getAccount())
-                .projectId(productDto.getProjectId())
-                .build();
-        escrowRepository.save(escrow);
+    public String getMarketTitleDto(String projectId) {
+        Escrow escrow = escrowRepository.findByProjectId(projectId)
+                .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
+        return escrow.getTitle();
     }
 }
