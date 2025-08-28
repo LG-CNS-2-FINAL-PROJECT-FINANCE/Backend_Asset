@@ -165,10 +165,6 @@ public class BankService {
         if (productDto.getProjectId() == null) {
             throw new BadParameter("이제 다 됐다.");
         }
-        Optional<Escrow> account = escrowRepository.findByProjectId(productDto.getProjectId());
-        if (account.isPresent()) {
-            throw new BadParameter("이미 있는뎌?");
-        }
 
         Escrow escrow = Escrow.builder()
                 .title(productDto.getTitle())
