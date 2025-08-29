@@ -38,7 +38,7 @@ public class AssetService {
         escrowDto.setUserSeq(sellerWallet.getUserSeq());
         escrowDto.setTransSeq(request.getTradeId().intValue());
         escrowDto.setTransType(1);
-        escrowDto.setAmount( request.getSellPrice());
+        escrowDto.setAmount( request.getSellPrice().intValue());
 
         escrowClient.escrowWithdrawal(escrowDto);
         tokenService.addBuyToken(buyerWallet.getUserSeq(), request.getProjectId(), request.getBuyTokenAmount());
