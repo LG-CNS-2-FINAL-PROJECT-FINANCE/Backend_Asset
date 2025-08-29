@@ -268,4 +268,26 @@ public class BankService {
                 .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
         return escrow.getTitle();
     }
+
+    @Transactional
+    public void depositForTrade(String userSeq, String role, long amount) {
+        if (amount <= 0) {
+            throw new BadParameter("입금 금액은 0보다 커야 합니다.");
+        }
+        Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
+                .orElseThrow(() -> new NotFound("판매자의 은행 계좌를 찾을 수 없습니다. userSeq: " + userSeq));
+
+        bank.setDeposit(bank.getDeposit() + (int)amount);
+        bankRepository.save(bank);
+
+        // 입금 내역(History) 기록
+        History history = History.builder()
+                .userSeq(userSeq)
+                .role(role)
+                .bankPrice((int)amount)
+                .moneyType(0) // 0: 입금
+                .bankTime(LocalDateTime.now())
+                .build();
+        historyRepository.save(history);
+    }
 }

@@ -10,8 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface TokenRepository extends JpaRepository<Token, Integer> {
-    Optional<Token> findByUserSeqAndTokenSymbol(String userSeq, String tokenSymbol);
-//    List<Token> findByUserSeq(String userSeq);
-    Optional<Token>findByUserSeq(String userSeq);
+    List<Token> findByUserSeq(String userSeq);
     Optional<Token> findByUserSeqAndProjectId(String userSeq, String projectId);
 }

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -21,47 +22,47 @@ import java.util.stream.Collectors;
 public class TokenService {
     private final TokenRepository tokenRepository;
 
-//    @Transactional
-//    public void searchToken(String userSeq, WalletTokenInfoDto walletTokenInfoDto) {
-//        Token token = tokenRepository.findByUserSeq(userSeq)
-//                .orElseThrow(() -> new NotFound("누구?"));
-//
-//        Token token1 = Token.builder()
-//                .projectId(token.getProjectId())
-//                .amount(token.getAmount())
-//                .price(token.getPrice())
-//                .build();
-//        re
-//    }
+    @Transactional
+    public void addBuyToken(String userSeq, String projectId, Long amountToAdd) {
+        // 구매자가 해당 프로젝트의 토큰을 이미 보유하고 있는지 확인
+        Optional<Token> tokenOptional = tokenRepository.findByUserSeqAndProjectId(userSeq, projectId);
 
-//    @Transactional
-//    public void setSellToken(String userSeq, MarketSellDto marketSellDto) {
-//        Token token = tokenRepository.findByUserSeqAndTokenSymbol(userSeq, marketSellDto.getTokenSymbol())
-//                .orElseThrow(() -> new NotFound("누구?"));
-//
-//        token.setAmount(token.getAmount() - marketSellDto.getSellToken());
-//        tokenRepository.save(token);
-//    }
+        if (tokenOptional.isPresent()) {
+            // 이미 토큰을 보유한 경우, 수량만 증가시킵니다.
+            Token existingToken = tokenOptional.get();
+            existingToken.setAmount(existingToken.getAmount() + amountToAdd.intValue());
+            tokenRepository.save(existingToken);
+        } else {
+            // 처음으로 토큰을 받는 경우, 새로운 Token 엔티티를 생성합니다.
+            Token newToken = Token.builder()
+                    .userSeq(userSeq)
+                    .projectId(projectId)
+                    .amount(amountToAdd.intValue())
+                    .build();
+            tokenRepository.save(newToken);
+        }
+    }
 
 
     @Transactional
-    public void setSellToken(String userSeq, MarketSellDto marketSellDto) {
+    public Integer setSellToken(String userSeq, MarketSellDto marketSellDto) {
         Token token = tokenRepository.findByUserSeqAndProjectId(userSeq, marketSellDto.getProjectId())
                 .orElseThrow(() -> new NotFound("해당 프로젝트의 토큰을 찾을 수 없습니다."));
 
         token.setAmount(token.getAmount() - marketSellDto.getSellToken());
         tokenRepository.save(token);
+        return token.getAmount();
     }
 
-//    @Transactional
-//    public List<WalletTokenInfoDto> getTokenInfo(String userSeq) {
-//        List<Token> tokens = tokenRepository.findByUserSeq(userSeq);
-//        if(tokens.isEmpty()){
-//            List.of();
-//        }
-//
-//        return tokens.stream()
-//                .map(WalletTokenInfoDto::new)
-//                .collect(Collectors.toList());
-//    }
+    @Transactional
+    public List<WalletTokenInfoDto> getTokenInfo(String userSeq) {
+        List<Token> tokens = tokenRepository.findByUserSeq(userSeq);
+        if(tokens.isEmpty()){
+            List.of();
+        }
+
+        return tokens.stream()
+                .map(WalletTokenInfoDto::new)
+                .collect(Collectors.toList());
+    }
 }

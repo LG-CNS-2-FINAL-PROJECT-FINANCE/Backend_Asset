@@ -12,12 +12,10 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class WalletTokenInfoDto {
     private String projectId;
-    private String tokenSymbol;
     private Integer amount;
     private Integer price;
     public WalletTokenInfoDto(Token token) {
         this.projectId = token.getProjectId();
-        this.tokenSymbol = token.getTokenSymbol();
         this.amount = token.getAmount();
         this.price = token.getPrice();
     }
