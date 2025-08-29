@@ -1,9 +1,13 @@
 package com.ddiring.backend_asset.service;
 
+import com.ddiring.backend_asset.api.escrow.EscrowClient;
+import com.ddiring.backend_asset.api.escrow.EscrowDto;
 import com.ddiring.backend_asset.common.exception.NotFound;
 import com.ddiring.backend_asset.dto.UpdateAssetRequestDto; // Market에서 받은 DTO
+import com.ddiring.backend_asset.entitiy.Escrow;
 import com.ddiring.backend_asset.entitiy.Wallet;
 import com.ddiring.backend_asset.repository.BankRepository;
+import com.ddiring.backend_asset.repository.EscrowRepository;
 import com.ddiring.backend_asset.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +20,8 @@ public class AssetService {
     private final BankService bankService;
     private final TokenService tokenService;
     private final WalletRepository walletRepository;
+    private final EscrowRepository escrowRepository;
+    private final EscrowClient escrowClient;
 
     @Transactional
     public void updateAssetsAfterTrade(UpdateAssetRequestDto request) {
@@ -24,11 +30,22 @@ public class AssetService {
                 .orElseThrow(() -> new NotFound("구매자 지갑 정보를 찾을 수 없습니다: " + request.getBuyAddress()));
         Wallet sellerWallet = walletRepository.findByWalletAddress(request.getSellAddress())
                 .orElseThrow(() -> new NotFound("판매자 지갑 정보를 찾을 수 없습니다: " + request.getSellAddress()));
+        Escrow escrow = escrowRepository.findByProjectId(request.getProjectId())
+                .orElseThrow(() -> new NotFound("에스크로 계좌번호 못찾음"));
 
+        EscrowDto escrowDto = new EscrowDto();
+        escrowDto.setAccount(escrow.getAccount());
+        escrowDto.setUserSeq(sellerWallet.getUserSeq());
+        escrowDto.setTransSeq(request.getTradeId().intValue());
+        escrowDto.setTransType(1);
+        escrowDto.setAmount( request.getSellPrice());
+
+        escrowClient.escrowWithdrawal(escrowDto);
         tokenService.addBuyToken(buyerWallet.getUserSeq(), request.getProjectId(), request.getBuyTokenAmount());
 
         String sellerRole = "USER";
         
         bankService.depositForTrade(sellerWallet.getUserSeq(), sellerRole,  request.getSellPrice());
+
     }
 }
