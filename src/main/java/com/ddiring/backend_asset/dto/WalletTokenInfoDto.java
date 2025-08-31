@@ -20,6 +20,3 @@ public class WalletTokenInfoDto {
         this.price = token.getPrice();
     }
 }
-
-
-//김민우 바보 O.<

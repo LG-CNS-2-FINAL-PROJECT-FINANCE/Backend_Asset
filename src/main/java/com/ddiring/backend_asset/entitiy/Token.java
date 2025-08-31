@@ -27,6 +27,9 @@ public class Token {
     @Column(name = "amount", nullable = false)
     private Integer amount;
 
+    @Column(name = "title")
+    private String title;
+
     @Column(name = "price")
     private Integer price;
 
@@ -43,9 +46,10 @@ public class Token {
     private Integer updatedAt;
 
     @Builder
-    public Token(String userSeq, String projectId, Integer amount, Integer price, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
+    public Token(String userSeq, String projectId, Integer amount,String title, Integer price, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
         this.projectId = projectId;
         this.amount = amount;
+        this.title = title;
         this.price = price;
         this.createdId = createdId;
         this.createdAt = createdAt;
