@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UpdateAssetRequestDto {
+public class UpdateBuyerAssetDto {
     private Long tradeId;
     private String projectId;
     private String buyAddress;
     private Long buyTokenAmount;
     private String sellAddress;
-    private Long sellPrice; // 판매자에게 입금될 최종 금액
+    private Long sellTokenAmount; // 판매자에게 입금될 최종 금액
 }

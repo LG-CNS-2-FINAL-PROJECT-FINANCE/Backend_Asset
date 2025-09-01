@@ -1,12 +1,12 @@
 package com.ddiring.backend_asset.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class MarketRefundDto {
     private Integer ordersId;
     private Integer refundPrice;

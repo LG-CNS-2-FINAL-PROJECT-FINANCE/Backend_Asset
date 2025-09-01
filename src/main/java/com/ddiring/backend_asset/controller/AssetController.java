@@ -5,7 +5,6 @@ import com.ddiring.backend_asset.api.product.ProductDto;
 import com.ddiring.backend_asset.common.dto.ApiResponseDto;
 import com.ddiring.backend_asset.common.util.GatewayRequestHeaderUtils;
 import com.ddiring.backend_asset.dto.*;
-import com.ddiring.backend_asset.service.AssetService;
 import com.ddiring.backend_asset.service.BankService;
 import com.ddiring.backend_asset.service.TokenService;
 import com.ddiring.backend_asset.service.WalletService;
@@ -22,7 +21,6 @@ public class AssetController {
     private final BankService bankService;
     private final WalletService walletService;
     private final TokenService tokenService;
-    private final AssetService assetService;
 
     @PostMapping("/account") //뱅크 생성
     public ApiResponseDto<String> createBank() {
@@ -153,9 +151,12 @@ public class AssetController {
         String marketTitleDto = bankService.getMarketTitleDto(requestDto.getProjectId());
         return marketTitleDto;
     }
-    @PostMapping("/update")
-    public ApiResponseDto<String> updateAssetsAfterTrade(@RequestBody UpdateAssetRequestDto requestDto) {
-        assetService.updateAssetsAfterTrade(requestDto);
+
+    @PostMapping("/market/profit")
+    public ApiResponseDto<String> marketProfit(@RequestBody MarketBuyDto marketBuyDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
+        bankService.setprofit(userSeq, role, marketBuyDto);
         return ApiResponseDto.createOk("success");
     }
 }

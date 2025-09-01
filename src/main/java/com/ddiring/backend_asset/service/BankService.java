@@ -228,7 +228,9 @@ public class BankService {
                 .orElseThrow(() -> new NotFound("누구?"));
         Escrow escrow = escrowRepository.findByProjectId(marketBuyDto.getProjectId())
                 .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
-        bank.setDeposit(bank.getDeposit() - marketBuyDto.getBuyPrice());
+        if (bank.getDeposit() < marketBuyDto.getBuyPrice()) {
+            throw new BadParameter("돈없어 그만");
+        }
 
         EscrowDto escrowDto = new EscrowDto();
         escrowDto.setAccount(escrow.getAccount());
@@ -238,6 +240,8 @@ public class BankService {
         escrowDto.setAmount(marketBuyDto.getBuyPrice());
 
         escrowClient.escrowDeposit(escrowDto);
+
+        bank.setDeposit(bank.getDeposit() - marketBuyDto.getBuyPrice());
 
         bankRepository.save(bank);
     }
@@ -270,7 +274,7 @@ public class BankService {
     }
 
     @Transactional
-    public void depositForTrade(String userSeq, String role, long amount) {
+    public void depositForTrade(String userSeq, String role, int amount) {
         if (amount <= 0) {
             throw new BadParameter("입금 금액은 0보다 커야 합니다.");
         }
@@ -280,14 +284,28 @@ public class BankService {
         bank.setDeposit(bank.getDeposit() + (int)amount);
         bankRepository.save(bank);
 
-        // 입금 내역(History) 기록
-        History history = History.builder()
-                .userSeq(userSeq)
-                .role(role)
-                .bankPrice((int)amount)
-                .moneyType(0) // 0: 입금
-                .bankTime(LocalDateTime.now())
-                .build();
-        historyRepository.save(history);
+    }
+    @Transactional
+    public void setprofit(String userSeq,String role, MarketBuyDto marketBuyDto) {
+        Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
+                .orElseThrow(() -> new NotFound("누구?"));
+        Escrow escrow = escrowRepository.findByProjectId(marketBuyDto.getProjectId())
+                .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
+        if (bank.getDeposit() < marketBuyDto.getBuyPrice()) {
+            throw new BadParameter("돈없어 그만");
+        }
+
+        EscrowDto escrowDto = new EscrowDto();
+        escrowDto.setAccount(escrow.getAccount());
+        escrowDto.setUserSeq(userSeq);
+        escrowDto.setTransSeq(marketBuyDto.getOrdersId());
+        escrowDto.setTransType(marketBuyDto.getTransType());
+        escrowDto.setAmount(marketBuyDto.getBuyPrice());
+
+        escrowClient.escrowDeposit(escrowDto);
+
+        bank.setDeposit(bank.getDeposit() - marketBuyDto.getBuyPrice());
+
+        bankRepository.save(bank);
     }
 }
