@@ -308,4 +308,14 @@ public class BankService {
 
         bankRepository.save(bank);
     }
+
+    @Transactional
+    public Integer getAllMoney(String userSeq, String role, AssetAllMoneyDto assetAllMoneyDto) {
+        Integer money = 0;
+        List<History> histories = historyRepository.findByUserSeqAndRoleAndMoneyTypeOrderByBankTimeDesc(userSeq, role, assetAllMoneyDto.getMoneyType());
+        for(History history : histories) {
+            money = money + history.getBankPrice();
+        }
+        return money;
+    }
 }

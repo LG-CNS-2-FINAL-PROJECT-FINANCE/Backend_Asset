@@ -159,4 +159,12 @@ public class AssetController {
         bankService.setprofit(userSeq, role, marketBuyDto);
         return ApiResponseDto.createOk("success");
     }
+
+    @PostMapping("/all")
+    public Integer getAllMoney(AssetAllMoneyDto assetAllMoneyDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
+        Integer  money = bankService.getAllMoney(userSeq, role, assetAllMoneyDto);
+        return money;
+    }
 }
