@@ -32,9 +32,10 @@ public class InvestSucceededEvent {
         private String investorAddress;
         private Long tokenAmount;
         private String projectId;
+        private Long price;
     }
 
-    public static InvestSucceededEvent of(Long investmentId, String investorAddress, Long tokenAmount, String projectId) {
+    public static InvestSucceededEvent of(Long investmentId, String investorAddress, Long tokenAmount, String projectId, Long price) {
         String uuid = java.util.UUID.randomUUID().toString();
         String eventType = PREFIX + ".SUCCEEDED";
 
@@ -50,5 +51,11 @@ public class InvestSucceededEvent {
                         .projectId(projectId)
                         .build())
                 .build();
+    }
+
+    public static InvestSucceededEvent of(Integer investmentSeq, String investorAddress, Integer tokenQuantity, String projectId , Long price) {
+        Long id = investmentSeq == null ? null : investmentSeq.longValue();
+        Long tokenAmount = tokenQuantity == null ? null : tokenQuantity.longValue();
+        return of(id, investorAddress, tokenAmount, projectId,  price);
     }
 }

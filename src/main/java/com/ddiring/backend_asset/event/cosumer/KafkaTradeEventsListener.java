@@ -84,7 +84,8 @@ public class KafkaTradeEventsListener {
             tokenService.addBuyToken(wallet1.getUserSeq(), payload.getProjectId(), payload.getBuyerTokenAmount());
             bankService.depositForTrade(wallet.getUserSeq(), "USER", tradeInfo.getPrice());
 
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             log.error("Asset 서비스 호출 중 심각한 오류 발생. tradeId={}", payload.getTradeId(), e);
             throw new RuntimeException("Asset 서비스 호출 실패", e);
         }
