@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 public class TokenService {
     private final TokenRepository tokenRepository;
 
+    // 2차거래 토큰 구매
     @Transactional
     public void addBuyToken(String userSeq, String projectId, Long amountToAdd) {
         // 구매자가 해당 프로젝트의 토큰을 이미 보유하고 있는지 확인
@@ -44,6 +45,7 @@ public class TokenService {
     }
 
 
+    // 2차거래 토큰 판매 요청
     @Transactional
     public Integer setSellToken(String userSeq, MarketSellDto marketSellDto) {
         Token token = tokenRepository.findByUserSeqAndProjectId(userSeq, marketSellDto.getProjectId())

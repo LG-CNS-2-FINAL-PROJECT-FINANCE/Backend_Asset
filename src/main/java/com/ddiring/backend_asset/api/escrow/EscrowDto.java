@@ -1,13 +1,13 @@
 package com.ddiring.backend_asset.api.escrow;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class EscrowDto {
     private String account;
     private String userSeq;

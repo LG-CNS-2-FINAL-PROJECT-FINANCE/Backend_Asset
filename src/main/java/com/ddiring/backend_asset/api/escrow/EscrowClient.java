@@ -12,7 +12,7 @@ public interface EscrowClient {
     @PostMapping("/api/escrow/deposit")
     ResponseEntity<String> escrowDeposit(@RequestBody EscrowDto escrowDto);
 
-    @PostMapping("/api/escrow/deposit")
+    @PostMapping("/api/escrow/withdrawal")
     ResponseEntity<String> escrowWithdrawal(@RequestBody EscrowDto escrowDto);
 
     @PostMapping("/api/escrow/refund")

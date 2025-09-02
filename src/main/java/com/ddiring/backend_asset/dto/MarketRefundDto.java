@@ -9,6 +9,8 @@ import lombok.*;
 @Builder
 public class MarketRefundDto {
     private Integer ordersId;
-    private Integer refundPrice;
     private String projectId;
+    private Integer refundPrice;
+    private Integer refundAmount;
+    private Integer orderType;
 }
