@@ -9,11 +9,13 @@ import com.ddiring.backend_asset.service.BankService;
 import com.ddiring.backend_asset.service.TokenService;
 import com.ddiring.backend_asset.service.WalletService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/asset")
 @RequiredArgsConstructor
@@ -164,7 +166,8 @@ public class AssetController {
     public Integer getAllMoney(AssetAllMoneyDto assetAllMoneyDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         String role = GatewayRequestHeaderUtils.getRole();
-        Integer  money = bankService.getAllMoney(userSeq, role, assetAllMoneyDto);
+        Integer money = bankService.getAllMoney(userSeq, role, assetAllMoneyDto);
+        log.info("얼만데: {}",money);
         return money;
     }
 }
