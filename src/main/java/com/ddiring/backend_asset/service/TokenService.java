@@ -1,11 +1,14 @@
 package com.ddiring.backend_asset.service;
 
+import com.ddiring.backend_asset.api.market.MarketTokenDto;
 import com.ddiring.backend_asset.common.exception.NotFound;
 import com.ddiring.backend_asset.dto.MarketRefundDto;
 import com.ddiring.backend_asset.dto.MarketSellDto;
 import com.ddiring.backend_asset.dto.WalletTokenInfoDto;
+import com.ddiring.backend_asset.entitiy.Escrow;
 import com.ddiring.backend_asset.entitiy.Token;
 import com.ddiring.backend_asset.entitiy.Wallet;
+import com.ddiring.backend_asset.repository.EscrowRepository;
 import com.ddiring.backend_asset.repository.TokenRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TokenService {
     private final TokenRepository tokenRepository;
+    private final EscrowRepository escrowRepository;
 
     // 2차거래 토큰 구매
     @Transactional
@@ -66,5 +70,24 @@ public class TokenService {
         return tokens.stream()
                 .map(WalletTokenInfoDto::new)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void getToken(MarketTokenDto marketTokenDto) {
+        Token token = tokenRepository.findByUserSeqAndProjectId(marketTokenDto.getUserSeq(), marketTokenDto.getProjectId())
+                .orElseThrow(() -> new NotFound("해당 프로젝트의 토큰을 찾을 수 없습니다."));
+        Escrow escrow = escrowRepository.findByProjectId(marketTokenDto.getProjectId()).orElseThrow(() -> new NotFound("해당 프로젝트를 찾을 수 없습니다."));
+        if(token == null) {
+            Token token1 = Token.builder()
+                    .userSeq(marketTokenDto.getUserSeq())
+                    .projectId(marketTokenDto.getProjectId())
+                    .price(marketTokenDto.getPerPrice())
+                    .title(escrow.getTitle())
+                    .amount(marketTokenDto.getTokenQuantity())
+                    .build();
+        }
+        else {
+            token.setAmount(token.getAmount() + marketTokenDto.getTokenQuantity());
+        }
     }
 }

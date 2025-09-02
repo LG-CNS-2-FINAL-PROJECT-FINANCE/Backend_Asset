@@ -1,6 +1,7 @@
 package com.ddiring.backend_asset.controller;
 
 import com.ddiring.backend_asset.api.market.MarketDto;
+import com.ddiring.backend_asset.api.market.MarketTokenDto;
 import com.ddiring.backend_asset.api.product.ProductDto;
 import com.ddiring.backend_asset.common.dto.ApiResponseDto;
 import com.ddiring.backend_asset.common.util.GatewayRequestHeaderUtils;
@@ -169,5 +170,10 @@ public class AssetController {
         Integer money = bankService.getAllMoney(userSeq, role, assetAllMoneyDto);
         log.info("얼만데: {}",money);
         return money;
+    }
+
+    @PostMapping("/get/token")
+    public void getToken(@RequestBody MarketTokenDto marketTokenDto) {
+        tokenService.getToken(marketTokenDto);
     }
 }
