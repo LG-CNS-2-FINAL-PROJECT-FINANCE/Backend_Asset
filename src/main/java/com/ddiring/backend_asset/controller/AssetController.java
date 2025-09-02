@@ -163,7 +163,7 @@ public class AssetController {
     }
 
     @PostMapping("/all")
-    public Integer getAllMoney(AssetAllMoneyDto assetAllMoneyDto) {
+    public Integer getAllMoney(@RequestBody AssetAllMoneyDto assetAllMoneyDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         String role = GatewayRequestHeaderUtils.getRole();
         Integer money = bankService.getAllMoney(userSeq, role, assetAllMoneyDto);
