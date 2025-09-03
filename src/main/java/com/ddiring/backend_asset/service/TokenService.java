@@ -13,6 +13,7 @@ import com.ddiring.backend_asset.repository.EscrowRepository;
 import com.ddiring.backend_asset.repository.TokenRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -21,6 +22,7 @@ import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TokenService {
@@ -75,6 +77,7 @@ public class TokenService {
 
     @Transactional
     public void getToken(String projectId, MarketTokenDto marketTokenDto) {
+        log.info("유저 시퀀스 : {}", marketTokenDto.getUserSeq());
         Optional<Token> token = tokenRepository.findByUserSeqAndProjectId(marketTokenDto.getUserSeq(), projectId);
 
         Escrow escrow = escrowRepository.findByProjectId(projectId).orElseThrow(() -> new NotFound("해당 프로젝트를 찾을 수 없습니다."));
