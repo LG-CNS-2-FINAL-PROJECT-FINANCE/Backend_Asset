@@ -84,12 +84,7 @@ public class TokenService {
 
         if (token.isPresent()) {
             Token existingToken = token.get();
-
-            long currentAmount = existingToken.getAmount() == null ? 0L : existingToken.getAmount();
-
-            long newAmount = currentAmount + marketTokenDto.getTokenQuantity();
-
-            existingToken.setAmount((int) newAmount);
+            existingToken.setAmount(existingToken.getAmount() + marketTokenDto.getTokenQuantity());
         }
         else {
             log.info("유저 시퀀스 : {}", marketTokenDto.getUserSeq());

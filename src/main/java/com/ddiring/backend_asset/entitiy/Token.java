@@ -48,6 +48,7 @@ public class Token {
     @Builder
     public Token(String userSeq, String projectId, Integer amount,String title, Integer price, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
         this.projectId = projectId;
+        this.userSeq = userSeq;
         this.amount = amount;
         this.title = title;
         this.price = price;
