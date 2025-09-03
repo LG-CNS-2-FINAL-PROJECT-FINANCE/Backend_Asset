@@ -175,7 +175,8 @@ public class AssetController {
 
     @PostMapping("/get/token/{projectId}")
     public void getToken(@PathVariable String projectId, @RequestBody MarketTokenDto marketTokenDto) {
-        tokenService.getToken(projectId, marketTokenDto);
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        tokenService.getToken(userSeq, projectId, marketTokenDto);
     }
 
     @PostMapping("/distribution")
