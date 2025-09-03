@@ -84,9 +84,7 @@ public class TokenService {
             existingToken.setAmount(existingToken.getAmount() + token.get().getAmount());
         }
         else {
-            Token existingToken = token.get();
-            existingToken.setAmount(existingToken.getAmount() + token.get().getAmount());
-            Token token1 = Token.builder()
+            Token newToken = Token.builder()
                     .userSeq(marketTokenDto.getUserSeq())
                     .projectId(projectId)
                     .price(marketTokenDto.getPerPrice())
@@ -94,7 +92,7 @@ public class TokenService {
                     .amount(marketTokenDto.getTokenQuantity())
                     .build();
 
-            tokenRepository.save(token1);
+            tokenRepository.save(newToken);
         }
     }
 }
