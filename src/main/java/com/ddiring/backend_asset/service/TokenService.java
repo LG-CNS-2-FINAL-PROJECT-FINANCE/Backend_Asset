@@ -74,8 +74,8 @@ public class TokenService {
     }
 
     @Transactional
-    public void getToken(String projectId, String userSeq, MarketTokenDto marketTokenDto) {
-        Optional<Token> token = tokenRepository.findByUserSeqAndProjectId(userSeq, projectId);
+    public void getToken(String projectId,  MarketTokenDto marketTokenDto) {
+        Optional<Token> token = tokenRepository.findByUserSeqAndProjectId(marketTokenDto.getUserSeq(), projectId);
 
         Escrow escrow = escrowRepository.findByProjectId(projectId).orElseThrow(() -> new NotFound("해당 프로젝트를 찾을 수 없습니다."));
 
@@ -87,7 +87,7 @@ public class TokenService {
             Token existingToken = token.get();
             existingToken.setAmount(existingToken.getAmount() + token.get().getAmount());
             Token token1 = Token.builder()
-                    .userSeq(userSeq)
+                    .userSeq(marketTokenDto.getUserSeq())
                     .projectId(projectId)
                     .price(marketTokenDto.getPerPrice())
                     .title(escrow.getTitle())
