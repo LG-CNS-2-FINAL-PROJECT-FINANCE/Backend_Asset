@@ -74,7 +74,7 @@ public class TokenService {
     }
 
     @Transactional
-    public void getToken(String userSeq, String projectId, MarketTokenDto marketTokenDto) {
+    public void getToken(String projectId, String userSeq, MarketTokenDto marketTokenDto) {
         Optional<Token> token = tokenRepository.findByUserSeqAndProjectId(userSeq, projectId);
 
         Escrow escrow = escrowRepository.findByProjectId(projectId).orElseThrow(() -> new NotFound("해당 프로젝트를 찾을 수 없습니다."));
