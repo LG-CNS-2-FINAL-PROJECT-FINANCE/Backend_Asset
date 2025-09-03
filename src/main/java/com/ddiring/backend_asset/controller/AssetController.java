@@ -173,9 +173,9 @@ public class AssetController {
         return money;
     }
 
-    @PostMapping("/get/token")
-    public void getToken(@RequestBody MarketTokenDto marketTokenDto) {
-        tokenService.getToken(marketTokenDto);
+    @PostMapping("/get/token/{projectId}")
+    public void getToken(@PathVariable String projectId, @RequestBody MarketTokenDto marketTokenDto) {
+        tokenService.getToken(projectId, marketTokenDto);
     }
 
     @PostMapping("/distribution")

@@ -2,6 +2,7 @@ package com.ddiring.backend_asset.service;
 
 import com.ddiring.backend_asset.api.market.MarketTokenDto;
 import com.ddiring.backend_asset.common.exception.NotFound;
+import com.ddiring.backend_asset.common.util.GatewayRequestHeaderUtils;
 import com.ddiring.backend_asset.dto.MarketRefundDto;
 import com.ddiring.backend_asset.dto.MarketSellDto;
 import com.ddiring.backend_asset.dto.WalletTokenInfoDto;
@@ -73,10 +74,11 @@ public class TokenService {
     }
 
     @Transactional
-    public void getToken(MarketTokenDto marketTokenDto) {
-        Optional<Token> token = tokenRepository.findByUserSeqAndProjectId(marketTokenDto.getUserSeq(), marketTokenDto.getProjectId());
+    public void getToken(String projectId, MarketTokenDto marketTokenDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        Optional<Token> token = tokenRepository.findByUserSeqAndProjectId(userSeq, projectId);
 
-        Escrow escrow = escrowRepository.findByProjectId(marketTokenDto.getProjectId()).orElseThrow(() -> new NotFound("해당 프로젝트를 찾을 수 없습니다."));
+        Escrow escrow = escrowRepository.findByProjectId(projectId).orElseThrow(() -> new NotFound("해당 프로젝트를 찾을 수 없습니다."));
 
         if (token.isPresent()) {
             Token existingToken = token.get();
@@ -86,8 +88,8 @@ public class TokenService {
             Token existingToken = token.get();
             existingToken.setAmount(existingToken.getAmount() + token.get().getAmount());
             Token token1 = Token.builder()
-                    .userSeq(marketTokenDto.getUserSeq())
-                    .projectId(marketTokenDto.getProjectId())
+                    .userSeq(userSeq)
+                    .projectId(projectId)
                     .price(marketTokenDto.getPerPrice())
                     .title(escrow.getTitle())
                     .amount(marketTokenDto.getTokenQuantity())
