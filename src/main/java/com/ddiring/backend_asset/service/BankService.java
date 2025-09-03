@@ -307,7 +307,7 @@ public class BankService {
         Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
                 .orElseThrow(() -> new NotFound("판매자의 은행 계좌를 찾을 수 없습니다. userSeq: " + userSeq));
 
-        bank.setDeposit(bank.getDeposit() + (int)amount);
+        bank.setDeposit((int) (bank.getDeposit() + (int)amount - (amount * 0.03)));
         bankRepository.save(bank);
 
     }
