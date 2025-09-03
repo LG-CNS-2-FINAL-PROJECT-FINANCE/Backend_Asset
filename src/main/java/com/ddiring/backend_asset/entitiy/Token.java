@@ -18,13 +18,13 @@ public class Token {
     @Column(name = "token_seq", nullable = false)
     private Integer tokenSeq;
 
-    @Column(name = "user_seq", nullable = false)
+    @Column(name = "user_seq")
     private String userSeq;
 
-    @Column(name = "project_id", nullable = false)
+    @Column(name = "project_id")
     private String projectId;
 
-    @Column(name = "amount", nullable = false)
+    @Column(name = "amount")
     private Integer amount;
 
     @Column(name = "title")
