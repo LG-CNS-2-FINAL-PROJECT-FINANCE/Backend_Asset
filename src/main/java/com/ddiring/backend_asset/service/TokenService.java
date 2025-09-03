@@ -32,7 +32,7 @@ public class TokenService {
     // 2차거래 토큰 구매
     @Transactional
     public void addBuyToken(String userSeq, String projectId, Long amountToAdd) {
-        // 구매자가 해당 프로젝트의 토큰을 이미 보유하고 있는지 확인
+
         Optional<Token> tokenOptional = tokenRepository.findByUserSeqAndProjectId(userSeq, projectId);
 
         if (tokenOptional.isPresent()) {
@@ -41,7 +41,7 @@ public class TokenService {
             existingToken.setAmount(existingToken.getAmount() + amountToAdd.intValue());
             tokenRepository.save(existingToken);
         } else {
-            // 처음으로 토큰을 받는 경우, 새로운 Token 엔티티를 생성합니다.
+
             Token newToken = Token.builder()
                     .userSeq(userSeq)
                     .projectId(projectId)
@@ -85,15 +85,14 @@ public class TokenService {
         if (token.isPresent()) {
             Token existingToken = token.get();
 
-            // 1. 기존 수량이 null일 경우 0으로 처리 (NullPointerException 방지)
             long currentAmount = existingToken.getAmount() == null ? 0L : existingToken.getAmount();
 
-            // 2. DTO에서 새로운 수량을 가져와 더하기 (논리 오류 수정)
             long newAmount = currentAmount + marketTokenDto.getTokenQuantity();
 
             existingToken.setAmount((int) newAmount);
         }
         else {
+            log.info("유저 시퀀스 : {}", marketTokenDto.getUserSeq());
             Token newToken = Token.builder()
                     .userSeq(marketTokenDto.getUserSeq())
                     .projectId(projectId)
