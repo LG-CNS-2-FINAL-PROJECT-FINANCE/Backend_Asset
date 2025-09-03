@@ -74,14 +74,21 @@ public class TokenService {
     }
 
     @Transactional
-    public void getToken(String projectId,  MarketTokenDto marketTokenDto) {
+    public void getToken(String projectId, MarketTokenDto marketTokenDto) {
         Optional<Token> token = tokenRepository.findByUserSeqAndProjectId(marketTokenDto.getUserSeq(), projectId);
 
         Escrow escrow = escrowRepository.findByProjectId(projectId).orElseThrow(() -> new NotFound("해당 프로젝트를 찾을 수 없습니다."));
 
         if (token.isPresent()) {
             Token existingToken = token.get();
-            existingToken.setAmount(existingToken.getAmount() + token.get().getAmount());
+
+            // 1. 기존 수량이 null일 경우 0으로 처리 (NullPointerException 방지)
+            long currentAmount = existingToken.getAmount() == null ? 0L : existingToken.getAmount();
+
+            // 2. DTO에서 새로운 수량을 가져와 더하기 (논리 오류 수정)
+            long newAmount = currentAmount + marketTokenDto.getTokenQuantity();
+
+            existingToken.setAmount((int) newAmount);
         }
         else {
             Token newToken = Token.builder()
