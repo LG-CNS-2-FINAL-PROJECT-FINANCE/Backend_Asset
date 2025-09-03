@@ -2,6 +2,7 @@ package com.ddiring.backend_asset.controller;
 
 import com.ddiring.backend_asset.api.market.MarketDto;
 import com.ddiring.backend_asset.api.market.MarketTokenDto;
+import com.ddiring.backend_asset.api.product.DistributionDto;
 import com.ddiring.backend_asset.api.product.ProductDto;
 import com.ddiring.backend_asset.common.dto.ApiResponseDto;
 import com.ddiring.backend_asset.common.util.GatewayRequestHeaderUtils;
@@ -175,5 +176,10 @@ public class AssetController {
     @PostMapping("/get/token")
     public void getToken(@RequestBody MarketTokenDto marketTokenDto) {
         tokenService.getToken(marketTokenDto);
+    }
+
+    @PostMapping("/distribution")
+    public void getDistribution(@RequestBody DistributionDto distributionDto) {
+
     }
 }
