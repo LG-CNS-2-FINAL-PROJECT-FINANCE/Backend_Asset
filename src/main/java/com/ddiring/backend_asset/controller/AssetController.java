@@ -180,6 +180,6 @@ public class AssetController {
 
     @PostMapping("/distribution")
     public void getDistribution(@RequestBody DistributionDto distributionDto) {
-
+        bankService.getDistribution(distributionDto);
     }
 }

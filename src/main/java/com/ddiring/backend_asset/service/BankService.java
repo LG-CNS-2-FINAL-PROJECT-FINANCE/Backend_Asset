@@ -3,6 +3,7 @@ package com.ddiring.backend_asset.service;
 import com.ddiring.backend_asset.api.escrow.EscrowClient;
 import com.ddiring.backend_asset.api.escrow.EscrowDto;
 import com.ddiring.backend_asset.api.market.MarketDto;
+import com.ddiring.backend_asset.api.product.DistributionDto;
 import com.ddiring.backend_asset.api.product.ProductDto;
 import com.ddiring.backend_asset.common.exception.BadParameter;
 import com.ddiring.backend_asset.common.exception.NotFound;
@@ -344,6 +345,20 @@ public class BankService {
         return money;
     }
 
-//    @Transactional
-//    public
+    @Transactional
+    public void getDistribution(DistributionDto distributionDto) {
+        List<Token> token = tokenRepository.findByProjectId(distributionDto.getProjectId());
+        Integer perPrice = 0;
+        Integer allAmount = 0;
+
+        for (Token token1 : token) {
+            allAmount = allAmount + token1.getAmount();
+        }
+        perPrice = distributionDto.getDistributionAmount() / allAmount;
+
+        for (Token token2 : token) {
+            Bank bank = bankRepository.findByUserSeq(token2.getUserSeq()).orElseThrow(() -> new NotFound("음슴"));
+            bank.setDeposit(bank.getDeposit() + (token2.getAmount() * perPrice));
+        }
+    }
 }
