@@ -269,16 +269,16 @@ public class BankService {
 
     @Transactional
     public void setRefundToken(String userSeq, String role, MarketRefundDto marketRefundDto) {
-        Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
-                .orElseThrow(() -> new NotFound("누구?"));
-        Escrow escrow = escrowRepository.findByProjectId(marketRefundDto.getProjectId())
-                .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
-        Token token = tokenRepository.findByUserSeqAndProjectId(userSeq, marketRefundDto.getProjectId()).orElseThrow(() -> new NotFound("아니양"));
+
         if (marketRefundDto.getOrderType() == 0) {
+            Token token = tokenRepository.findByUserSeqAndProjectId(userSeq, marketRefundDto.getProjectId()).orElseThrow(() -> new NotFound("아니양"));
             token.setAmount(marketRefundDto.getRefundPrice());
         }
         else if (marketRefundDto.getOrderType() == 1) {
-
+            Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
+                    .orElseThrow(() -> new NotFound("누구?"));
+            Escrow escrow = escrowRepository.findByProjectId(marketRefundDto.getProjectId())
+                    .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
             EscrowDto escrowDto = new EscrowDto();
             escrowDto.setAccount(escrow.getAccount());
             escrowDto.setUserSeq(userSeq);
