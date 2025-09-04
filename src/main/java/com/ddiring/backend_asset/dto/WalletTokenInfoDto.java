@@ -11,12 +11,14 @@ import java.math.BigDecimal;
 @Getter
 @NoArgsConstructor
 public class WalletTokenInfoDto {
-    private String projectId;
+    private String title;
     private Integer amount;
     private Integer price;
+    private Integer currentPrice;
     public WalletTokenInfoDto(Token token) {
-        this.projectId = token.getProjectId();
+        this.title = token.getTitle();
         this.amount = token.getAmount();
         this.price = token.getPrice();
+        this.currentPrice = token.getCurrentPrice();
     }
 }

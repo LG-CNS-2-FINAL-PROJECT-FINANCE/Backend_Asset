@@ -1,4 +1,4 @@
-package com.ddiring.backend_asset.event.cosumer;
+package com.ddiring.backend_asset.event.consumer;
 
 import com.ddiring.backend_asset.common.exception.NotFound;
 import com.ddiring.backend_asset.common.util.GatewayRequestHeaderUtils;
@@ -12,9 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 
 @Slf4j

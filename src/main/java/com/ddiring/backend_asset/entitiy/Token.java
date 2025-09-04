@@ -33,6 +33,9 @@ public class Token {
     @Column(name = "price")
     private Integer price;
 
+    @Column(name = "current_price") // ✨ 실시간 현재가 컬럼 추가
+    private Integer currentPrice;
+
     @Column(name = "created_id")
     private Integer createdId;
 
@@ -46,12 +49,13 @@ public class Token {
     private Integer updatedAt;
 
     @Builder
-    public Token(String userSeq, String projectId, Integer amount,String title, Integer price, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
+    public Token(String userSeq, String projectId, Integer amount, String title, Integer price, Integer currentPrice, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
         this.projectId = projectId;
         this.userSeq = userSeq;
         this.amount = amount;
         this.title = title;
         this.price = price;
+        this.currentPrice = currentPrice;
         this.createdId = createdId;
         this.createdAt = createdAt;
         this.updatedId = updatedId;

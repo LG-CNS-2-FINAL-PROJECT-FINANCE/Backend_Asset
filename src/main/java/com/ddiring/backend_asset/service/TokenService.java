@@ -14,10 +14,13 @@ import com.ddiring.backend_asset.repository.TokenRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -28,6 +31,7 @@ import java.util.stream.Collectors;
 public class TokenService {
     private final TokenRepository tokenRepository;
     private final EscrowRepository escrowRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     // 2차거래 토큰 구매
     @Transactional
@@ -98,5 +102,26 @@ public class TokenService {
 
             tokenRepository.save(newToken);
         }
+    }
+
+    @Transactional
+    public void updateTokenCurrentPrice(String projectId, Integer newPrice) {
+        List<Token> tokens = tokenRepository.findByProjectId(projectId);
+        if (tokens.isEmpty()) {
+            log.warn("가격 업데이트 대상 토큰을 찾을 수 없습니다. projectId={}", projectId);
+            return;
+        }
+
+        tokens.forEach(token -> token.setCurrentPrice(newPrice));
+        tokenRepository.saveAll(tokens);
+        log.info("projectId {}의 토큰 {}개 현재가를 {}원으로 업데이트했습니다.", projectId, tokens.size(), newPrice);
+
+        String destination = "/topic/price/" + projectId;
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("projectId", projectId);
+        payload.put("currentPrice", newPrice);
+
+        messagingTemplate.convertAndSend(destination, payload);
+        log.info("웹소켓 전송 완료: destination={}, payload={}", destination, payload);
     }
 }
