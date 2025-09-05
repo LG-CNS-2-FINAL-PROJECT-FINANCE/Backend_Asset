@@ -24,6 +24,10 @@ public class Wallet {
     @Column(name = "created_id")
     private Integer createdId;
 
+    @Lob
+    @Column(name = "private_key")
+    private byte[] privateKey;
+
     @Column(name = "created_at")
     private Integer createdAt;
 
@@ -34,9 +38,10 @@ public class Wallet {
     private Integer updatedAt;
 
     @Builder
-    public Wallet(String userSeq, String walletAddress, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
+    public Wallet(String userSeq, String walletAddress, byte[] privateKey, Integer createdId, Integer createdAt, Integer updatedId, Integer updatedAt) {
         this.userSeq = userSeq;
         this.walletAddress = walletAddress;
+        this.privateKey = privateKey;
         this.createdId = createdId;
         this.createdAt = createdAt;
         this.updatedId = updatedId;

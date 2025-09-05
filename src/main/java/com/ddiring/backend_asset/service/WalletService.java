@@ -24,8 +24,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class WalletService {
     private final WalletRepository walletRepository;
-    private final TokenRepository tokenRepository; // TokenRepository 주입
-    private final ExternalPriceApi externalPriceApi; // 토큰 가격 조회용 외부 API
+    private final CryptoService  cryptoService;
 
     // Web3j 인스턴스 (이더리움 노드 URL에 맞게 설정)
     // "YOUR_INFURA_PROJECT_ID"를 실제 프로젝트 ID로 교체해야 합니다.
@@ -40,7 +39,7 @@ public class WalletService {
 
     // 새 이더리움 지갑을 생성하고 주소와 개인 키를 반환하는 메소드
     @Transactional
-    public CreateWalletAddressDto createWalletAndReturnKeys(String userSeq) {
+    public void createWalletAndReturnKeys(String userSeq) {
 
         Optional<Wallet> userWallet = walletRepository.findByUserSeq(userSeq);
         if (userWallet.isPresent()) {
@@ -58,17 +57,16 @@ public class WalletService {
             // 3. 지갑 주소와 개인 키 추출
             String walletAddress = credentials.getAddress();
             String privateKey = Numeric.toHexStringWithPrefix(credentials.getEcKeyPair().getPrivateKey());
+            byte[] encryptedPrivateKey = cryptoService.encrypt(privateKey);
 
             // 4. 지갑 주소를 DB에 저장 (개인 키는 저장하지 않음)
             Wallet wallet = Wallet.builder()
                     .userSeq(userSeq)
                     .walletAddress(walletAddress)
+                    .privateKey(encryptedPrivateKey)
                     .build();
 
             walletRepository.save(wallet);
-
-            // 5. 지갑 주소와 개인 키를 DTO에 담아 반환
-            return new CreateWalletAddressDto(walletAddress, privateKey);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -83,5 +81,19 @@ public class WalletService {
             throw new BadParameter("지갑 주소가 없습니다");
         }
         return userWallet.get().getWalletAddress();
+    }
+
+    @Transactional(readOnly = true)
+    public String getDecryptedPrivateKey(String userSeq) {
+        Wallet wallet = walletRepository.findByUserSeq(userSeq)
+                .orElseThrow(() -> new BadParameter("지갑을 찾을 수 없습니다."));
+        byte[] encryptedKey = wallet.getPrivateKey();
+        if (encryptedKey == null) throw new BadParameter("저장된 개인키가 없습니다.");
+        try {
+            return cryptoService.decrypt(encryptedKey);
+        } catch (Exception e) {
+            log.error("개인키 복호화 실패. userSeq: {}", userSeq, e);
+            throw new RuntimeException("내부 보안 처리 중 오류가 발생했습니다.");
+        }
     }
 }

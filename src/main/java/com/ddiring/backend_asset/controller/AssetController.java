@@ -59,10 +59,10 @@ public class AssetController {
     }
 
     @PostMapping("/wallet")
-    public ApiResponseDto<CreateWalletAddressDto> createWallet() {
+    public ApiResponseDto<String> createWallet() {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
-        CreateWalletAddressDto wallet = walletService.createWalletAndReturnKeys(userSeq);
-        return ApiResponseDto.createOk(wallet);
+        walletService.createWalletAndReturnKeys(userSeq);
+        return ApiResponseDto.createOk("지갑 생성 완");
     }
 
     @GetMapping("/wallet/search")
@@ -181,5 +181,12 @@ public class AssetController {
     @PostMapping("/distribution")
     public void getDistribution(@RequestBody DistributionDto distributionDto) {
         bankService.getDistribution(distributionDto);
+    }
+
+    @GetMapping("/wallet/private-key")
+    public ApiResponseDto<String> getDecryptedPrivateKey() {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String privateKey = walletService.getDecryptedPrivateKey(userSeq);
+        return ApiResponseDto.createOk(privateKey);
     }
 }
