@@ -1,6 +1,7 @@
 package com.ddiring.backend_asset.service;
 
 import com.ddiring.backend_asset.api.market.MarketTokenDto;
+import com.ddiring.backend_asset.common.exception.BadParameter;
 import com.ddiring.backend_asset.common.exception.NotFound;
 import com.ddiring.backend_asset.common.util.GatewayRequestHeaderUtils;
 import com.ddiring.backend_asset.dto.MarketRefundDto;
@@ -62,6 +63,9 @@ public class TokenService {
         Token token = tokenRepository.findByUserSeqAndProjectId(userSeq, marketSellDto.getProjectId())
                 .orElseThrow(() -> new NotFound("해당 프로젝트의 토큰을 찾을 수 없습니다."));
 
+        if (token.getAmount() < marketSellDto.getSellToken()) {
+            throw new BadParameter("토큰 없");
+        }
         token.setAmount(token.getAmount() - marketSellDto.getSellToken());
         tokenRepository.save(token);
         return token.getAmount();
@@ -112,8 +116,13 @@ public class TokenService {
             return;
         }
 
-        tokens.forEach(token -> token.setCurrentPrice(newPrice));
+        tokens.forEach(token -> {
+            token.setCurrentPrice(newPrice);
+            token.setPrice(token.getAmount() * newPrice);
+        });
+
         tokenRepository.saveAll(tokens);
+
         log.info("projectId {}의 토큰 {}개 현재가를 {}원으로 업데이트했습니다.", projectId, tokens.size(), newPrice);
 
         String destination = "/topic/price/" + projectId;

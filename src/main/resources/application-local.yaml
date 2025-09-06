@@ -29,6 +29,7 @@ spring:
       properties:
         springJsonTrustedPackages: \"*\"
         springJsonUseTypeHeaders: false
+
     producer:
       keySerializer: org.apache.kafka.common.serialization.StringSerializer
       valueSerializer: org.springframework.kafka.support.serializer.JsonSerializer

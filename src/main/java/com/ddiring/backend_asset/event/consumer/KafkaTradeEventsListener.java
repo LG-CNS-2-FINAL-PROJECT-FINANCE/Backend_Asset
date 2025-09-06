@@ -37,9 +37,10 @@ public class KafkaTradeEventsListener {
      * TRADE 토픽에서 발생하는 모든 이벤트를 수신하여 처리합니다.
      */
     @KafkaListener(topics = "TRADE", groupId = "asset-service-group")
-    public void listenTradeEvents(Map<String, Object> messageMap) {
+    public void listenTradeEvents(String message) { // 파라미터를 String으로 변경
         try {
-//            Map<String, Object> messageMap = objectMapper.readValue(message, new TypeReference<>() {});
+            // ObjectMapper를 사용하여 String 메시지를 Map으로 직접 변환
+            Map<String, Object> messageMap = objectMapper.readValue(message, new TypeReference<>() {});
             String eventType = (String) messageMap.get("eventType");
             if (eventType == null) {
                 log.warn("eventType 필드를 찾을 수 없습니다: {}", messageMap);
@@ -56,7 +57,7 @@ public class KafkaTradeEventsListener {
                     TradeFailedEvent failedEvent = objectMapper.convertValue(messageMap, TradeFailedEvent.class);
                     handleTradeFailed(failedEvent);
                     break;
-                case "TRADE.PRICE.UPDATED": // ✨ 가격 업데이트 이벤트 처리 추가
+                case "TRADE.PRICE.UPDATED":
                     TradePriceUpdateEvent priceUpdateEvent = objectMapper.convertValue(messageMap, TradePriceUpdateEvent.class);
                     handleTradePriceUpdate(priceUpdateEvent);
                     break;
@@ -65,7 +66,7 @@ public class KafkaTradeEventsListener {
                     break;
             }
         } catch (Exception e) {
-            log.error("Kafka 메시지 처리 중 오류 발생: {}", messageMap, e);
+            log.error("Kafka 메시지 처리 중 오류 발생: {}", message, e); // 에러 로그에 messageMap 대신 message 출력
         }
     }
 
@@ -126,9 +127,7 @@ public class KafkaTradeEventsListener {
         }
     }
 
-    /**
-     * ✨ 토큰 현재가 업데이트 이벤트를 처리합니다.
-     */
+
     public void handleTradePriceUpdate(TradePriceUpdateEvent event) {
         TradePriceUpdateEvent.Payload payload = event.getPayload();
         if (payload != null && payload.getProjectId() != null && payload.getPricePerToken() != null) {
