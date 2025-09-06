@@ -12,4 +12,9 @@ service:
   escrow:
     url: http://localhost:8084  # TODO: Asset 서비스 URL 수정
   market:
-    url: http://localhost:8086  # TODO: Asset 서비스 URL 수정    
+    url: http://localhost:8086  # TODO: Asset 서비스 URL 수정
+
+encryption:
+  master:
+    # 1단계에서 생성한 Base64 인코딩된 키로 교체합니다.
+    key: "CppjKe/vlomxodmWvKE4GY2coaxCPm38Aor/DPtni7Y="
