@@ -24,13 +24,13 @@ public class KafkaInvestmentEventsListener {
     private final EscrowRepository escrowRepository;
 
     @KafkaListener(topics = "INVESTMENT", groupId = "asset-service-group")
-    public void listenInvestmentEvents(String message) {
+    public void listenInvestmentEvents(Map<String, Object> messageMap) {
         try {
-            Map<String, Object> messageMap = objectMapper.readValue(message, new TypeReference<>() {
-            });
+//            Map<String, Object> messageMap = objectMapper.readValue(message, new TypeReference<>() {
+//            });
             String eventType = (String) messageMap.get("eventType");
             if (eventType == null) {
-                log.warn("eventType 필드를 찾을 수 없습니다: {}", message);
+                log.warn("eventType 필드를 찾을 수 없습니다: {}", messageMap);
                 return;
             }
 
@@ -47,7 +47,7 @@ public class KafkaInvestmentEventsListener {
                     break;
             }
         } catch (Exception e) {
-            log.error("투자 이벤트 처리 실패: {}", message, e);
+            log.error("투자 이벤트 처리 실패: {}", messageMap, e);
         }
     }
 
