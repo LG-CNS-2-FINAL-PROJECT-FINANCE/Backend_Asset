@@ -88,7 +88,7 @@ public class KafkaTradeEventsListener {
             TradeInfoResponseDto tradeInfo = response.getData();
 
             // 구매자에게 토큰 추가, 판매자에게 대금 입금
-            tokenService.addBuyToken(buyerWallet.getUserSeq(), payload.getProjectId(), payload.getBuyerTokenAmount());
+            tokenService.addBuyToken(buyerWallet.getUserSeq(), payload.getProjectId(), payload.getBuyerTokenAmount(), tradeInfo.getPrice());
             bankService.depositForTrade(sellerWallet.getUserSeq(), "USER", tradeInfo.getPrice());
 
         } catch (Exception e) {
@@ -110,7 +110,7 @@ public class KafkaTradeEventsListener {
             TradeInfoResponseDto tradeInfo = response.getData();
 
             // 판매자에게 토큰 원복, 구매자에게 대금 환불
-            tokenService.addBuyToken(tradeInfo.getSellerUserSeq(), tradeInfo.getProjectId(), (long) tradeInfo.getTokenQuantity());
+            tokenService.addBuyToken(tradeInfo.getSellerUserSeq(), tradeInfo.getProjectId(), (long) tradeInfo.getTokenQuantity(), tradeInfo.getPrice());
 
             MarketRefundDto marketRefundDto = MarketRefundDto.builder()
                     .refundPrice(tradeInfo.getPrice())

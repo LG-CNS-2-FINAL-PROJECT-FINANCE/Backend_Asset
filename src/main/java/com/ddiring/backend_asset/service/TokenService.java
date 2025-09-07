@@ -36,7 +36,7 @@ public class TokenService {
 
     // 2차거래 토큰 구매
     @Transactional
-    public void addBuyToken(String userSeq, String projectId, Long amountToAdd) {
+    public void addBuyToken(String userSeq, String projectId, Long amountToAdd , Integer price) {
 
         Optional<Token> tokenOptional = tokenRepository.findByUserSeqAndProjectId(userSeq, projectId);
 
@@ -45,11 +45,15 @@ public class TokenService {
             Token existingToken = tokenOptional.get();
             existingToken.setAmount(existingToken.getAmount() + amountToAdd.intValue());
             tokenRepository.save(existingToken);
+            existingToken.setPrice(existingToken.getAmount() * (int) (price / amountToAdd));
+            tokenRepository.save(existingToken);
         } else {
 
             Token newToken = Token.builder()
                     .userSeq(userSeq)
                     .projectId(projectId)
+                    .price(price)
+                    .currentPrice((int) (price / amountToAdd))
                     .amount(amountToAdd.intValue())
                     .build();
             tokenRepository.save(newToken);
@@ -99,7 +103,8 @@ public class TokenService {
             Token newToken = Token.builder()
                     .userSeq(marketTokenDto.getUserSeq())
                     .projectId(projectId)
-                    .price(marketTokenDto.getPerPrice())
+                    .price(marketTokenDto.getPerPrice() * marketTokenDto.getTokenQuantity())
+                    .currentPrice(marketTokenDto.getPerPrice())
                     .title(escrow.getTitle())
                     .amount(marketTokenDto.getTokenQuantity())
                     .build();
