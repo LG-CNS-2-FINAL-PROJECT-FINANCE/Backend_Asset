@@ -292,7 +292,7 @@ public class BankService {
             escrowDto.setAmount((int) (marketRefundDto.getRefundPrice() + (marketRefundDto.getRefundPrice() * 0.03)));
 
 //            escrowClient.escrowDeposit(escrowDto);
-            bank.setDeposit((int) (bank.getDeposit() + marketRefundDto.getRefundPrice() + marketRefundDto.getRefundPrice()));
+            bank.setDeposit((int) (bank.getDeposit() + marketRefundDto.getRefundPrice() + (marketRefundDto.getRefundPrice() * 0.03)));
         }
 
     }
