@@ -234,7 +234,7 @@ public class BankService {
                 .amount(marketDto.getPrice())
                 .build();
 
-//        escrowClient.escrowWithdrawal(escrowDto);
+        escrowClient.escrowWithdrawal(escrowDto);
 
         bank.setDeposit(bank.getDeposit() + marketDto.getPrice());
         bankRepository.save(bank);
@@ -260,7 +260,7 @@ public class BankService {
         escrowDto.setTransType(marketBuyDto.getTransType());
         escrowDto.setAmount((int) (marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice() * 0.03)));
 
-//        escrowClient.escrowDeposit(escrowDto);
+        escrowClient.escrowDeposit(escrowDto);
 
         bank.setDeposit((int) (bank.getDeposit() - (marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice() * 0.03))));
 
@@ -291,7 +291,7 @@ public class BankService {
             escrowDto.setTransType(-1);
             escrowDto.setAmount((int) (marketRefundDto.getRefundPrice() + (marketRefundDto.getRefundPrice() * 0.03)));
 
-//            escrowClient.escrowDeposit(escrowDto);
+            escrowClient.escrowDeposit(escrowDto);
             bank.setDeposit((int) (bank.getDeposit() + marketRefundDto.getRefundPrice() + (marketRefundDto.getRefundPrice() * 0.03)));
         }
 
@@ -333,7 +333,7 @@ public class BankService {
         escrowDto.setTransType(marketBuyDto.getTransType());
         escrowDto.setAmount(marketBuyDto.getBuyPrice());
 
-//        escrowClient.escrowDeposit(escrowDto);
+         escrowClient.escrowDeposit(escrowDto);
 
         bank.setDeposit(bank.getDeposit() - marketBuyDto.getBuyPrice());
 
