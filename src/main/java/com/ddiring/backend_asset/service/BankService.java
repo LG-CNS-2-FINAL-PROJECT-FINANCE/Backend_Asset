@@ -366,4 +366,10 @@ public class BankService {
             bank.setDeposit(bank.getDeposit() + (token2.getAmount() * perPrice));
         }
     }
+    @Transactional(readOnly = true)
+    public boolean checkUserBalance(String userSeq, String role, Integer price) {
+        Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
+                .orElseThrow(() -> new NotFound("사용자 계좌를 찾을 수 없습니다."));
+        return bank.getDeposit() >= (price + (price * 0.03));
+    }
 }

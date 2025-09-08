@@ -12,11 +12,11 @@ import com.ddiring.backend_asset.entitiy.Token;
 import com.ddiring.backend_asset.entitiy.Wallet;
 import com.ddiring.backend_asset.repository.EscrowRepository;
 import com.ddiring.backend_asset.repository.TokenRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.HashMap;
@@ -137,5 +137,11 @@ public class TokenService {
 
         messagingTemplate.convertAndSend(destination, payload);
         log.info("웹소켓 전송 완료: destination={}, payload={}", destination, payload);
+    }
+    @Transactional(readOnly = true)
+    public boolean checkUserToken(String userSeq, String projectId, Integer requiredAmount) {
+        Token token = tokenRepository.findByUserSeqAndProjectId(userSeq, projectId)
+                .orElseThrow(() -> new NotFound("보유한 토큰이 없습니다."));
+        return token.getAmount() >= requiredAmount;
     }
 }
