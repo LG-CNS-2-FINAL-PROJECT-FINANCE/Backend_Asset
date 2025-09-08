@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "escrowClient", url = "http://localhost:8084")
+@FeignClient(name = "escrowClient", url = "${escrow.base-url}")
 public interface EscrowClient {
 
     @PostMapping("/api/escrow/deposit")

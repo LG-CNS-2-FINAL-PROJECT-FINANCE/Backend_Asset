@@ -5,6 +5,7 @@ import com.ddiring.backend_asset.api.market.MarketTokenDto;
 import com.ddiring.backend_asset.api.product.DistributionDto;
 import com.ddiring.backend_asset.api.product.ProductDto;
 import com.ddiring.backend_asset.common.dto.ApiResponseDto;
+import com.ddiring.backend_asset.common.util.GatewayRequestHeaderUtils;
 import com.ddiring.backend_asset.dto.*;
 import com.ddiring.backend_asset.service.BankService;
 import com.ddiring.backend_asset.service.TokenService;
@@ -25,65 +26,71 @@ public class AssetController {
     private final TokenService tokenService;
 
     @PostMapping("/account") //뱅크 생성
-    public ApiResponseDto<String> createBank(@RequestHeader("userSeq") String userSeq,
-                                             @RequestHeader("role") String role) {
+    public ApiResponseDto<String> createBank() {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
         bankService.createBank(userSeq, role);
         return ApiResponseDto.createOk("물주 생성 굿");
     }
 
     @GetMapping("/account/search")
-    public ApiResponseDto<BankSearchDto> bankSearch(@RequestHeader("userSeq") String userSeq,
-                                                    @RequestHeader("role") String role) {
+    public ApiResponseDto<BankSearchDto> bankSearch() {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
         BankSearchDto history = bankService.bankSearch(userSeq, role);
         return ApiResponseDto.createOk(history);
     }
 
     @PostMapping("/account/deposit") //입금
-    public ApiResponseDto<Integer> deposit(@RequestHeader("userSeq") String userSeq,
-                                           @RequestHeader("role") String role,
-                                           @RequestBody DepositDto depositDto) {
+    public ApiResponseDto<Integer> deposit(@RequestBody DepositDto depositDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
         bankService.deposit(userSeq, role, depositDto);
         return ApiResponseDto.createOk(depositDto.getPrice());
     }
 
     @PostMapping("/account/withdrawal")
-    public ApiResponseDto<Integer> withdrawal(@RequestHeader("userSeq") String userSeq,
-                                              @RequestHeader("role") String role,
-                                              @RequestBody WithdrawalDto withdrawalDto) {
+    public ApiResponseDto<Integer> withdrawal(@RequestBody WithdrawalDto withdrawalDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
         bankService.withdrawal(userSeq, role, withdrawalDto);
         return ApiResponseDto.createOk(withdrawalDto.getWithdrawal());
     }
 
     @PostMapping("/wallet")
-    public ApiResponseDto<String> createWallet(@RequestHeader("userSeq") String userSeq) {
+    public ApiResponseDto<String> createWallet() {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         walletService.createWalletAndReturnKeys(userSeq);
         return ApiResponseDto.createOk("지갑 생성 완");
     }
 
     @GetMapping("/wallet/search")
-    public ApiResponseDto<String> getWalletAddress(@RequestHeader("userSeq") String userSeq) {
-        String walletTokenInfoList = walletService.getWalletAddress(userSeq);
-        return ApiResponseDto.createOk(walletTokenInfoList);
+    public ApiResponseDto<String> getWalletAddress() {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String walletAddress = walletService.getWalletAddress(userSeq);
+        return ApiResponseDto.createOk(walletAddress);
     }
 
     @GetMapping("/wallet-token/search")
-    public ApiResponseDto<List<WalletTokenInfoDto>> getTokenAmount(@RequestHeader("userSeq") String userSeq) {
+    public ApiResponseDto<List<WalletTokenInfoDto>> getTokenAmount() {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         List<WalletTokenInfoDto> walletTokenInfoList = tokenService.getTokenInfo(userSeq);
         return ApiResponseDto.createOk(walletTokenInfoList);
     }
 
 
     @GetMapping("/history/{moneyType}")
-    public ApiResponseDto<List<MoneyMoveDto>> history(@RequestHeader("userSeq") String userSeq,
-                                                      @RequestHeader("role") String role,
-                                                      @PathVariable Integer moneyType) {
+    public ApiResponseDto<List<MoneyMoveDto>> history(@PathVariable Integer moneyType) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
         List<MoneyMoveDto> history = bankService.moneyMove(userSeq, role, moneyType);
         return ApiResponseDto.createOk(history);
     }
 
     @GetMapping("/history")
-    public ApiResponseDto<List<MoneyMoveDto>> allhistory(@RequestHeader("userSeq") String userSeq,
-                                                         @RequestHeader("role") String role) {
+    public ApiResponseDto<List<MoneyMoveDto>> allhistory() {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
         List<MoneyMoveDto> history = bankService.allMoneyMove(userSeq, role);
         return ApiResponseDto.createOk(history);
     }
@@ -95,17 +102,17 @@ public class AssetController {
     }
 
     @PostMapping("/escrow/deposit")
-    public ApiResponseDto<Integer> depositToEscrow(@RequestHeader("userSeq") String userSeq,
-                                                   @RequestHeader("role") String role,
-                                                   @RequestBody MarketDto marketDto) {
+    public ApiResponseDto<Integer> depositToEscrow(@RequestBody MarketDto marketDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
         Integer money = bankService.depositToEscrow(userSeq, role, marketDto);
         return ApiResponseDto.createOk(money);
     }
 
     @PostMapping("/escrow/withdrawal")
-    public ApiResponseDto<Integer> withdrawalFromEscrow(@RequestHeader("userSeq") String userSeq,
-                                                        @RequestHeader("role") String role,
-                                                        @RequestBody MarketDto marketDto) {
+    public ApiResponseDto<Integer> withdrawalFromEscrow(@RequestBody MarketDto marketDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
         Integer money = bankService.withdrawalFromEscrow(userSeq, role, marketDto);
         return ApiResponseDto.createOk(money);
     }
@@ -117,24 +124,24 @@ public class AssetController {
     }
 
     @PostMapping("/market/buy")
-    public ApiResponseDto<String> marketBuy(@RequestHeader("userSeq") String userSeq,
-                                            @RequestHeader("role") String role,
-                                            @RequestBody MarketBuyDto marketBuyDto) {
+    public ApiResponseDto<String> marketBuy(@RequestBody MarketBuyDto marketBuyDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
         bankService.setBuyPrice(userSeq, role, marketBuyDto);
         return ApiResponseDto.createOk("success");
     }
 
     @PostMapping("/market/sell")
-    public ApiResponseDto<String> marketSell(@RequestHeader("userSeq") String userSeq,
-                                             @RequestBody MarketSellDto marketSellDto) {
+    public ApiResponseDto<String> marketSell(@RequestBody MarketSellDto marketSellDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         tokenService.setSellToken(userSeq, marketSellDto);
         return ApiResponseDto.createOk("success");
     }
 
     @PostMapping("/market/refund")
-    public ApiResponseDto<String> marketRefund(@RequestHeader("userSeq") String userSeq,
-                                               @RequestHeader("role") String role,
-                                               @RequestBody MarketRefundDto marketRefundDto) {
+    public ApiResponseDto<String> marketRefund(@RequestBody MarketRefundDto marketRefundDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
         bankService.setRefundToken(userSeq, role, marketRefundDto);
         return ApiResponseDto.createOk("success");
     }
@@ -145,17 +152,17 @@ public class AssetController {
     }
 
     @PostMapping("/market/profit")
-    public ApiResponseDto<String> marketProfit(@RequestHeader("userSeq") String userSeq,
-                                               @RequestHeader("role") String role,
-                                               @RequestBody MarketBuyDto marketBuyDto) {
+    public ApiResponseDto<String> marketProfit(@RequestBody MarketBuyDto marketBuyDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
         bankService.setprofit(userSeq, role, marketBuyDto);
         return ApiResponseDto.createOk("success");
     }
 
     @PostMapping("/all")
-    public Integer getAllMoney(@RequestHeader("userSeq") String userSeq,
-                               @RequestHeader("role") String role,
-                               @RequestBody AssetAllMoneyDto assetAllMoneyDto) {
+    public Integer getAllMoney(@RequestBody AssetAllMoneyDto assetAllMoneyDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
         return bankService.getAllMoney(userSeq, role, assetAllMoneyDto);
     }
 
@@ -170,21 +177,24 @@ public class AssetController {
     }
 
     @GetMapping("/wallet/private-key")
-    public ApiResponseDto<String> getDecryptedPrivateKey(@RequestHeader("userSeq") String userSeq) {
+    public ApiResponseDto<String> getDecryptedPrivateKey() {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         String privateKey = walletService.getDecryptedPrivateKey(userSeq);
         return ApiResponseDto.createOk(privateKey);
     }
 
     @PostMapping("/market/check-balance")
-    public ApiResponseDto<Boolean> checkBalance(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role, @RequestBody MarketBuyDto marketBuyDto) {
+    public ApiResponseDto<Boolean> checkBalance(@RequestBody MarketBuyDto marketBuyDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
         boolean hasEnoughBalance = bankService.checkUserBalance(userSeq, role, marketBuyDto.getBuyPrice());
         return ApiResponseDto.createOk(hasEnoughBalance);
     }
 
     @PostMapping("/market/check-token")
-    public ApiResponseDto<Boolean> checkToken(@RequestHeader("userSeq") String userSeq, @RequestBody MarketSellDto marketSellDto) {
+    public ApiResponseDto<Boolean> checkToken(@RequestBody MarketSellDto marketSellDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
         boolean hasEnoughTokens = tokenService.checkUserToken(userSeq, marketSellDto.getProjectId(), marketSellDto.getSellToken());
         return ApiResponseDto.createOk(hasEnoughTokens);
     }
 }
-

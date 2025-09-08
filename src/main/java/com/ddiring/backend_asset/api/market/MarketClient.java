@@ -5,7 +5,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "marketClient", url = "http://localhost:8086") // Eureka 등에 등록된 Market 서비스 이름
+@FeignClient(name = "marketClient", url = "${market.base-url}") // Eureka 등에 등록된 Market 서비스 이름
 public interface MarketClient {
 
     @GetMapping("/api/market/trade/{tradeId}")
