@@ -174,5 +174,17 @@ public class AssetController {
         String privateKey = walletService.getDecryptedPrivateKey(userSeq);
         return ApiResponseDto.createOk(privateKey);
     }
+
+    @PostMapping("/market/check-balance")
+    public ApiResponseDto<Boolean> checkBalance(@RequestHeader("userSeq") String userSeq, @RequestHeader("role") String role, @RequestBody MarketBuyDto marketBuyDto) {
+        boolean hasEnoughBalance = bankService.checkUserBalance(userSeq, role, marketBuyDto.getBuyPrice());
+        return ApiResponseDto.createOk(hasEnoughBalance);
+    }
+
+    @PostMapping("/market/check-token")
+    public ApiResponseDto<Boolean> checkToken(@RequestHeader("userSeq") String userSeq, @RequestBody MarketSellDto marketSellDto) {
+        boolean hasEnoughTokens = tokenService.checkUserToken(userSeq, marketSellDto.getProjectId(), marketSellDto.getSellToken());
+        return ApiResponseDto.createOk(hasEnoughTokens);
+    }
 }
 
