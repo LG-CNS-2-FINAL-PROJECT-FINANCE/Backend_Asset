@@ -372,8 +372,7 @@ public class BankService {
         }
         List<Token> tokens = tokenRepository.findByProjectId(distributionDto.getProjectId());
         if (tokens.isEmpty()) {
-            log.warn("배분할 토큰이 존재하지 않습니다. projectId={}", distributionDto.getProjectId());
-            return;
+            throw new NotFound("배분할 토큰이 존재하지 않습니다.");
         }
         Integer perPrice = 0;
         Integer allAmount = 0;
@@ -383,13 +382,11 @@ public class BankService {
             }
         }
         if (allAmount == 0) {
-            log.warn("총 토큰 수량이 0이므로 배분을 진행할 수 없습니다. projectId={}", distributionDto.getProjectId());
-            return;
+            throw new NotFound("총 토큰 수량이 0이므로 배분을 진행할 수 없습니다.");
         }
 
         if (distributionDto.getDistributionAmount() == null || distributionDto.getDistributionAmount() <= 0) {
-            log.warn("배분할 금액이 없습니다. amount={}", distributionDto.getDistributionAmount());
-            return;
+            throw new BadParameter("배분할 금액이 없습니다.");
         }
 
         perPrice = distributionDto.getDistributionAmount() / allAmount;
