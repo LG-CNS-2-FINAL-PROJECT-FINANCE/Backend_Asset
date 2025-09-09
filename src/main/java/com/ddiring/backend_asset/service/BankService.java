@@ -257,7 +257,7 @@ public class BankService {
             escrowDto.setUserSeq(userSeq);
             escrowDto.setTransSeq(marketBuyDto.getOrdersId());
             escrowDto.setTransType(marketBuyDto.getTransType());
-            escrowDto.setAmount((marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice())));
+            escrowDto.setAmount((int) (marketBuyDto.getBuyPrice() + ((marketBuyDto.getBuyPrice() * 0.03))));
 
             escrowClient.escrowDeposit(escrowDto);
 
