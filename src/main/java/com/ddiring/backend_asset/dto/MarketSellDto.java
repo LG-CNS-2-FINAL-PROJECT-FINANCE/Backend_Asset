@@ -9,6 +9,5 @@ public class MarketSellDto {
     public Integer transType;
     private Integer sellToken;
     private Integer ordersId;
-//    private String tokenSymbol;
     private String projectId;
 }

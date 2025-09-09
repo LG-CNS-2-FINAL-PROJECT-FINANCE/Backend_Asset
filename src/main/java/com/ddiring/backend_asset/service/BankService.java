@@ -252,19 +252,34 @@ public class BankService {
             throw new BadParameter("돈없어 그만");
         }
 
+        if(marketBuyDto.getTransType() == 0 ) {
+            EscrowDto escrowDto = new EscrowDto();
+            escrowDto.setAccount(escrow.getAccount());
+            escrowDto.setUserSeq(userSeq);
+            escrowDto.setTransSeq(marketBuyDto.getOrdersId());
+            escrowDto.setTransType(marketBuyDto.getTransType());
+            escrowDto.setAmount((marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice())));
 
-        EscrowDto escrowDto = new EscrowDto();
-        escrowDto.setAccount(escrow.getAccount());
-        escrowDto.setUserSeq(userSeq);
-        escrowDto.setTransSeq(marketBuyDto.getOrdersId());
-        escrowDto.setTransType(marketBuyDto.getTransType());
-        escrowDto.setAmount((int) (marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice() * 0.03)));
+            escrowClient.escrowDeposit(escrowDto);
 
-        escrowClient.escrowDeposit(escrowDto);
+            bank.setDeposit((bank.getDeposit() - (marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice()))));
 
-        bank.setDeposit((int) (bank.getDeposit() - (marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice() * 0.03))));
+            bankRepository.save(bank);
+        }
+        else {
+            EscrowDto escrowDto = new EscrowDto();
+            escrowDto.setAccount(escrow.getAccount());
+            escrowDto.setUserSeq(userSeq);
+            escrowDto.setTransSeq(marketBuyDto.getOrdersId());
+            escrowDto.setTransType(marketBuyDto.getTransType());
+            escrowDto.setAmount((int) (marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice() * 0.03)));
 
-        bankRepository.save(bank);
+            escrowClient.escrowDeposit(escrowDto);
+
+            bank.setDeposit((int) (bank.getDeposit() - (marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice() * 0.03))));
+
+            bankRepository.save(bank);
+        }
     }
 
     @Transactional
