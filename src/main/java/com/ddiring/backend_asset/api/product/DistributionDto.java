@@ -8,4 +8,5 @@ import lombok.NoArgsConstructor;
 public class DistributionDto {
     private String projectId;
     private Integer distributionAmount;
+    private String userSeq;
 }

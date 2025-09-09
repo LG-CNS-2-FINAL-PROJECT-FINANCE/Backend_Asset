@@ -41,14 +41,12 @@ public class TokenService {
         Optional<Token> tokenOptional = tokenRepository.findByUserSeqAndProjectId(userSeq, projectId);
 
         if (tokenOptional.isPresent()) {
-            // 이미 토큰을 보유한 경우, 수량만 증가시킵니다.
             Token existingToken = tokenOptional.get();
             existingToken.setAmount(existingToken.getAmount() + amountToAdd.intValue());
             tokenRepository.save(existingToken);
             existingToken.setPrice(existingToken.getAmount() * (int) (price / amountToAdd));
             tokenRepository.save(existingToken);
         } else {
-
             Token newToken = Token.builder()
                     .userSeq(userSeq)
                     .projectId(projectId)

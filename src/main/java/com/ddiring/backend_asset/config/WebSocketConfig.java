@@ -12,9 +12,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // 클라이언트가 웹소켓 연결을 시작할 엔드포인트
-        // 예: http://localhost:8082/ws
-        registry.addEndpoint("192.168.0.222:8080/wallet-token/search")
+
+        registry.addEndpoint("192.168.0.222:8080/api/asset/wallet-token/search")
                 .setAllowedOriginPatterns("*") // 모든 출처에서의 연결 허용 (CORS)
                 .withSockJS(); // SockJS는 웹소켓을 지원하지 않는 브라우저를 위한 대체 옵션
     }

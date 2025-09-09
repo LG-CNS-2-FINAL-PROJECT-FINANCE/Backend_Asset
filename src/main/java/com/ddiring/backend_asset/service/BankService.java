@@ -344,10 +344,10 @@ public class BankService {
         escrowDto.setAccount(escrow.getAccount());
         escrowDto.setUserSeq(userSeq);
         escrowDto.setTransSeq(marketBuyDto.getOrdersId());
-        escrowDto.setTransType(marketBuyDto.getTransType());
+        escrowDto.setTransType(4);
         escrowDto.setAmount(marketBuyDto.getBuyPrice());
 
-         escrowClient.escrowDeposit(escrowDto);
+        escrowClient.escrowDeposit(escrowDto);
 
         bank.setDeposit(bank.getDeposit() - marketBuyDto.getBuyPrice());
 
@@ -366,16 +366,31 @@ public class BankService {
 
     @Transactional
     public void getDistribution(DistributionDto distributionDto) {
+        Integer count = 0;
+        Integer perPrice = 0;
+        Integer allAmount = 0;
         if (distributionDto.getProjectId() == null || distributionDto.getProjectId().isBlank()) {
             log.error("Distribution 호출 시 projectId가 없습니다.");
             throw new IllegalArgumentException("ProjectId는 필수입니다.");
         }
+        Escrow escrow = escrowRepository.findByProjectId(distributionDto.getProjectId())
+                .orElseThrow(() -> new NotFound("없"));
+
+        EscrowDto escrowDto = EscrowDto.builder()
+                .account(escrow.getAccount())
+                .transSeq(count++)
+                .userSeq(distributionDto.getUserSeq())
+                .transType(3)
+                .amount(distributionDto.getDistributionAmount())
+                .build();
+
+        escrowClient.escrowWithdrawal(escrowDto);
+
         List<Token> tokens = tokenRepository.findByProjectId(distributionDto.getProjectId());
         if (tokens.isEmpty()) {
             throw new NotFound("배분할 토큰이 존재하지 않습니다.");
         }
-        Integer perPrice = 0;
-        Integer allAmount = 0;
+
         for (Token token1 : tokens) {
             if (token1.getAmount() != null) {
                 allAmount = allAmount + token1.getAmount();
@@ -409,4 +424,28 @@ public class BankService {
                 .orElseThrow(() -> new NotFound("사용자 계좌를 찾을 수 없습니다."));
         return bank.getDeposit() >= (price + (price * 0.03));
     }
+
+    @Transactional
+    public void toCreator(String userSeq, String role, ProjectIdDto projectIdDto) {
+        Integer count = 0;
+        if(userSeq == null || userSeq.isBlank() || role != "CREATOR") {
+            throw new BadParameter("못");
+        }
+        Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
+                .orElseThrow(() -> new NotFound("사용자 계좌를 찾을 수 없습니다."));
+        Escrow escrow = escrowRepository.findByProjectId(projectIdDto.getProjectId())
+                .orElseThrow(() -> new NotFound("없"));
+
+        EscrowDto escrowDto = EscrowDto.builder()
+                .account(escrow.getAccount())
+                .transSeq(count++)
+                .userSeq(userSeq)
+                .transType(5)
+                .amount(projectIdDto.getPrice())
+                .build();
+        escrowClient.escrowWithdrawal(escrowDto);
+        bank.setDeposit(bank.getDeposit() + escrowDto.getAmount());
+        bankRepository.save(bank);
+    }
+
 }
