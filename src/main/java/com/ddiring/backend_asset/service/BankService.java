@@ -366,20 +366,50 @@ public class BankService {
 
     @Transactional
     public void getDistribution(DistributionDto distributionDto) {
-        List<Token> token = tokenRepository.findByProjectId(distributionDto.getProjectId());
+        if (distributionDto.getProjectId() == null || distributionDto.getProjectId().isBlank()) {
+            log.error("Distribution 호출 시 projectId가 없습니다.");
+            throw new IllegalArgumentException("ProjectId는 필수입니다.");
+        }
+
+        List<Token> tokens = tokenRepository.findByProjectId(distributionDto.getProjectId());
+        if (tokens.isEmpty()) {
+            log.warn("배분할 토큰이 존재하지 않습니다. projectId={}", distributionDto.getProjectId());
+            return;
+        }
+
         Integer perPrice = 0;
         Integer allAmount = 0;
 
-        for (Token token1 : token) {
-            allAmount = allAmount + token1.getAmount();
+        for (Token token1 : tokens) {
+            if (token1.getAmount() != null) {
+                allAmount = allAmount + token1.getAmount();
+            }
         }
+
+        if (allAmount == 0) {
+            log.warn("총 토큰 수량이 0이므로 배분을 진행할 수 없습니다. projectId={}", distributionDto.getProjectId());
+            return; // 총 수량이 0이면 종료
+        }
+
+        if (distributionDto.getDistributionAmount() == null || distributionDto.getDistributionAmount() <= 0) {
+            log.warn("배분할 금액이 없습니다. amount={}", distributionDto.getDistributionAmount());
+            return;
+        }
+
         perPrice = distributionDto.getDistributionAmount() / allAmount;
 
-        for (Token token2 : token) {
+        if (perPrice == 0) {
+            log.warn("토큰 당 배분 금액이 0원입니다. (총 금액이 총 토큰 수량보다 작음)");
+            return;
+        }
+
+        for (Token token2 : tokens) {
             Bank bank = bankRepository.findByUserSeq(token2.getUserSeq()).orElseThrow(() -> new NotFound("음슴"));
             bank.setDeposit(bank.getDeposit() + (token2.getAmount() * perPrice));
+            bankRepository.save(bank);
         }
     }
+
     @Transactional(readOnly = true)
     public boolean checkUserBalance(String userSeq, String role, Integer price) {
         Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
