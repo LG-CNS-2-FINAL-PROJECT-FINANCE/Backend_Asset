@@ -91,7 +91,7 @@ public class KafkaTradeEventsListener {
             Wallet sellerWallet = walletRepository.findByWalletAddress(payload.getSellerAddress())
                     .orElseThrow(() -> new NotFound("판매자 지갑을 찾을 수 없습니다: " + payload.getSellerAddress()));
 
-            tokenService.addBuyToken(buyerWallet.getUserSeq(), payload.getProjectId(), payload.getBuyerTokenAmount(), tradeInfo.getPrice());
+            tokenService.addBuyToken(buyerWallet.getUserSeq(), payload.getProjectId(), payload.getTradeAmount(), tradeInfo.getPrice());
             bankService.depositForTrade(sellerWallet.getUserSeq(), "USER", tradeInfo.getPrice());
             log.info("자산 이동 처리 완료. tradeId={}", payload.getTradeId());
 
