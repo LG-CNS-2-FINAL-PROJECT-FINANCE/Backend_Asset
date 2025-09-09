@@ -88,10 +88,10 @@ public class KafkaInvestmentEventsListener {
         Token token = Token.builder()
                 .amount(payload.getTokenAmount().intValue())
                 .projectId(payload.getProjectId())
-                .price(payload.getPrice().intValue())
+                .price(payload.getInitialAmountPerToken().intValue() * payload.getTokenAmount().intValue())
                 .userSeq(userSeq)
                 .title(escrow.getTitle())
-                .currentPrice(payload.getPrice().intValue() / payload.getTokenAmount().intValue()) // 개당 가격 계산
+                .currentPrice(payload.getInitialAmountPerToken().intValue())
                 .build();
 
         tokenRepository.save(token);
