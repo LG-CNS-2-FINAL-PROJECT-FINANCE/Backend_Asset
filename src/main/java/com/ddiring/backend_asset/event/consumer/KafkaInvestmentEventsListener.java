@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -65,13 +66,24 @@ public class KafkaInvestmentEventsListener {
             return;
         }
 
-        Escrow escrow = escrowRepository.findByProjectId(payload.getProjectId())
-                .orElseThrow(() -> new NotFound("에스크로 정보를 찾을 수 없습니다: " + payload.getProjectId()));
-
         // investorAddress로 Wallet을 찾아 userSeq를 가져옴
         Wallet investorWallet = walletRepository.findByWalletAddress(payload.getInvestorAddress())
                 .orElseThrow(() -> new NotFound("투자자 지갑을 찾을 수 없습니다: " + payload.getInvestorAddress()));
         String userSeq = investorWallet.getUserSeq();
+
+        // 멱등성 체크: 해당 사용자가 프로젝트 토큰을 이미 보유하고 있는지 확인
+        Optional<Token> existingTokenOpt = tokenRepository.findByUserSeqAndProjectId(userSeq, payload.getProjectId());
+
+        if (existingTokenOpt.isPresent()) {
+            // 이미 토큰이 존재하면, 중복 이벤트로 간주하고 무시하거나 업데이트 로직 수행
+            // 여기서는 중복 지급을 막기 위해 로그만 남기고 무시합니다.
+            log.info("이미 투자 토큰이 지급된 이벤트입니다. 중복 처리 방지. userSeq={}, projectId={}", userSeq, payload.getProjectId());
+            return;
+        }
+
+        // --- 토큰 신규 지급 로직 (최초 1회만 실행) ---
+        Escrow escrow = escrowRepository.findByProjectId(payload.getProjectId())
+                .orElseThrow(() -> new NotFound("에스크로 정보를 찾을 수 없습니다: " + payload.getProjectId()));
 
         Token token = Token.builder()
                 .amount(payload.getTokenAmount().intValue())
@@ -79,10 +91,10 @@ public class KafkaInvestmentEventsListener {
                 .price(payload.getPrice().intValue())
                 .userSeq(userSeq)
                 .title(escrow.getTitle())
+                .currentPrice(payload.getPrice().intValue() / payload.getTokenAmount().intValue()) // 개당 가격 계산
                 .build();
 
         tokenRepository.save(token);
         log.info("투자 성공 처리 완료: userSeq={}, projectId={}, amount={}", userSeq, payload.getProjectId(), payload.getTokenAmount());
     }
-
 }

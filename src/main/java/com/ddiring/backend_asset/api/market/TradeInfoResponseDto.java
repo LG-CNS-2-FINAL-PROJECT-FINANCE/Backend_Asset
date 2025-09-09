@@ -12,4 +12,5 @@ public class TradeInfoResponseDto {
     private Integer tokenQuantity;
     private String buyerUserSeq;
     private String sellerUserSeq;
+    private String status;
 }
