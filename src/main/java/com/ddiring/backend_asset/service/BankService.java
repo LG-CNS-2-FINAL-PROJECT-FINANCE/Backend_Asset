@@ -370,25 +370,21 @@ public class BankService {
             log.error("Distribution 호출 시 projectId가 없습니다.");
             throw new IllegalArgumentException("ProjectId는 필수입니다.");
         }
-
         List<Token> tokens = tokenRepository.findByProjectId(distributionDto.getProjectId());
         if (tokens.isEmpty()) {
             log.warn("배분할 토큰이 존재하지 않습니다. projectId={}", distributionDto.getProjectId());
             return;
         }
-
         Integer perPrice = 0;
         Integer allAmount = 0;
-
         for (Token token1 : tokens) {
             if (token1.getAmount() != null) {
                 allAmount = allAmount + token1.getAmount();
             }
         }
-
         if (allAmount == 0) {
             log.warn("총 토큰 수량이 0이므로 배분을 진행할 수 없습니다. projectId={}", distributionDto.getProjectId());
-            return; // 총 수량이 0이면 종료
+            return;
         }
 
         if (distributionDto.getDistributionAmount() == null || distributionDto.getDistributionAmount() <= 0) {
