@@ -257,11 +257,11 @@ public class BankService {
             escrowDto.setUserSeq(userSeq);
             escrowDto.setTransSeq(marketBuyDto.getOrdersId());
             escrowDto.setTransType(marketBuyDto.getTransType());
-            escrowDto.setAmount((int) (marketBuyDto.getBuyPrice() + ((marketBuyDto.getBuyPrice() * 0.03))));
+            escrowDto.setAmount((marketBuyDto.getBuyPrice()));
 
             escrowClient.escrowDeposit(escrowDto);
 
-            bank.setDeposit((bank.getDeposit() - (marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice()))));
+            bank.setDeposit((bank.getDeposit() - (marketBuyDto.getBuyPrice())));
 
             bankRepository.save(bank);
         }
