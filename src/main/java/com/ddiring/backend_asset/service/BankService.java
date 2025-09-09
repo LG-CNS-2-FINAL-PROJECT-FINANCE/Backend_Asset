@@ -251,20 +251,34 @@ public class BankService {
         if (bank.getDeposit() < marketBuyDto.getBuyPrice() + (int)(marketBuyDto.getBuyPrice() * 0.03)) {
             throw new BadParameter("돈없어 그만");
         }
+        if (marketBuyDto.getTransType() == 0) {
+            EscrowDto escrowDto = new EscrowDto();
+            escrowDto.setAccount(escrow.getAccount());
+            escrowDto.setUserSeq(userSeq);
+            escrowDto.setTransSeq(marketBuyDto.getOrdersId());
+            escrowDto.setTransType(marketBuyDto.getTransType());
+            escrowDto.setAmount((marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice())));
 
+            escrowClient.escrowDeposit(escrowDto);
 
-        EscrowDto escrowDto = new EscrowDto();
-        escrowDto.setAccount(escrow.getAccount());
-        escrowDto.setUserSeq(userSeq);
-        escrowDto.setTransSeq(marketBuyDto.getOrdersId());
-        escrowDto.setTransType(marketBuyDto.getTransType());
-        escrowDto.setAmount((int) (marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice() * 0.03)));
+            bank.setDeposit((bank.getDeposit() - (marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice()))));
 
-        escrowClient.escrowDeposit(escrowDto);
+            bankRepository.save(bank);
+        }
+        else {
+            EscrowDto escrowDto = new EscrowDto();
+            escrowDto.setAccount(escrow.getAccount());
+            escrowDto.setUserSeq(userSeq);
+            escrowDto.setTransSeq(marketBuyDto.getOrdersId());
+            escrowDto.setTransType(marketBuyDto.getTransType());
+            escrowDto.setAmount((int) (marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice() * 0.03)));
 
-        bank.setDeposit((int) (bank.getDeposit() - (marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice() * 0.03))));
+            escrowClient.escrowDeposit(escrowDto);
 
-        bankRepository.save(bank);
+            bank.setDeposit((int) (bank.getDeposit() - (marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice() * 0.03))));
+
+            bankRepository.save(bank);
+        }
     }
 
     @Transactional
