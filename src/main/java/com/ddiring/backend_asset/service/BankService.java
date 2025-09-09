@@ -400,7 +400,7 @@ public class BankService {
         }
 
         for (Token token2 : tokens) {
-            Bank bank = bankRepository.findByUserSeq(token2.getUserSeq()).orElseThrow(() -> new NotFound("음슴"));
+            Bank bank = bankRepository.findByUserSeqAndRole(token2.getUserSeq(), "USER").orElseThrow(() -> new NotFound("음슴"));
             bank.setDeposit(bank.getDeposit() + (token2.getAmount() * perPrice));
             bankRepository.save(bank);
         }
