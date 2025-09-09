@@ -89,9 +89,10 @@ public class KafkaInvestmentEventsListener {
                 .amount(payload.getTokenAmount().intValue())
                 .projectId(payload.getProjectId())
                 .price(payload.getInitialAmountPerToken().intValue() * payload.getTokenAmount().intValue())
+                .amount(payload.getTokenAmount().intValue())
                 .userSeq(userSeq)
                 .title(escrow.getTitle())
-                .currentPrice(payload.getInitialAmountPerToken().intValue())
+                .currentPrice(payload.getInitialAmountPerToken().intValue()) // 개당 가격 계산
                 .build();
 
         tokenRepository.save(token);
