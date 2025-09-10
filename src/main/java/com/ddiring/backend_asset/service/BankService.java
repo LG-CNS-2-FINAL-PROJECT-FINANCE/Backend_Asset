@@ -287,8 +287,20 @@ public class BankService {
             token.setAmount(token.getAmount() + marketRefundDto.getRefundAmount());
             Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
                     .orElseThrow(() -> new NotFound("누구?"));
+            Escrow escrow = escrowRepository.findByProjectId(marketRefundDto.getProjectId())
+                    .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
+            EscrowDto escrowDto = new EscrowDto();
+            escrowDto.setAccount(escrow.getAccount());
+            escrowDto.setUserSeq(userSeq);
+            escrowDto.setTransSeq(marketRefundDto.getOrdersId());
+            escrowDto.setTransType(-1);
+            escrowDto.setAmount((marketRefundDto.getRefundPrice()));
+
+            escrowClient.escrowDeposit(escrowDto);
+
             bank.setDeposit(bank.getDeposit() + marketRefundDto.getRefundAmount());
             bankRepository.save(bank);
+
             if(token.getCurrentPrice() != null) {
                 token.setPrice(token.getAmount() * token.getCurrentPrice());
             }
