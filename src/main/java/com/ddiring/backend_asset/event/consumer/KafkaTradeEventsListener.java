@@ -94,6 +94,7 @@ public class KafkaTradeEventsListener {
                     .orElseThrow(() -> new NotFound("없"));
 
             tokenService.addBuyToken(buyerWallet.getUserSeq(), payload.getProjectId(), payload.getTradeAmount(), tradeInfo.getPrice());
+
             EscrowDto escrowDto = EscrowDto.builder()
                     .account(escrow.getAccount())
                     .transSeq(Math.toIntExact(payload.getTradeId()))

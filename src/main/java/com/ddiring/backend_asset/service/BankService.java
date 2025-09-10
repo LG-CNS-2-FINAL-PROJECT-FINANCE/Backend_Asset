@@ -342,7 +342,7 @@ public class BankService {
         escrowDto.setAccount(escrow.getAccount());
         escrowDto.setUserSeq(userSeq);
         escrowDto.setTransSeq(marketBuyDto.getOrdersId());
-        escrowDto.setTransType(marketBuyDto.getTransType());
+        escrowDto.setTransType(4);
         escrowDto.setAmount(marketBuyDto.getBuyPrice());
 
          escrowClient.escrowDeposit(escrowDto);
@@ -364,10 +364,24 @@ public class BankService {
 
     @Transactional
     public void getDistribution(DistributionDto distributionDto) {
-        List<Token> token = tokenRepository.findByProjectId(distributionDto.getProjectId());
+        Integer count = 0;
         Integer perPrice = 0;
         Integer allAmount = 0;
 
+        Escrow escrow = escrowRepository.findByProjectId(distributionDto.getProjectId())
+                .orElseThrow(() -> new NotFound("없"));
+
+        EscrowDto escrowDto = EscrowDto.builder()
+                .account(escrow.getAccount())
+                .transSeq(count++)
+                .userSeq(distributionDto.getUserSeq())
+                .transType(3)
+                .amount(distributionDto.getDistributionAmount())
+                .build();
+
+        escrowClient.escrowWithdrawal(escrowDto);
+
+        List<Token> token = tokenRepository.findByProjectId(distributionDto.getProjectId());
         for (Token token1 : token) {
             allAmount = allAmount + token1.getAmount();
         }
@@ -384,4 +398,28 @@ public class BankService {
                 .orElseThrow(() -> new NotFound("사용자 계좌를 찾을 수 없습니다."));
         return bank.getDeposit() >= (price + (price * 0.03));
     }
+
+    @Transactional
+    public void toCreator(String userSeq, String role, ProjectIdDto projectIdDto) {
+        Integer count = 0;
+        if(userSeq == null || userSeq.isBlank() || role != "CREATOR") {
+            throw new BadParameter("못");
+        }
+        Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
+                .orElseThrow(() -> new NotFound("사용자 계좌를 찾을 수 없습니다."));
+        Escrow escrow = escrowRepository.findByProjectId(projectIdDto.getProjectId())
+                .orElseThrow(() -> new NotFound("없"));
+
+        EscrowDto escrowDto = EscrowDto.builder()
+                .account(escrow.getAccount())
+                .transSeq(count++)
+                .userSeq(userSeq)
+                .transType(5)
+                .amount(projectIdDto.getPrice())
+                .build();
+        escrowClient.escrowWithdrawal(escrowDto);
+        bank.setDeposit(bank.getDeposit() + escrowDto.getAmount());
+        bankRepository.save(bank);
+    }
+
 }
