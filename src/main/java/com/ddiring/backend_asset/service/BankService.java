@@ -5,6 +5,7 @@ import com.ddiring.backend_asset.api.escrow.EscrowDto;
 import com.ddiring.backend_asset.api.market.MarketDto;
 import com.ddiring.backend_asset.api.product.DistributionDto;
 import com.ddiring.backend_asset.api.product.ProductDto;
+import com.ddiring.backend_asset.common.dto.ApiResponseDto;
 import com.ddiring.backend_asset.common.exception.BadParameter;
 import com.ddiring.backend_asset.common.exception.NotFound;
 import com.ddiring.backend_asset.dto.*;
@@ -349,6 +350,10 @@ public class BankService {
             throw new BadParameter("돈없어 그만");
         }
 
+        bank.setDistribution(marketBuyDto.getBuyPrice());
+        bank.setDeposit(bank.getDeposit() - marketBuyDto.getBuyPrice());
+        bankRepository.save(bank);
+
         EscrowDto escrowDto = new EscrowDto();
         escrowDto.setAccount(escrow.getAccount());
         escrowDto.setUserSeq(userSeq);
@@ -356,11 +361,7 @@ public class BankService {
         escrowDto.setTransType(4);
         escrowDto.setAmount(marketBuyDto.getBuyPrice());
 
-         escrowClient.escrowDeposit(escrowDto);
-
-        bank.setDeposit(bank.getDeposit() - marketBuyDto.getBuyPrice());
-
-        bankRepository.save(bank);
+        escrowClient.escrowDeposit(escrowDto);
     }
 
     @Transactional
@@ -375,35 +376,12 @@ public class BankService {
 
     @Transactional
     public void getDistribution(DistributionDto distributionDto) {
-        Integer count = 0;
-        Integer perPrice = 0;
-        Integer allAmount = 0;
-
-        Escrow escrow = escrowRepository.findByProjectId(distributionDto.getProjectId())
-                .orElseThrow(() -> new NotFound("없"));
-
-        log.info("앙아ㅏㅇ:{}", distributionDto.getDistributionAmount());
-        EscrowDto escrowDto = EscrowDto.builder()
-                .account(escrow.getAccount())
-                .transSeq(count++)
-                .userSeq(distributionDto.getUserSeq())
-                .transType(3)
-                .amount(distributionDto.getDistributionAmount())
-                .build();
-
-        escrowClient.escrowWithdrawal(escrowDto);
-
-        List<Token> token = tokenRepository.findByProjectId(distributionDto.getProjectId());
-        for (Token token1 : token) {
-            allAmount = allAmount + token1.getAmount();
-        }
-        perPrice = distributionDto.getDistributionAmount() / allAmount;
-
-        for (Token token2 : token) {
-            Bank bank = bankRepository.findByUserSeq(token2.getUserSeq()).orElseThrow(() -> new NotFound("음슴"));
-            bank.setDeposit(bank.getDeposit() + (token2.getAmount() * perPrice));
-        }
+        Bank bank = bankRepository.findByUserSeqAndRole(distributionDto.getUserSeq(), "CREATOR")
+                .orElseThrow(() -> new NotFound("사용자 계좌를 찾을 수 없습니다."));
+        bank.setDistribution(distributionDto.getDistributionAmount());
+        bankRepository.save(bank);
     }
+
     @Transactional(readOnly = true)
     public boolean checkUserBalance(String userSeq, String role, Integer price) {
         Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
@@ -412,26 +390,35 @@ public class BankService {
     }
 
     @Transactional
-    public void toCreator(String userSeq, String role, ProjectIdDto projectIdDto) {
+    public void divideMoney(String userSeq, String role, MarketBuyDto marketBuyDto) {
         Integer count = 0;
-        if(userSeq == null || userSeq.isBlank() || role != "CREATOR") {
-            throw new BadParameter("못");
-        }
-        Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
-                .orElseThrow(() -> new NotFound("사용자 계좌를 찾을 수 없습니다."));
-        Escrow escrow = escrowRepository.findByProjectId(projectIdDto.getProjectId())
+        Integer perPrice = 0;
+        Integer allAmount = 0;
+
+        Escrow escrow = escrowRepository.findByProjectId(marketBuyDto.getProjectId())
                 .orElseThrow(() -> new NotFound("없"));
 
         EscrowDto escrowDto = EscrowDto.builder()
                 .account(escrow.getAccount())
                 .transSeq(count++)
                 .userSeq(userSeq)
-                .transType(5)
-                .amount(projectIdDto.getPrice())
+                .transType(3)
+                .amount(marketBuyDto.getBuyPrice())
                 .build();
+
         escrowClient.escrowWithdrawal(escrowDto);
-        bank.setDeposit(bank.getDeposit() + escrowDto.getAmount());
-        bankRepository.save(bank);
+
+        List<Token> token = tokenRepository.findByProjectId(marketBuyDto.getProjectId());
+        for (Token token1 : token) {
+            allAmount = allAmount + token1.getAmount();
+        }
+        perPrice = marketBuyDto.getBuyPrice() / allAmount;
+
+        for (Token token2 : token) {
+            Bank bank = bankRepository.findByUserSeqAndRole(token2.getUserSeq(), "USER").orElseThrow(() -> new NotFound("음슴"));
+            bank.setDeposit(bank.getDeposit() + (token2.getAmount() * perPrice));
+            bankRepository.save(bank);
+        }
     }
 
 }

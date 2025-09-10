@@ -75,13 +75,10 @@ public class KafkaInvestmentEventsListener {
         Optional<Token> existingTokenOpt = tokenRepository.findByUserSeqAndProjectId(userSeq, payload.getProjectId());
 
         if (existingTokenOpt.isPresent()) {
-            // 이미 토큰이 존재하면, 중복 이벤트로 간주하고 무시하거나 업데이트 로직 수행
-            // 여기서는 중복 지급을 막기 위해 로그만 남기고 무시합니다.
             log.info("이미 투자 토큰이 지급된 이벤트입니다. 중복 처리 방지. userSeq={}, projectId={}", userSeq, payload.getProjectId());
             return;
         }
 
-        // --- 토큰 신규 지급 로직 (최초 1회만 실행) ---
         Escrow escrow = escrowRepository.findByProjectId(payload.getProjectId())
                 .orElseThrow(() -> new NotFound("에스크로 정보를 찾을 수 없습니다: " + payload.getProjectId()));
 

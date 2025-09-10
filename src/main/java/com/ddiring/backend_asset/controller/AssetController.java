@@ -159,6 +159,14 @@ public class AssetController {
         return ApiResponseDto.createOk("success");
     }
 
+    @PostMapping("/market/distribution")
+    public ApiResponseDto<String> marketDistribution(@RequestBody MarketBuyDto marketBuyDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
+        bankService.divideMoney(userSeq, role, marketBuyDto);
+        return ApiResponseDto.createOk("그만하고 싶다");
+    }
+
     @PostMapping("/all")
     public Integer getAllMoney(@RequestBody AssetAllMoneyDto assetAllMoneyDto) {
         String userSeq = GatewayRequestHeaderUtils.getUserSeq();
@@ -198,11 +206,4 @@ public class AssetController {
         return ApiResponseDto.createOk(hasEnoughTokens);//
     }
 
-    @PostMapping("/market/creator")
-    public ApiResponseDto<String> creatorMoney(@RequestBody ProjectIdDto projectIdDto) {
-        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
-        String role = GatewayRequestHeaderUtils.getRole();
-        bankService.toCreator(userSeq, role, projectIdDto);
-        return ApiResponseDto.createOk("success");
-    }
 }
