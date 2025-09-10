@@ -289,6 +289,7 @@ public class BankService {
                     .orElseThrow(() -> new NotFound("누구?"));
             Escrow escrow = escrowRepository.findByProjectId(marketRefundDto.getProjectId())
                     .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
+
             EscrowDto escrowDto = new EscrowDto();
             escrowDto.setAccount(escrow.getAccount());
             escrowDto.setUserSeq(userSeq);
@@ -296,7 +297,7 @@ public class BankService {
             escrowDto.setTransType(-1);
             escrowDto.setAmount((marketRefundDto.getRefundPrice()));
 
-            escrowClient.escrowDeposit(escrowDto);
+            escrowClient.escrowWithdrawal(escrowDto);
 
             bank.setDeposit(bank.getDeposit() + marketRefundDto.getRefundAmount());
             bankRepository.save(bank);
