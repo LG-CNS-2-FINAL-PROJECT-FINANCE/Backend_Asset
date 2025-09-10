@@ -112,31 +112,7 @@ public class TokenService {
         }
     }
 
-    @Transactional
-    public void updateTokenCurrentPrice(String projectId, Integer newPrice) {
-        List<Token> tokens = tokenRepository.findByProjectId(projectId);
-        if (tokens.isEmpty()) {
-            log.warn("가격 업데이트 대상 토큰을 찾을 수 없습니다. projectId={}", projectId);
-            return;
-        }
 
-        tokens.forEach(token -> {
-            token.setCurrentPrice(newPrice);
-            token.setPrice(token.getAmount() * newPrice);
-        });
-
-        tokenRepository.saveAll(tokens);
-
-        log.info("projectId {}의 토큰 {}개 현재가를 {}원으로 업데이트했습니다.", projectId, tokens.size(), newPrice);
-
-        String destination = "/topic/price/" + projectId;
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("projectId", projectId);
-        payload.put("currentPrice", newPrice);
-
-        messagingTemplate.convertAndSend(destination, payload);
-        log.info("웹소켓 전송 완료: destination={}, payload={}", destination, payload);
-    }
     @Transactional(readOnly = true)
     public boolean checkUserToken(String userSeq, String projectId, Integer requiredAmount) {
         Token token = tokenRepository.findByUserSeqAndProjectId(userSeq, projectId)

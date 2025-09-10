@@ -285,22 +285,11 @@ public class BankService {
 
         if (marketRefundDto.getOrderType() == 0) {
 
-            Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
+            Token token = tokenRepository.findByUserSeqAndProjectId(userSeq, marketRefundDto.getProjectId())
                     .orElseThrow(() -> new NotFound("누구?"));
-            Escrow escrow = escrowRepository.findByProjectId(marketRefundDto.getProjectId())
-                    .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
 
-            EscrowDto escrowDto = new EscrowDto();
-            escrowDto.setAccount(escrow.getAccount());
-            escrowDto.setUserSeq(userSeq);
-            escrowDto.setTransSeq(marketRefundDto.getOrdersId());
-            escrowDto.setTransType(-1);
-            escrowDto.setAmount((marketRefundDto.getRefundPrice()));
-
-            escrowClient.escrowWithdrawal(escrowDto);
-
-            bank.setDeposit(bank.getDeposit() + marketRefundDto.getRefundPrice());
-            bankRepository.save(bank);
+            token.setAmount(token.getAmount() + marketRefundDto.getRefundAmount());
+            tokenRepository.save(token);
 
         }
         else if (marketRefundDto.getOrderType() == 1) {
@@ -317,6 +306,24 @@ public class BankService {
 
             escrowClient.escrowDeposit(escrowDto);
             bank.setDeposit((int) (bank.getDeposit() + marketRefundDto.getRefundPrice() + (marketRefundDto.getRefundPrice() * 0.03)));
+        }
+        else if(marketRefundDto.getOrderType() == 2) {
+            Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
+                    .orElseThrow(() -> new NotFound("누구?"));
+            Escrow escrow = escrowRepository.findByProjectId(marketRefundDto.getProjectId())
+                    .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
+
+            EscrowDto escrowDto = new EscrowDto();
+            escrowDto.setAccount(escrow.getAccount());
+            escrowDto.setUserSeq(userSeq);
+            escrowDto.setTransSeq(marketRefundDto.getOrdersId());
+            escrowDto.setTransType(-1);
+            escrowDto.setAmount((marketRefundDto.getRefundPrice()));
+
+            escrowClient.escrowWithdrawal(escrowDto);
+
+            bank.setDeposit(bank.getDeposit() + marketRefundDto.getRefundPrice());
+            bankRepository.save(bank);
         }
 
     }

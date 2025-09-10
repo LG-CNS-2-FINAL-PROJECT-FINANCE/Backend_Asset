@@ -63,10 +63,6 @@ public class KafkaTradeEventsListener {
                     TradeFailedEvent failedEvent = objectMapper.convertValue(messageMap, TradeFailedEvent.class);
                     handleTradeFailed(failedEvent);
                     break;
-                case "TRADE.PRICE.UPDATED":
-                    TradePriceUpdateEvent priceUpdateEvent = objectMapper.convertValue(messageMap, TradePriceUpdateEvent.class);
-                    handleTradePriceUpdate(priceUpdateEvent);
-                    break;
                 default:
                     log.warn("알 수 없는 이벤트 타입입니다: {}", eventType);
                     break;
@@ -150,12 +146,4 @@ public class KafkaTradeEventsListener {
         }
     }
 
-    public void handleTradePriceUpdate(TradePriceUpdateEvent event) {
-        TradePriceUpdateEvent.Payload payload = event.getPayload();
-        if (payload != null && payload.getProjectId() != null && payload.getPricePerToken() != null) {
-            tokenService.updateTokenCurrentPrice(payload.getProjectId(), payload.getPricePerToken());
-        } else {
-            log.warn("가격 업데이트 이벤트의 payload가 유효하지 않습니다: {}", event);
-        }
-    }
 }
