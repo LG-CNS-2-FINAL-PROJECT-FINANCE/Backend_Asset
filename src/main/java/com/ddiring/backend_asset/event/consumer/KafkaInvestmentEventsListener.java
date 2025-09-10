@@ -83,13 +83,7 @@ public class KafkaInvestmentEventsListener {
                 .orElseThrow(() -> new NotFound("에스크로 정보를 찾을 수 없습니다: " + payload.getProjectId()));
 
         Token token = Token.builder()
-                .amount(payload.getTokenAmount().intValue())
-                .projectId(payload.getProjectId())
-                .price(payload.getInitialAmountPerToken().intValue() * payload.getTokenAmount().intValue())
-                .amount(payload.getTokenAmount().intValue())
-                .userSeq(userSeq)
                 .title(escrow.getTitle())
-                .currentPrice(payload.getInitialAmountPerToken().intValue()) // 개당 가격 계산
                 .build();
 
         tokenRepository.save(token);
