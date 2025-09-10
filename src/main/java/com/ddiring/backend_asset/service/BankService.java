@@ -285,7 +285,10 @@ public class BankService {
         if (marketRefundDto.getOrderType() == 0) {
             Token token = tokenRepository.findByUserSeqAndProjectId(userSeq, marketRefundDto.getProjectId()).orElseThrow(() -> new NotFound("아니양"));
             token.setAmount(token.getAmount() + marketRefundDto.getRefundAmount());
-
+            Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
+                    .orElseThrow(() -> new NotFound("누구?"));
+            bank.setDeposit(bank.getDeposit() + marketRefundDto.getRefundAmount());
+            bankRepository.save(bank);
             if(token.getCurrentPrice() != null) {
                 token.setPrice(token.getAmount() * token.getCurrentPrice());
             }
