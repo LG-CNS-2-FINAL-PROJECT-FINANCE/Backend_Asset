@@ -261,7 +261,7 @@ public class BankService {
 
             escrowClient.escrowDeposit(escrowDto);
 
-            bank.setDeposit((bank.getDeposit() - (marketBuyDto.getBuyPrice())));
+            bank.setDeposit((bank.getDeposit() - marketBuyDto.getBuyPrice()));
 
             bankRepository.save(bank);
         } else {
@@ -283,8 +283,7 @@ public class BankService {
     public void setRefundToken(String userSeq, String role, MarketRefundDto marketRefundDto) {
 
         if (marketRefundDto.getOrderType() == 0) {
-            Token token = tokenRepository.findByUserSeqAndProjectId(userSeq, marketRefundDto.getProjectId()).orElseThrow(() -> new NotFound("아니양"));
-            token.setAmount(token.getAmount() + marketRefundDto.getRefundAmount());
+
             Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
                     .orElseThrow(() -> new NotFound("누구?"));
             Escrow escrow = escrowRepository.findByProjectId(marketRefundDto.getProjectId())
@@ -299,13 +298,9 @@ public class BankService {
 
             escrowClient.escrowWithdrawal(escrowDto);
 
-            bank.setDeposit(bank.getDeposit() + marketRefundDto.getRefundAmount());
+            bank.setDeposit(bank.getDeposit() + marketRefundDto.getRefundPrice());
             bankRepository.save(bank);
 
-            if(token.getCurrentPrice() != null) {
-                token.setPrice(token.getAmount() * token.getCurrentPrice());
-            }
-            tokenRepository.save(token);
         }
         else if (marketRefundDto.getOrderType() == 1) {
             Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
