@@ -39,7 +39,7 @@ public class TokenService {
     public void addBuyToken(String userSeq, String projectId, Long amountToAdd , Integer price) {
 
         Optional<Token> tokenOptional = tokenRepository.findByUserSeqAndProjectId(userSeq, projectId);
-
+        Escrow escrow = escrowRepository.findByProjectId(projectId) .orElseThrow(() -> new NotFound("해당 프로젝트의 토큰을 찾을 수 없습니다."));;
         if (tokenOptional.isPresent()) {
             Token existingToken = tokenOptional.get();
             existingToken.setAmount(existingToken.getAmount() + amountToAdd.intValue());
@@ -51,6 +51,7 @@ public class TokenService {
                     .userSeq(userSeq)
                     .projectId(projectId)
                     .price(price)
+                    .title(escrow.getTitle())
                     .currentPrice((int) (price / amountToAdd))
                     .amount(amountToAdd.intValue())
                     .build();
