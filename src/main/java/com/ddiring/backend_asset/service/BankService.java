@@ -382,6 +382,7 @@ public class BankService {
         Escrow escrow = escrowRepository.findByProjectId(distributionDto.getProjectId())
                 .orElseThrow(() -> new NotFound("없"));
 
+        log.info("앙아ㅏㅇ:{}", distributionDto.getDistributionAmount());
         EscrowDto escrowDto = EscrowDto.builder()
                 .account(escrow.getAccount())
                 .transSeq(count++)
