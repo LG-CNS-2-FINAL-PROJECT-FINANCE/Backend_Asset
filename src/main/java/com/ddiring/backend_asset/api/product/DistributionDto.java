@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class DistributionDto {
-    private String userSeq;
-    private String ProjectId;
+    private String projectId;
     private Integer distributionAmount;
+    private String userSeq;
 }

@@ -1,14 +1,18 @@
 package com.ddiring.backend_asset.event.consumer;
 
+import com.ddiring.backend_asset.api.escrow.EscrowClient;
+import com.ddiring.backend_asset.api.escrow.EscrowDto;
 import com.ddiring.backend_asset.api.market.MarketClient;
 import com.ddiring.backend_asset.api.market.TradeInfoResponseDto;
 import com.ddiring.backend_asset.common.dto.ApiResponseDto;
 import com.ddiring.backend_asset.common.exception.NotFound;
 import com.ddiring.backend_asset.dto.MarketRefundDto;
+import com.ddiring.backend_asset.entitiy.Escrow;
 import com.ddiring.backend_asset.entitiy.Wallet;
 import com.ddiring.backend_asset.event.dto.TradeFailedEvent;
 import com.ddiring.backend_asset.event.dto.TradeSucceededEvent;
 import com.ddiring.backend_asset.event.dto.TradePriceUpdateEvent;
+import com.ddiring.backend_asset.repository.EscrowRepository;
 import com.ddiring.backend_asset.repository.WalletRepository;
 import com.ddiring.backend_asset.service.BankService;
 import com.ddiring.backend_asset.service.TokenService;
@@ -31,7 +35,9 @@ public class KafkaTradeEventsListener {
     private final TokenService tokenService;
     private final WalletRepository walletRepository;
     private final BankService bankService;
+    private final EscrowRepository escrowRepository;
     private final MarketClient marketClient;
+    private final EscrowClient escrowClient;
 
     /**
      * TRADE 토픽에서 발생하는 모든 이벤트를 수신하여 처리합니다.
@@ -70,30 +76,39 @@ public class KafkaTradeEventsListener {
         }
     }
 
-    /**
-     * 거래 성공 이벤트를 처리합니다. (자산 이동)
-     */
     @Transactional
     public void handleTradeSucceeded(TradeSucceededEvent event) {
         TradeSucceededEvent.TradeSucceededPayload payload = event.getPayload();
         log.info("TradeSucceededEvent 처리 시작: tradeId={}", payload.getTradeId());
 
-        Wallet buyerWallet = walletRepository.findByWalletAddress(payload.getBuyerAddress())
-                .orElseThrow(() -> new NotFound("구매자 지갑을 찾을 수 없습니다: " + payload.getBuyerAddress()));
-        Wallet sellerWallet = walletRepository.findByWalletAddress(payload.getSellerAddress())
-                .orElseThrow(() -> new NotFound("판매자 지갑을 찾을 수 없습니다: " + payload.getSellerAddress()));
-
         try {
+            // 멱등성 처리를 위해 Market 서비스에서 현재 거래 상태를 먼저 조회합니다.
             ApiResponseDto<TradeInfoResponseDto> response = marketClient.getTradeInfo(payload.getTradeId());
             TradeInfoResponseDto tradeInfo = response.getData();
 
-            // 구매자에게 토큰 추가, 판매자에게 대금 입금
-            tokenService.addBuyToken(buyerWallet.getUserSeq(), payload.getProjectId(), payload.getBuyerTokenAmount(), tradeInfo.getPrice());
-            bankService.depositForTrade(sellerWallet.getUserSeq(), "USER", tradeInfo.getPrice());
+            Wallet buyerWallet = walletRepository.findByWalletAddress(payload.getBuyerAddress())
+                    .orElseThrow(() -> new NotFound("구매자 지갑을 찾을 수 없습니다: " + payload.getBuyerAddress()));
+            Wallet sellerWallet = walletRepository.findByWalletAddress(payload.getSellerAddress())
+                    .orElseThrow(() -> new NotFound("판매자 지갑을 찾을 수 없습니다: " + payload.getSellerAddress()));
+            Escrow escrow = escrowRepository.findByProjectId(payload.getProjectId())
+                    .orElseThrow(() -> new NotFound("없"));
+
+            tokenService.addBuyToken(buyerWallet.getUserSeq(), payload.getProjectId(), payload.getTradeAmount(), tradeInfo.getPrice());
+            EscrowDto escrowDto = EscrowDto.builder()
+                    .account(escrow.getAccount())
+                    .transSeq(Math.toIntExact(payload.getTradeId()))
+                    .userSeq(sellerWallet.getUserSeq())
+                    .transType(2)
+                    .amount((int) (tradeInfo.getPrice() - (tradeInfo.getPrice() * 0.03)))
+                    .build();
+
+            escrowClient.escrowWithdrawal(escrowDto);
+            bankService.depositForTrade(sellerWallet.getUserSeq(), "USER", (int) (tradeInfo.getPrice() - (tradeInfo.getPrice() * 0.03)));
+            log.info("자산 이동 처리 완료. tradeId={}", payload.getTradeId());
 
         } catch (Exception e) {
-            log.error("Asset 서비스 호출 중 심각한 오류 발생. tradeId={}", payload.getTradeId(), e);
-            throw new RuntimeException("Asset 서비스 호출 실패", e);
+            log.error("TradeSucceededEvent 처리 중 심각한 오류 발생. tradeId={}", payload.getTradeId(), e);
+            throw new RuntimeException("TradeSucceededEvent 처리 실패", e);
         }
     }
 
@@ -103,13 +118,20 @@ public class KafkaTradeEventsListener {
     @Transactional
     public void handleTradeFailed(TradeFailedEvent event) {
         TradeFailedEvent.TradeFailedPayload payload = event.getPayload();
-        log.info("TradeFailedEvent 처리: tradeId={}", payload.getTradeId());
+        log.info("TradeFailedEvent 처리 시작: tradeId={}", payload.getTradeId());
 
         try {
+            // 멱등성 처리를 위해 Market 서비스에서 현재 거래 상태를 먼저 조회합니다.
             ApiResponseDto<TradeInfoResponseDto> response = marketClient.getTradeInfo(payload.getTradeId());
             TradeInfoResponseDto tradeInfo = response.getData();
 
-            // 판매자에게 토큰 원복, 구매자에게 대금 환불
+            // 멱등성 체크: 이미 처리된 거래인지 확인합니다.
+            if ("FAILED".equals(tradeInfo.getStatus())) {
+                log.info("이미 'FAILED' 상태인 거래입니다. 중복 이벤트이므로 무시합니다. tradeId={}", payload.getTradeId());
+                return;
+            }
+
+            // --- 실제 자산 원복 로직 ---
             tokenService.addBuyToken(tradeInfo.getSellerUserSeq(), tradeInfo.getProjectId(), (long) tradeInfo.getTokenQuantity(), tradeInfo.getPrice());
 
             MarketRefundDto marketRefundDto = MarketRefundDto.builder()
@@ -126,7 +148,6 @@ public class KafkaTradeEventsListener {
             throw new RuntimeException("자산 원복 처리 실패", e);
         }
     }
-
 
     public void handleTradePriceUpdate(TradePriceUpdateEvent event) {
         TradePriceUpdateEvent.Payload payload = event.getPayload();

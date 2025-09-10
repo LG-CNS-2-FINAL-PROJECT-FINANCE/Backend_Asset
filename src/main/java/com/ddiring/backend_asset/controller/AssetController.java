@@ -197,4 +197,12 @@ public class AssetController {
         boolean hasEnoughTokens = tokenService.checkUserToken(userSeq, marketSellDto.getProjectId(), marketSellDto.getSellToken());
         return ApiResponseDto.createOk(hasEnoughTokens);//
     }
+
+    @PostMapping("/market/creator")
+    public ApiResponseDto<String> creatorMoney(@RequestBody ProjectIdDto projectIdDto) {
+        String userSeq = GatewayRequestHeaderUtils.getUserSeq();
+        String role = GatewayRequestHeaderUtils.getRole();
+        bankService.toCreator(userSeq, role, projectIdDto);
+        return ApiResponseDto.createOk("success");
+    }
 }

@@ -248,25 +248,23 @@ public class BankService {
                 .orElseThrow(() -> new NotFound("누구?"));
         Escrow escrow = escrowRepository.findByProjectId(marketBuyDto.getProjectId())
                 .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
-        if (bank.getDeposit() < marketBuyDto.getBuyPrice() + (int)(marketBuyDto.getBuyPrice() * 0.03)) {
+        if (bank.getDeposit() < marketBuyDto.getBuyPrice() + (int) (marketBuyDto.getBuyPrice() * 0.03)) {
             throw new BadParameter("돈없어 그만");
         }
-
-        if(marketBuyDto.getTransType() == 0 ) {
+        if (marketBuyDto.getTransType() == 0) {
             EscrowDto escrowDto = new EscrowDto();
             escrowDto.setAccount(escrow.getAccount());
             escrowDto.setUserSeq(userSeq);
             escrowDto.setTransSeq(marketBuyDto.getOrdersId());
             escrowDto.setTransType(marketBuyDto.getTransType());
-            escrowDto.setAmount((marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice())));
+            escrowDto.setAmount((marketBuyDto.getBuyPrice()));
 
             escrowClient.escrowDeposit(escrowDto);
 
-            bank.setDeposit((bank.getDeposit() - (marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice()))));
+            bank.setDeposit((bank.getDeposit() - (marketBuyDto.getBuyPrice())));
 
             bankRepository.save(bank);
-        }
-        else {
+        } else {
             EscrowDto escrowDto = new EscrowDto();
             escrowDto.setAccount(escrow.getAccount());
             escrowDto.setUserSeq(userSeq);
@@ -281,7 +279,6 @@ public class BankService {
             bankRepository.save(bank);
         }
     }
-
     @Transactional
     public void setRefundToken(String userSeq, String role, MarketRefundDto marketRefundDto) {
 
