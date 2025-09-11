@@ -4,7 +4,11 @@ import com.ddiring.backend_asset.common.exception.NotFound;
 import com.ddiring.backend_asset.entitiy.Escrow;
 import com.ddiring.backend_asset.entitiy.Token;
 import com.ddiring.backend_asset.entitiy.Wallet;
+import com.ddiring.backend_asset.event.dto.InvestFailedEvent;
 import com.ddiring.backend_asset.event.dto.InvestSucceededEvent;
+import com.ddiring.backend_asset.event.dto.TradeFailedEvent;
+import com.ddiring.backend_asset.event.dto.TradeSucceededEvent;
+import com.ddiring.backend_asset.event.producer.KafkaMessageProducer;
 import com.ddiring.backend_asset.repository.EscrowRepository;
 import com.ddiring.backend_asset.repository.TokenRepository;
 import com.ddiring.backend_asset.repository.WalletRepository;
@@ -29,6 +33,8 @@ public class KafkaInvestmentEventsListener {
     private final WalletRepository walletRepository;
     private final TokenRepository tokenRepository;
 
+    private final KafkaMessageProducer kafkaMessageProducer;
+
     @KafkaListener(topics = "INVESTMENT", groupId = "asset-service-group")
     public void listenInvestmentEvents(String message) { // 파라미터를 String으로 변경
         try {
@@ -47,6 +53,11 @@ public class KafkaInvestmentEventsListener {
                     InvestSucceededEvent succeeded = objectMapper.convertValue(messageMap,
                             InvestSucceededEvent.class);
                     handleInvestSucceeded(succeeded);
+                    break;
+                }
+                case "INVESTMENT.FAILED": {
+                    InvestFailedEvent failed = objectMapper.convertValue(messageMap,InvestFailedEvent.class);
+                    handleInvestFailed(failed);
                     break;
                 }
                 default:
@@ -88,5 +99,32 @@ public class KafkaInvestmentEventsListener {
 
         tokenRepository.save(token);
         log.info("투자 성공 처리 완료: userSeq={}, projectId={}, amount={}", userSeq, payload.getProjectId(), payload.getTokenAmount());
+
+        // 투자 성공 알림 이벤트 발행
+        kafkaMessageProducer.sendInvestmentSucceededMessage(escrow.getTitle(), userSeq);
     }
+
+    @Transactional
+    public void handleInvestFailed(InvestFailedEvent event) {
+        InvestFailedEvent.InvestFailedPayload payload = event.getPayload();
+        if (payload == null) {
+            log.warn("INVESTMENT.FAILED 이벤트에 payload가 없습니다.");
+            return;
+        }
+
+        Wallet wallet = walletRepository.findByWalletAddress(payload.getInvestorAddress())
+                .orElseGet(() -> {
+                    log.warn("INVESTMENT.FAILED 투자자 지갑을 찾을 수 없습니다: {}", payload.getInvestorAddress());
+                    throw new NotFound("INVESTMENT.FAILED 투자자 지갑을 찾을 수 없습니다: " + payload.getInvestorAddress());
+                });
+
+        Escrow escrow = escrowRepository.findByProjectId(payload.getProjectId())
+                .orElseGet(() -> {
+                    log.warn("INVESTMENT.FAILED 에스크로 정보를 찾을 수 없습니다: {}", payload.getProjectId());
+                    throw new NotFound("INVESTMENT.FAILED 에스크로 정보를 찾을 수 없습니다: " + payload.getProjectId());
+                });
+
+        kafkaMessageProducer.sendInvestmentFailedMessage(escrow.getTitle(), wallet.getUserSeq());
+    }
+
 }
