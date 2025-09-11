@@ -27,10 +27,14 @@ public class Escrow {
     @Column(name = "account")
     private String account;
 
+    @Column(name = "distribution")
+    private Integer distribution;
+
     @Builder
-    public Escrow(String title, String account, String projectId) {
+    public Escrow(String title, String account, String projectId, Integer distribution) {
         this.title = title;
         this.account = account;
         this.projectId = projectId;
+        this.distribution = distribution;
     }
 }
