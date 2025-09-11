@@ -457,35 +457,40 @@ public class BankService {
         //     bankRepository.save(bank);
 
         // }
-        Integer allAmount = 0;
+        Integer allAmount = tokenRepository.findAllByProjectId(marketBuyDto.getProjectId())
+        .stream()
+        .mapToInt(Token::getAmount)
+        .sum();
+
+        if (allAmount == 0) {
+            throw new IllegalStateException("토큰 총액이 0입니다.");
+        }
 
         Escrow escrow = escrowRepository.findByProjectId(marketBuyDto.getProjectId())
                 .orElseThrow(() -> new NotFound("에스크로 계좌 없음"));
 
-        List<Token> token = tokenRepository.findAllByProjectId(marketBuyDto.getProjectId());
-        token.stream().forEach(t -> {
-            allAmount += t.getAmount();
-        });
+        List<Token> tokens = tokenRepository.findAllByProjectId(marketBuyDto.getProjectId());
 
-        token.stream().forEach(t -> {
-            Double devideRate = (t.getAmonut() / allAmount);
-
-            Integer devideAmount = marketBuyDto.getBuyPrice() * devideRate;
+        for (Token t : tokens) {
+            double divideRate = (double) t.getAmount() / allAmount;
+            int divideAmount = (int) Math.round(marketBuyDto.getBuyPrice() * divideRate);
 
             EscrowDto escrowDto = EscrowDto.builder()
                     .account(escrow.getAccount())
-                    .transSeq(12345)
+                    .transSeq(12345) // TODO: 거래번호 생성 로직 필요
                     .userSeq(t.getUserSeq())
                     .transType(3)
-                    .amount(devideAmount)
+                    .amount(divideAmount)
                     .build();
 
             escrowClient.escrowWithdrawal(escrowDto);
 
-            Bank bank = bankRepository.findByUserSeqAndRole(token2.getUserSeq(), "USER")
-                    .orElseThrow(() -> new NotFound("음슴"));
-            bank.setDeposit(bank.getDeposit() + (token2.getAmount() * perPrice));
+            Bank bank = bankRepository.findByUserSeqAndRole(t.getUserSeq(), "USER")
+                    .orElseThrow(() -> new NotFound("해당 유저의 계좌 없음"));
+
+            Long updatedDeposit = Math.round(bank.getDeposit() + (t.getAmount() * divideRate));
+            bank.setDeposit(updatedDeposit.intValue());
             bankRepository.save(bank);
-        });
+        }
     }
 }
