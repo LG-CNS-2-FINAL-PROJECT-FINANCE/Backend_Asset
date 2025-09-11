@@ -38,7 +38,6 @@ public class BankService {
     private final EscrowRepository escrowRepository;
     private final EscrowClient escrowClient;
 
-
     // 내 계좌 조회
     @Transactional(readOnly = true)
     public BankSearchDto bankSearch(String userSeq, String role) {
@@ -98,7 +97,6 @@ public class BankService {
             throw new BadParameter("유효하지 않은 role 값입니다.");
         }
 
-
     }
 
     // 내 계좌에 내가 입금
@@ -151,10 +149,11 @@ public class BankService {
         if (userSeq == null) {
             throw new NotFound("누구냐 넌");
         }
-        List<History> history = historyRepository.findByUserSeqAndRoleAndMoneyTypeOrderByBankTimeDesc(userSeq, role, moneyType);
-                return history.stream()
-                        .map(MoneyMoveDto::new)
-                        .collect(Collectors.toList());
+        List<History> history = historyRepository.findByUserSeqAndRoleAndMoneyTypeOrderByBankTimeDesc(userSeq, role,
+                moneyType);
+        return history.stream()
+                .map(MoneyMoveDto::new)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -181,8 +180,7 @@ public class BankService {
             Escrow escrow = account.get();
             escrow.setTitle(productDto.getTitle());
             escrowRepository.save(escrow);
-        }
-        else {
+        } else {
             Escrow escrow = Escrow.builder()
                     .title(productDto.getTitle())
                     .projectId(productDto.getProjectId())
@@ -201,15 +199,12 @@ public class BankService {
         Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
                 .orElseThrow(() -> new NotFound("누구?"));
 
-
         if (bank.getDeposit() < marketDto.getPrice()) {
             throw new BadParameter("돈 없");
         }
 
         Escrow escrow = escrowRepository.findByProjectId(marketDto.getProjectId())
                 .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
-
-
 
         return bank.getDeposit();
     }
@@ -222,7 +217,6 @@ public class BankService {
 
         Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
                 .orElseThrow(() -> new NotFound("누구?"));
-
 
         Escrow escrow = escrowRepository.findByProjectId(marketDto.getProjectId())
                 .orElseThrow(() -> new NotFound("프로젝트의 에스크로 계좌 으디있냐"));
@@ -244,7 +238,7 @@ public class BankService {
     }
 
     @Transactional
-    public void setBuyPrice(String userSeq,String role, MarketBuyDto marketBuyDto) {
+    public void setBuyPrice(String userSeq, String role, MarketBuyDto marketBuyDto) {
         Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
                 .orElseThrow(() -> new NotFound("누구?"));
         Escrow escrow = escrowRepository.findByProjectId(marketBuyDto.getProjectId())
@@ -275,11 +269,13 @@ public class BankService {
 
             escrowClient.escrowDeposit(escrowDto);
 
-            bank.setDeposit((int) (bank.getDeposit() - (marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice() * 0.03))));
+            bank.setDeposit(
+                    (int) (bank.getDeposit() - (marketBuyDto.getBuyPrice() + (marketBuyDto.getBuyPrice() * 0.03))));
 
             bankRepository.save(bank);
         }
     }
+
     @Transactional
     public void setRefundToken(String userSeq, String role, MarketRefundDto marketRefundDto) {
 
@@ -291,8 +287,7 @@ public class BankService {
             token.setAmount(token.getAmount() + marketRefundDto.getRefundAmount());
             tokenRepository.save(token);
 
-        }
-        else if (marketRefundDto.getOrderType() == 1) {
+        } else if (marketRefundDto.getOrderType() == 1) {
             Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
                     .orElseThrow(() -> new NotFound("누구?"));
             Escrow escrow = escrowRepository.findByProjectId(marketRefundDto.getProjectId())
@@ -305,9 +300,9 @@ public class BankService {
             escrowDto.setAmount((int) (marketRefundDto.getRefundPrice() + (marketRefundDto.getRefundPrice() * 0.03)));
 
             escrowClient.escrowDeposit(escrowDto);
-            bank.setDeposit((int) (bank.getDeposit() + marketRefundDto.getRefundPrice() + (marketRefundDto.getRefundPrice() * 0.03)));
-        }
-        else if(marketRefundDto.getOrderType() == 2) {
+            bank.setDeposit((int) (bank.getDeposit() + marketRefundDto.getRefundPrice()
+                    + (marketRefundDto.getRefundPrice() * 0.03)));
+        } else if (marketRefundDto.getOrderType() == 2) {
             Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
                     .orElseThrow(() -> new NotFound("누구?"));
             Escrow escrow = escrowRepository.findByProjectId(marketRefundDto.getProjectId())
@@ -343,12 +338,13 @@ public class BankService {
         Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
                 .orElseThrow(() -> new NotFound("판매자의 은행 계좌를 찾을 수 없습니다. userSeq: " + userSeq));
 
-        bank.setDeposit((int) (bank.getDeposit() + (int)amount));
+        bank.setDeposit((int) (bank.getDeposit() + (int) amount));
         bankRepository.save(bank);
 
     }
+
     @Transactional
-    public void setprofit(String userSeq,String role, MarketBuyDto marketBuyDto) {
+    public void setprofit(String userSeq, String role, MarketBuyDto marketBuyDto) {
         Bank bank = bankRepository.findByUserSeqAndRole(userSeq, role)
                 .orElseThrow(() -> new NotFound("누구?"));
         Escrow escrow = escrowRepository.findByProjectId(marketBuyDto.getProjectId())
@@ -374,8 +370,9 @@ public class BankService {
     @Transactional
     public Integer getAllMoney(String userSeq, String role, AssetAllMoneyDto assetAllMoneyDto) {
         Integer money = 0;
-        List<History> histories = historyRepository.findByUserSeqAndRoleAndMoneyTypeOrderByBankTimeDesc(userSeq, role, assetAllMoneyDto.getMoneyType());
-        for(History history : histories) {
+        List<History> histories = historyRepository.findByUserSeqAndRoleAndMoneyTypeOrderByBankTimeDesc(userSeq, role,
+                assetAllMoneyDto.getMoneyType());
+        for (History history : histories) {
             money = money + history.getBankPrice();
         }
         return money;
@@ -430,45 +427,65 @@ public class BankService {
 //    }
 
     @Transactional
-    public void divideMoney(String buyerSeq, String role, MarketBuyDto marketBuyDto) {
-        // 전체 토큰 수량 합계
-        int allAmount = tokenRepository.findByProjectId(marketBuyDto.getProjectId())
-                .stream()
-                .mapToInt(Token::getAmount)
-                .sum();
+    public void divideMoney(String userSeq, String role, MarketBuyDto marketBuyDto) {
+        // Integer perPrice = 0;
+        // Integer allAmount = 0;
 
-        if (allAmount <= 0) {
-            throw new NotFound("분배할 토큰이 없습니다.");
-        }
+        // Escrow escrow = escrowRepository.findByProjectId(marketBuyDto.getProjectId())
+        //         .orElseThrow(() -> new NotFound("없"));
 
-        // 1토큰당 분배 금액 (수수료는 setBuyPrice 단계에서 이미 차감됐다고 가정)
-        int perPrice = marketBuyDto.getBuyPrice() / allAmount;
+        // List<Token> token = tokenRepository.findByProjectId(marketBuyDto.getProjectId());
+        // for (Token token1 : token) {
+        //     allAmount = allAmount + token1.getAmount();
+        // }
+        // perPrice = marketBuyDto.getBuyPrice() / allAmount;
+
+        // for (Token token2 : token) {
+        //     Bank bank = bankRepository.findByUserSeqAndRole(token2.getUserSeq(), "USER")
+        //             .orElseThrow(() -> new NotFound("음슴"));
+        //     EscrowDto escrowDto = EscrowDto.builder()
+        //             .account(escrow.getAccount())
+        //             .transSeq(12345)
+        //             .userSeq(userSeq)
+        //             .transType(3)
+        //             .amount(bank.getDeposit() + (token2.getAmount() * perPrice))
+        //             .build();
+
+        //     escrowClient.escrowWithdrawal(escrowDto);
+
+        //     bank.setDeposit(bank.getDeposit() + (token2.getAmount() * perPrice));
+        //     bankRepository.save(bank);
+
+        // }
+        Integer allAmount = 0;
 
         Escrow escrow = escrowRepository.findByProjectId(marketBuyDto.getProjectId())
                 .orElseThrow(() -> new NotFound("에스크로 계좌 없음"));
 
-        // 각 토큰 보유자에게 분배
-        List<Token> tokenList = tokenRepository.findByProjectId(marketBuyDto.getProjectId());
-        for (Token token : tokenList) {
-            int userReward = token.getAmount() * perPrice; // 이 보유자가 받을 금액
+        List<Token> token = tokenRepository.findAllByProjectId(marketBuyDto.getProjectId());
+        token.stream().forEach(t -> {
+            allAmount += t.getAmount();
+        });
 
-            Bank bank = bankRepository.findByUserSeqAndRole(token.getUserSeq(), "USER")
-                    .orElseThrow(() -> new NotFound("사용자 은행 계좌 없음"));
+        token.stream().forEach(t -> {
+            Double devideRate = (t.getAmonut() / allAmount);
 
-            // 구매자 에스크로에서 해당 금액만큼 출금
+            Integer devideAmount = marketBuyDto.getBuyPrice() * devideRate;
+
             EscrowDto escrowDto = EscrowDto.builder()
                     .account(escrow.getAccount())
-                    .transSeq(12345) // TODO: 실제 거래 ID 값으로 교체 필요
-                    .userSeq(buyerSeq) // 구매자 계좌에서 출금
-                    .transType(marketBuyDto.getTransType())
-                    .amount(userReward) // 기존 예금 + 보너스 ❌ → 보유자 몫만 출금
+                    .transSeq(12345)
+                    .userSeq(t.getUserSeq())
+                    .transType(3)
+                    .amount(devideAmount)
                     .build();
 
             escrowClient.escrowWithdrawal(escrowDto);
 
-            // 보유자 은행 계좌에 분배금 입금
-            bank.setDeposit(bank.getDeposit() + userReward);
+            Bank bank = bankRepository.findByUserSeqAndRole(token2.getUserSeq(), "USER")
+                    .orElseThrow(() -> new NotFound("음슴"));
+            bank.setDeposit(bank.getDeposit() + (token2.getAmount() * perPrice));
             bankRepository.save(bank);
-        }
+        });
     }
 }
