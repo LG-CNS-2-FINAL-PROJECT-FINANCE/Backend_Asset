@@ -12,6 +12,7 @@ import com.ddiring.backend_asset.entitiy.Wallet;
 import com.ddiring.backend_asset.event.dto.TradeFailedEvent;
 import com.ddiring.backend_asset.event.dto.TradeSucceededEvent;
 import com.ddiring.backend_asset.event.dto.TradePriceUpdateEvent;
+import com.ddiring.backend_asset.event.producer.KafkaMessageProducer;
 import com.ddiring.backend_asset.repository.EscrowRepository;
 import com.ddiring.backend_asset.repository.WalletRepository;
 import com.ddiring.backend_asset.service.BankService;
@@ -38,6 +39,8 @@ public class KafkaTradeEventsListener {
     private final EscrowRepository escrowRepository;
     private final MarketClient marketClient;
     private final EscrowClient escrowClient;
+
+    private final KafkaMessageProducer kafkaMessageProducer;
 
     /**
      * TRADE 토픽에서 발생하는 모든 이벤트를 수신하여 처리합니다.
@@ -83,11 +86,22 @@ public class KafkaTradeEventsListener {
             TradeInfoResponseDto tradeInfo = response.getData();
 
             Wallet buyerWallet = walletRepository.findByWalletAddress(payload.getBuyerAddress())
-                    .orElseThrow(() -> new NotFound("구매자 지갑을 찾을 수 없습니다: " + payload.getBuyerAddress()));
+                    .orElseGet(() -> {
+                        log.warn("구매자 지갑을 찾을 수 없습니다: {}", payload.getBuyerAddress());
+                        throw new NotFound("구매자 지갑을 찾을 수 없습니다: " + payload.getBuyerAddress());
+                    });
+
             Wallet sellerWallet = walletRepository.findByWalletAddress(payload.getSellerAddress())
-                    .orElseThrow(() -> new NotFound("판매자 지갑을 찾을 수 없습니다: " + payload.getSellerAddress()));
+                    .orElseGet(() -> {
+                        log.warn("판매자 지갑을 찾을 수 없습니다: {}", payload.getSellerAddress());
+                        throw new NotFound("판매자 지갑을 찾을 수 없습니다: " + payload.getSellerAddress());
+                    });
+
             Escrow escrow = escrowRepository.findByProjectId(payload.getProjectId())
-                    .orElseThrow(() -> new NotFound("없"));
+                    .orElseGet(() -> {
+                        log.warn("에스크로를 찾을 수 없습니다: {}", payload.getProjectId());
+                        throw new NotFound("에스크로를 찾을 수 없습니다: " + payload.getProjectId());
+                    });
 
             tokenService.addBuyToken(buyerWallet.getUserSeq(), payload.getProjectId(), payload.getTradeAmount(), tradeInfo.getPrice());
 
@@ -102,6 +116,10 @@ public class KafkaTradeEventsListener {
             escrowClient.escrowWithdrawal(escrowDto);
             bankService.depositForTrade(sellerWallet.getUserSeq(), "USER", (int) (tradeInfo.getPrice() - (tradeInfo.getPrice() * 0.03)));
             log.info("자산 이동 처리 완료. tradeId={}", payload.getTradeId());
+
+
+            kafkaMessageProducer.sendTradeSucceededMessage(escrow.getTitle(), buyerWallet.getUserSeq());
+            kafkaMessageProducer.sendTradeSucceededMessage(escrow.getTitle(), sellerWallet.getUserSeq());
 
         } catch (Exception e) {
             log.error("TradeSucceededEvent 처리 중 심각한 오류 발생. tradeId={}", payload.getTradeId(), e);
@@ -139,6 +157,27 @@ public class KafkaTradeEventsListener {
             bankService.setRefundToken(tradeInfo.getBuyerUserSeq(), "USER", marketRefundDto);
 
             log.info("거래 실패(tradeId:{})로 인한 자산 원복 완료.", payload.getTradeId());
+
+            Wallet buyerWallet = walletRepository.findByWalletAddress(payload.getBuyerAddress())
+                    .orElseGet(() -> {
+                        log.warn("구매자 지갑을 찾을 수 없습니다: {}", payload.getBuyerAddress());
+                        throw new NotFound("구매자 지갑을 찾을 수 없습니다: " + payload.getBuyerAddress());
+                    });
+
+            Wallet sellerWallet = walletRepository.findByWalletAddress(payload.getSellerAddress())
+                    .orElseGet(() -> {
+                        log.warn("판매자 지갑을 찾을 수 없습니다: {}", payload.getSellerAddress());
+                        throw new NotFound("판매자 지갑을 찾을 수 없습니다: " + payload.getSellerAddress());
+                    });
+
+            Escrow escrow = escrowRepository.findByProjectId(payload.getProjectId())
+                    .orElseGet(() -> {
+                        log.warn("에스크로를 찾을 수 없습니다: {}", payload.getProjectId());
+                        throw new NotFound("에스크로를 찾을 수 없습니다: " + payload.getProjectId());
+                    });
+
+            kafkaMessageProducer.sendTradeSucceededMessage(escrow.getTitle(), buyerWallet.getUserSeq());
+            kafkaMessageProducer.sendTradeSucceededMessage(escrow.getTitle(), sellerWallet.getUserSeq());
 
         } catch (Exception e) {
             log.error("자산 원복 처리 중 오류 발생. tradeId={}", payload.getTradeId(), e);
