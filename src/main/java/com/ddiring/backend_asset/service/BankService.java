@@ -417,7 +417,7 @@ public class BankService {
                     .account(escrow.getAccount())
                     .transSeq(12345)
                     .userSeq(userSeq)
-                    .transType(3)
+                    .transType(marketBuyDto.getTransType())
                     .amount(bank.getDeposit() + (token2.getAmount() * perPrice))
                     .build();
 
