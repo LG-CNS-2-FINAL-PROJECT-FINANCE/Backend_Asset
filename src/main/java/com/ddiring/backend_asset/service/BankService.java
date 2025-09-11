@@ -397,36 +397,78 @@ public class BankService {
         return bank.getDeposit() >= (price + (price * 0.03));
     }
 
+//    @Transactional
+//    public void divideMoney(String userSeq, String role, MarketBuyDto marketBuyDto) {
+//        Integer perPrice = 0;
+//        Integer allAmount = 0;
+//
+//        Escrow escrow = escrowRepository.findByProjectId(marketBuyDto.getProjectId())
+//                .orElseThrow(() -> new NotFound("없"));
+//
+//        List<Token> token = tokenRepository.findByProjectId(marketBuyDto.getProjectId());
+//        for (Token token1 : token) {
+//            allAmount = allAmount + token1.getAmount();
+//        }
+//        perPrice = marketBuyDto.getBuyPrice() / allAmount;
+//
+//        for (Token token2 : token) {
+//            Bank bank = bankRepository.findByUserSeqAndRole(token2.getUserSeq(), "USER").orElseThrow(() -> new NotFound("음슴"));
+//            EscrowDto escrowDto = EscrowDto.builder()
+//                    .account(escrow.getAccount())
+//                    .transSeq(12345)
+//                    .userSeq(userSeq)
+//                    .transType(marketBuyDto.getTransType())
+//                    .amount(bank.getDeposit() + (token2.getAmount() * perPrice))
+//                    .build();
+//
+//            escrowClient.escrowWithdrawal(escrowDto);
+//
+//            bank.setDeposit(bank.getDeposit() + (token2.getAmount() * perPrice));
+//            bankRepository.save(bank);
+//
+//        }
+//    }
+
     @Transactional
-    public void divideMoney(String userSeq, String role, MarketBuyDto marketBuyDto) {
-        Integer perPrice = 0;
-        Integer allAmount = 0;
+    public void divideMoney(String buyerSeq, String role, MarketBuyDto marketBuyDto) {
+        // 전체 토큰 수량 합계
+        int allAmount = tokenRepository.findByProjectId(marketBuyDto.getProjectId())
+                .stream()
+                .mapToInt(Token::getAmount)
+                .sum();
+
+        if (allAmount <= 0) {
+            throw new NotFound("분배할 토큰이 없습니다.");
+        }
+
+        // 1토큰당 분배 금액 (수수료는 setBuyPrice 단계에서 이미 차감됐다고 가정)
+        int perPrice = marketBuyDto.getBuyPrice() / allAmount;
 
         Escrow escrow = escrowRepository.findByProjectId(marketBuyDto.getProjectId())
-                .orElseThrow(() -> new NotFound("없"));
+                .orElseThrow(() -> new NotFound("에스크로 계좌 없음"));
 
-        List<Token> token = tokenRepository.findByProjectId(marketBuyDto.getProjectId());
-        for (Token token1 : token) {
-            allAmount = allAmount + token1.getAmount();
-        }
-        perPrice = marketBuyDto.getBuyPrice() / allAmount;
+        // 각 토큰 보유자에게 분배
+        List<Token> tokenList = tokenRepository.findByProjectId(marketBuyDto.getProjectId());
+        for (Token token : tokenList) {
+            int userReward = token.getAmount() * perPrice; // 이 보유자가 받을 금액
 
-        for (Token token2 : token) {
-            Bank bank = bankRepository.findByUserSeqAndRole(token2.getUserSeq(), "USER").orElseThrow(() -> new NotFound("음슴"));
+            Bank bank = bankRepository.findByUserSeqAndRole(token.getUserSeq(), "USER")
+                    .orElseThrow(() -> new NotFound("사용자 은행 계좌 없음"));
+
+            // 구매자 에스크로에서 해당 금액만큼 출금
             EscrowDto escrowDto = EscrowDto.builder()
                     .account(escrow.getAccount())
-                    .transSeq(12345)
-                    .userSeq(userSeq)
+                    .transSeq(12345) // TODO: 실제 거래 ID 값으로 교체 필요
+                    .userSeq(buyerSeq) // 구매자 계좌에서 출금
                     .transType(marketBuyDto.getTransType())
-                    .amount(bank.getDeposit() + (token2.getAmount() * perPrice))
+                    .amount(userReward) // 기존 예금 + 보너스 ❌ → 보유자 몫만 출금
                     .build();
 
             escrowClient.escrowWithdrawal(escrowDto);
 
-            bank.setDeposit(bank.getDeposit() + (token2.getAmount() * perPrice));
+            // 보유자 은행 계좌에 분배금 입금
+            bank.setDeposit(bank.getDeposit() + userReward);
             bankRepository.save(bank);
-
         }
     }
-
 }
