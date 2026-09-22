@@ -149,10 +149,13 @@ public class KafkaTradeEventsListener {
             // --- 실제 자산 원복 로직 ---
             tokenService.addBuyToken(tradeInfo.getSellerUserSeq(), tradeInfo.getProjectId(), (long) tradeInfo.getTokenQuantity(), tradeInfo.getPrice());
 
+            // orderType=2: 에스크로에 보관 중이던 구매자 결제금을 인출해 구매자 은행 잔액으로 반환
+            // (setRefundToken의 0=토큰 환불, 1=수수료 포함 에스크로 예치, 2=에스크로 인출 중 '거래 실패로 인한 결제금 반환'과 일치하는 분기)
             MarketRefundDto marketRefundDto = MarketRefundDto.builder()
                     .refundPrice(tradeInfo.getPrice())
                     .ordersId(payload.getTradeId().intValue())
                     .projectId(tradeInfo.getProjectId())
+                    .orderType(2)
                     .build();
             bankService.setRefundToken(tradeInfo.getBuyerUserSeq(), "USER", marketRefundDto);
 
