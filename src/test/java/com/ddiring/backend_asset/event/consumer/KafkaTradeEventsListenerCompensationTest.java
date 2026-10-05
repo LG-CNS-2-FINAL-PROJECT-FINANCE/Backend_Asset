@@ -34,7 +34,7 @@ class KafkaTradeEventsListenerCompensationTest {
 
     @Test
     void 거래_실패_시_N건_보상_트랜잭션_결과를_집계한다() {
-        int totalTrials = 10;
+        int totalTrials = Integer.parseInt(System.getenv().getOrDefault("TRIALS", "1000"));
         int restored = 0;
         int failed = 0;
 
@@ -107,25 +107,40 @@ class KafkaTradeEventsListenerCompensationTest {
                 int restoredTokenAmount = tokenCaptor.getValue().getAmount();
                 int restoredDeposit = buyerBank.getDeposit();
 
+                // 구매 시 setBuyPrice가 거래 금액 + 3% 수수료를 차감하므로, 환불도 수수료 포함 금액이어야 한다.
+                int expectedRefund = (int) (price + (price * 0.03));
+                org.mockito.ArgumentCaptor<com.ddiring.backend_asset.api.escrow.EscrowDto> escrowCaptor =
+                        org.mockito.ArgumentCaptor.forClass(com.ddiring.backend_asset.api.escrow.EscrowDto.class);
+                org.mockito.Mockito.verify(escrowClient).escrowWithdrawal(escrowCaptor.capture());
+                int escrowWithdrawn = escrowCaptor.getValue().getAmount();
+
                 boolean tokenOk = restoredTokenAmount == tokenQuantity;
-                boolean depositOk = restoredDeposit == price;
-                if (!tokenOk || !depositOk) {
+                boolean depositOk = restoredDeposit == expectedRefund;
+                boolean escrowOk = escrowWithdrawn == expectedRefund;
+                if (!tokenOk || !depositOk || !escrowOk) {
                     throw new AssertionError("복원 값 불일치: token=" + restoredTokenAmount + "(기대 " + tokenQuantity
-                            + "), deposit=" + restoredDeposit + "(기대 " + price + ")");
+                            + "), deposit=" + restoredDeposit + "(기대 " + expectedRefund
+                            + "), escrow인출=" + escrowWithdrawn + "(기대 " + expectedRefund + ")");
                 }
 
                 restored++;
-                System.out.println("[복원 성공] tradeId=" + tradeId + " sellerToken=+" + restoredTokenAmount
-                        + " buyerDeposit=+" + restoredDeposit);
-            } catch (Exception e) {
+                if (i <= 3) {
+                    System.out.println("[복원 성공] tradeId=" + tradeId + " sellerToken=+" + restoredTokenAmount
+                            + " buyerDeposit=+" + restoredDeposit + " (거래금액 " + price + " + 수수료 "
+                            + (expectedRefund - price) + ")");
+                }
+            } catch (Exception | AssertionError e) {
                 failed++;
-                System.out.println("[복원 실패] tradeId=" + tradeId + " -> " + e.getClass().getSimpleName()
-                        + ": " + rootCauseMessage(e));
+                if (failed <= 3) {
+                    System.out.println("[복원 실패] tradeId=" + tradeId + " -> " + e.getClass().getSimpleName()
+                            + ": " + rootCauseMessage(e));
+                }
             }
         }
 
         System.out.println("\n===== 보상 트랜잭션 실패 시나리오 테스트 결과 =====");
         System.out.println("총 시도: " + totalTrials + "건, 복원 성공: " + restored + "건, 복원 실패: " + failed + "건");
+        org.junit.jupiter.api.Assertions.assertEquals(0, failed, "보상 트랜잭션 복원 실패 건수");
     }
 
     private String rootCauseMessage(Throwable t) {

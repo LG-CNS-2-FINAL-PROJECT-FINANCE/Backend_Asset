@@ -151,8 +151,10 @@ public class KafkaTradeEventsListener {
 
             // orderType=2: 에스크로에 보관 중이던 구매자 결제금을 인출해 구매자 은행 잔액으로 반환
             // (setRefundToken의 0=토큰 환불, 1=수수료 포함 에스크로 예치, 2=에스크로 인출 중 '거래 실패로 인한 결제금 반환'과 일치하는 분기)
+            // 구매 시 setBuyPrice가 거래 금액 + 3% 수수료를 차감하므로 환불도 수수료를 포함해 같은 금액을 돌려준다.
+            int refundWithFee = (int) (tradeInfo.getPrice() + (tradeInfo.getPrice() * 0.03));
             MarketRefundDto marketRefundDto = MarketRefundDto.builder()
-                    .refundPrice(tradeInfo.getPrice())
+                    .refundPrice(refundWithFee)
                     .ordersId(payload.getTradeId().intValue())
                     .projectId(tradeInfo.getProjectId())
                     .orderType(2)
